@@ -2,13 +2,19 @@
   "fr": {
     "AppSidebar": {
       "home": "Accueil",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "search": "Recherche",
+      "subscriptions": "Abonnements",
+      "version": "Version"
     }
   },
   "en": {
     "AppSidebar": {
       "home": "Home",
-      "settings": "Settings"
+      "settings": "Settings",
+      "search": "Search",
+      "subscriptions": "Subscriptions",
+      "version": "Version"
     }
   }
 }

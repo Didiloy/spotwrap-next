@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Home, Settings } from "lucide-vue-next";
+import { Home, Settings, Search, Bell } from "lucide-vue-next";
+import ProgressCard from "@/components/sidebar/ProgressCard.vue";
 import {
     Sidebar,
     SidebarHeader,
@@ -10,21 +11,32 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarFooter,
 } from "@/components/ui/sidebar";
-import logo from "../assets/images/appicon.png";
+import logo from "../../assets/images/appicon.png";
+import infos from "../../../package.json";
 import { useI18n } from "vue-i18n";
-
 const i18n = useI18n();
 
 const items = [
     {
         title: i18n.t("AppSidebar.home"),
-        url: "#",
+        url: "/",
         icon: Home,
     },
     {
+        title: i18n.t("AppSidebar.search"),
+        url: "/search",
+        icon: Search,
+    },
+    {
+        title: i18n.t("AppSidebar.subscriptions"),
+        url: "/subscriptions",
+        icon: Bell,
+    },
+    {
         title: i18n.t("AppSidebar.settings"),
-        url: "#",
+        url: "/settings",
         icon: Settings,
     },
 ];
@@ -40,7 +52,6 @@ const items = [
         </SidebarHeader>
         <SidebarContent>
             <SidebarGroup>
-                <!-- <SidebarGroupLabel>Application</SidebarGroupLabel> -->
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem
@@ -48,15 +59,19 @@ const items = [
                             :key="item.title"
                         >
                             <SidebarMenuButton asChild>
-                                <a :href="item.url">
+                                <router-link :to="item.url">
                                     <component :is="item.icon" />
                                     <span>{{ item.title }}</span>
-                                </a>
+                                </router-link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
                     </SidebarMenu>
                 </SidebarGroupContent>
             </SidebarGroup>
         </SidebarContent>
+        <SidebarFooter class="flex items-center justify-center">
+            <ProgressCard :progress="75" message="Loading..." />
+            <span>{{ $t("AppSidebar.version") }} {{ infos.version }}</span>
+        </SidebarFooter>
     </Sidebar>
 </template>
