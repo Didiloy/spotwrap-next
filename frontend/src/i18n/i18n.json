@@ -1,0 +1,14 @@
+{
+  "fr": {
+    "AppSidebar": {
+      "home": "Accueil",
+      "settings": "Paramètres"
+    }
+  },
+  "en": {
+    "AppSidebar": {
+      "home": "Home",
+      "settings": "Settings"
+    }
+  }
+}

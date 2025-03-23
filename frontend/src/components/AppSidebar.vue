@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-vue-next";
+import { Home, Settings } from "lucide-vue-next";
 import {
     Sidebar,
+    SidebarHeader,
     SidebarContent,
     SidebarGroup,
     SidebarGroupContent,
@@ -10,31 +11,19 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import logo from "../assets/images/appicon.png";
+import { useI18n } from "vue-i18n";
 
-// Menu items.
+const i18n = useI18n();
+
 const items = [
     {
-        title: "Home",
+        title: i18n.t("AppSidebar.home"),
         url: "#",
         icon: Home,
     },
     {
-        title: "Inbox",
-        url: "#",
-        icon: Inbox,
-    },
-    {
-        title: "Calendar",
-        url: "#",
-        icon: Calendar,
-    },
-    {
-        title: "Search",
-        url: "#",
-        icon: Search,
-    },
-    {
-        title: "Settings",
+        title: i18n.t("AppSidebar.settings"),
         url: "#",
         icon: Settings,
     },
@@ -43,9 +32,15 @@ const items = [
 
 <template>
     <Sidebar>
+        <SidebarHeader>
+            <div class="flex flex-row items-center justify-center w-full">
+                <img :src="logo" alt="Logo" class="w-8 h-8 mr-2" />
+                <span class="text-xl font-bold">spotwrap-next</span>
+            </div>
+        </SidebarHeader>
         <SidebarContent>
             <SidebarGroup>
-                <SidebarGroupLabel>Application</SidebarGroupLabel>
+                <!-- <SidebarGroupLabel>Application</SidebarGroupLabel> -->
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem
