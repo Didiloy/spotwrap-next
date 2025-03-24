@@ -6,6 +6,16 @@
       "search": "Recherche",
       "subscriptions": "Abonnements",
       "version": "Version"
+    },
+    "Search": {
+      "placeholder": "Rechercher...",
+      "button": "Rechercher"
+    },
+    "AlbumsRow": {
+      "title": "Albums"
+    },
+    "TracksRow": {
+      "title": "Titres"
     }
   },
   "en": {
@@ -15,6 +25,16 @@
       "search": "Search",
       "subscriptions": "Subscriptions",
       "version": "Version"
+    },
+    "Search": {
+      "placeholder": "Search...",
+      "button": "Search"
+    },
+    "AlbumsRow": {
+      "title": "Albums"
+    },
+    "TracksRow": {
+      "title": "Tracks"
     }
   }
 }
