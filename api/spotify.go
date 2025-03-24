@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -11,7 +12,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const TokenURL = "https://accounts.spotify.com/api/token"
+const (
+	TokenURL  = "https://accounts.spotify.com/api/token"
+	BaseURL   = "https://api.spotify.com/v1"
+	SearchURL = BaseURL + "/search"
+)
 
 type TokenResponse struct {
 	AccessToken string `json:"access_token"`
@@ -19,7 +24,6 @@ type TokenResponse struct {
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-// Fetch Spotify Access Token
 func GetToken() (string, int, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -63,4 +67,36 @@ func GetToken() (string, int, error) {
 	// fmt.Println("Spotify Token Expires In (seconds):", strconv.Itoa(tokenResponse.ExpiresIn))
 
 	return tokenResponse.AccessToken, tokenResponse.ExpiresIn, nil
+}
+
+func Search(query string, token string) (map[string]any, error) {
+	req, err := http.NewRequest("GET", SearchURL, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	q := req.URL.Query()
+	q.Add("q", query)
+	q.Add("type", "album,artist,track")
+	req.URL.RawQuery = q.Encode()
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var result map[string]any
+	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

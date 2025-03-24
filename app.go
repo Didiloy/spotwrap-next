@@ -48,5 +48,16 @@ func (a *App) refreshTokenPeriodically() {
 	for {
 		<-ticker.C
 		a.fetchSpotifyAccessToken()
+		fmt.Println("Token refreshed")
 	}
+}
+
+// Search Spotify API for query
+func (a *App) Search(query string) map[string]any {
+	result, err := api.Search(query, a.spotifyAccessToken)
+	if err != nil {
+		fmt.Println("Error searching:", err)
+		return map[string]any{}
+	}
+	return result
 }
