@@ -14,12 +14,12 @@
                     <CarouselItem
                         v-for="album in props.albums"
                         :key="album.id"
-                        class="max-w-[200px] flex flex-col items-center justify-center hover:cursor-pointer"
+                        class="max-w-[200px] flex flex-col items-center justify-center hover:cursor-pointer group"
                     >
                         <img
                             :src="album.images[0]?.url"
                             alt="Album Cover"
-                            class="w-40 min-w-40 h-40 object-cover rounded-md shadow-2xl"
+                            class="w-40 min-w-40 h-40 object-cover rounded-md shadow-2xl transition-shadow duration-300 group-hover:shadow-[var(--accent-color)]"
                         />
                         <p
                             class="w-full text-[var(--accent-color)] mt-2 text-center text-bold truncate"
