@@ -17,6 +17,9 @@
     },
     "TracksRow": {
       "title": "Titres"
+    },
+    "ArtistsRow": {
+      "title": "Artistes"
     }
   },
   "en": {
@@ -37,6 +40,9 @@
     },
     "TracksRow": {
       "title": "Tracks"
+    },
+    "ArtistsRow": {
+      "title": "Artists"
     }
   }
 }
