@@ -3,7 +3,7 @@
         <h2 class="text-lg font-semibold mb-3">
             {{ i18n.t("TracksRow.title") }}
         </h2>
-        <div class="bg-white p-4 rounded-lg h-fit max-h-96 overflow-y-auto">
+        <div class="bg-white p-4 rounded-lg h-fit overflow-y-auto">
             <div
                 v-for="track in tracks"
                 :key="track.id"
