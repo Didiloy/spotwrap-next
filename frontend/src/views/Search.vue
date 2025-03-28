@@ -35,10 +35,10 @@
                 v-if="searchResults.tracks"
                 :tracks="searchResults.tracks.items.slice(0, 10)"
             />
-            <!-- <ArtistsRow
+            <ArtistsRow
                 v-if="searchResults.artists"
                 :artists="searchResults.artists.items"
-            /> -->
+            />
         </div>
     </div>
 </template>
