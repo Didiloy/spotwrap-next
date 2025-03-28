@@ -9,7 +9,8 @@
     },
     "Search": {
       "placeholder": "Rechercher...",
-      "button": "Rechercher"
+      "button": "Rechercher",
+      "loading": "Chargement..."
     },
     "AlbumsRow": {
       "title": "Albums"
@@ -28,7 +29,8 @@
     },
     "Search": {
       "placeholder": "Search...",
-      "button": "Search"
+      "button": "Search",
+      "loading": "Loading..."
     },
     "AlbumsRow": {
       "title": "Albums"

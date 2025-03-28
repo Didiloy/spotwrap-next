@@ -11,10 +11,17 @@
                 v-model="searchQuery"
                 :placeholder="i18n.t('Search.placeholder')"
                 @keyup.enter="handleSearch"
+                :disabled="isLoading"
             />
-            <Button @click="handleSearch">
-                <SearchIcon class="w-4 h-4" />
-                {{ i18n.t("Search.button") }}
+            <Button @click="handleSearch" :disabled="isLoading">
+                <template v-if="isLoading">
+                    <LoaderCircle class="w-4 h-4 animate-spin" />
+                    {{ i18n.t("Search.loading") }}
+                </template>
+                <template v-else>
+                    <SearchIcon class="w-4 h-4" />
+                    {{ i18n.t("Search.button") }}
+                </template>
             </Button>
         </div>
 
@@ -43,22 +50,31 @@ import TracksRow from "@/components/search/TracksRow.vue";
 import ArtistsRow from "@/components/search/ArtistsRow.vue";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search as SearchIcon } from "lucide-vue-next";
+import { Search as SearchIcon, LoaderCircle } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 import { Search } from "../../wailsjs/go/main/App";
 
 const i18n = useI18n();
 const searchQuery = ref("");
 const searchResults = ref<any>(null);
+const isLoading = ref(false);
 
 const handleSearch = async () => {
     if (searchQuery.value.trim() === "") {
         console.log("Search query is empty");
         return;
     }
+    isLoading.value = true;
     console.log("Searching for:", searchQuery.value);
-    searchResults.value = await Search(searchQuery.value);
-    console.log("Search results:", searchResults.value);
+
+    try {
+        searchResults.value = await Search(searchQuery.value);
+        console.log("Search results:", searchResults.value);
+    } catch (error) {
+        console.error("Error fetching search results:", error);
+    } finally {
+        isLoading.value = false;
+    }
 };
 </script>
 
