@@ -10,7 +10,13 @@
     "Search": {
       "placeholder": "Rechercher...",
       "button": "Rechercher",
-      "loading": "Chargement..."
+      "loading": "Chargement...",
+      "errorTitle": "Échec de la recherche",
+      "errorMessage": "Nous n'avons pas pu effectuer votre recherche. Veuillez vérifier votre connexion et réessayer.",
+      "noResultsTitle": "Aucun résultat trouvé",
+      "noResultsMessage": "Votre recherche pour",
+      "noResultsDetailed": "Aucune piste, album ou artiste correspondant trouvé.",
+      "retry": "Réessayer"
     },
     "AlbumsRow": {
       "title": "Albums"
@@ -33,7 +39,13 @@
     "Search": {
       "placeholder": "Search...",
       "button": "Search",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "errorTitle": "Search failed",
+      "errorMessage": "We couldn't complete your search. Please check your connection and try again.",
+      "noResultsTitle": "No results found",
+      "noResultsMessage": "Your search for",
+      "noResultsDetailed": "No matching tracks, albums or artists found.",
+      "retry": "Try Again"
     },
     "AlbumsRow": {
       "title": "Albums"
