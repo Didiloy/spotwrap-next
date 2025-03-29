@@ -26,6 +26,7 @@
                 <div class="flex items-center gap-3 ml-2 overflow-hidden">
                     <img
                         :src="track.album.images[0]?.url"
+                        loading="lazy"
                         alt="Track Cover"
                         class="w-10 h-10 rounded-md flex-shrink-0 object-cover shadow-sm"
                     />

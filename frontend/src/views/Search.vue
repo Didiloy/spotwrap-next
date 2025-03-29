@@ -95,7 +95,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, shallowRef } from "vue";
 import AlbumsRow from "@/components/search/AlbumsRow.vue";
 import TracksRow from "@/components/search/TracksRow.vue";
 import ArtistsRow from "@/components/search/ArtistsRow.vue";
@@ -111,7 +111,7 @@ import { Search } from "../../wailsjs/go/main/App";
 
 const i18n = useI18n();
 const search_query = ref("");
-const search_results = ref<any>(null);
+const search_results = shallowRef<any>(null);
 const is_loading = ref(false);
 const error_message = ref("");
 const search_attempted = ref(false);

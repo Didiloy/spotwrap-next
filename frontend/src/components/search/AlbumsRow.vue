@@ -15,7 +15,7 @@
                     <CarouselItem
                         v-for="album in props.albums"
                         :key="album.id"
-                        class="pl-1 basis-[180px] max-w-[180px]"
+                        class="pl-1 basis-[180px] max-w-[180px] hover:cursor-pointer"
                     >
                         <div
                             class="group relative p-2 transition-all duration-300 hover:scale-[1.03] active:scale-95"
@@ -25,6 +25,7 @@
                             >
                                 <img
                                     :src="album.images[0]?.url"
+                                    loading="lazy"
                                     alt="Album Cover"
                                     class="w-full h-full object-cover shadow-lg transition-all duration-500 group-hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)] group-hover:brightness-110"
                                 />

@@ -64,7 +64,13 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast/use-toast";
 import { GetArtist } from "../../wailsjs/go/main/App";
+import {
+    AddArtist,
+    RemoveArtist,
+    GetArtistsFromDB,
+} from "../../wailsjs/go/database/Database";
 import AlbumsRow from "@/components/search/AlbumsRow.vue";
 import TracksRow from "@/components/search/TracksRow.vue";
 import { useI18n } from "vue-i18n";
@@ -74,6 +80,7 @@ const artist = ref<any>(null);
 const artistData = ref<any>({});
 const isFollowing = ref(false);
 const i18n = useI18n();
+const { toast } = useToast();
 
 const topTracks = computed(() => {
     return (
@@ -107,15 +114,44 @@ const formatNumber = (num: number) => {
     return new Intl.NumberFormat().format(num);
 };
 
-const toggleFollow = () => {
+const toggleFollow = async () => {
+    if (isFollowing.value) {
+        const success = await RemoveArtist(artist.value.id);
+        if (!success) {
+            console.error("Failed to remove artist");
+            toast({
+                title: i18n.t("ArtistDetails.error_title"),
+                description: i18n.t("ArtistDetails.error_unfollowing"),
+                variant: "destructive",
+            });
+            return;
+        }
+    } else {
+        const success = await AddArtist(artist.value.id);
+        if (!success) {
+            console.error("Failed to add artist");
+            toast({
+                title: i18n.t("ArtistDetails.error_title"),
+                description: i18n.t("ArtistDetails.error_following"),
+                variant: "destructive",
+            });
+            return;
+        }
+    }
     isFollowing.value = !isFollowing.value;
 };
 
 onMounted(async () => {
     const artistId = route.params.id as string;
     const data = await getArtistDetails(artistId);
+    const subbed_artists = await GetArtistsFromDB();
+    const isSubbed = subbed_artists.some(
+        (artist: { SpotifyID: string; LastChecked: Date }) =>
+            artist.SpotifyID === artistId,
+    );
     artistData.value = data;
     artist.value = data.artist;
+    isFollowing.value = isSubbed;
 });
 
 const getArtistDetails = async (id: string) => {
@@ -124,6 +160,11 @@ const getArtistDetails = async (id: string) => {
         return artistData;
     } catch (error) {
         console.error("Error fetching artist details:", error);
+        toast({
+            title: i18n.t("ArtistDetails.error_title"),
+            description: i18n.t("ArtistDetails.error_getting"),
+            variant: "destructive",
+        });
         return {};
     }
 };

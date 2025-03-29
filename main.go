@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"embed"
+	"fmt"
 	"os"
+	"spotwrap-next/database"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -30,6 +33,11 @@ func main() {
 
 	// Create an instance of the app structure
 	app := NewApp()
+	database, errDB := database.New()
+	if errDB != nil {
+		fmt.Printf("Could not initialize database: \n%s\n", errDB.Error())
+		return
+	}
 
 	// Create application with options
 	err := wails.Run(&options.App{
@@ -43,6 +51,13 @@ func main() {
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
+			database,
+		},
+		CSSDragProperty:          "widows",
+		CSSDragValue:             "1",
+		EnableDefaultContextMenu: false,
+		OnShutdown: func(ctx context.Context) {
+			database.Close()
 		},
 	})
 
