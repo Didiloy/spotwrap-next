@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-
-	"github.com/joho/godotenv"
 )
 
 const (
@@ -26,11 +24,6 @@ type TokenResponse struct {
 }
 
 func GetToken() (string, int, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return "", 0, fmt.Errorf("Error loading .env file: %v", err)
-	}
-
 	clientID := os.Getenv("SPOTIFY_CLIENT_ID")
 	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
 

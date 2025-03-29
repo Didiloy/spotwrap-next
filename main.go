@@ -2,16 +2,32 @@ package main
 
 import (
 	"embed"
+	"os"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+
+	"github.com/joho/godotenv"
 )
+
+//go:embed .env
+var envFile embed.FS
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
+	//env file
+	if data, err := envFile.ReadFile(".env"); err == nil {
+		envMap, err := godotenv.Unmarshal(string(data))
+		if err == nil {
+			for k, v := range envMap {
+				os.Setenv(k, v)
+			}
+		}
+	}
+
 	// Create an instance of the app structure
 	app := NewApp()
 
