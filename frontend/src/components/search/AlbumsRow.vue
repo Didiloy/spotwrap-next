@@ -3,7 +3,7 @@
         <h2
             class="relative text-lg font-semibold uppercase tracking-widest text-gray-800 dark:text-gray-200 mb-6 font-montserrat pb-2 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-12 after:h-[3px] after:bg-[var(--accent-color)] after:rounded-full"
         >
-            {{ i18n.t("AlbumsRow.title") }}
+            {{ props.title ? props.title : i18n.t("AlbumsRow.title") }}
         </h2>
 
         <div class="flex w-full justify-center">
@@ -85,6 +85,7 @@ const props = defineProps<{
         images: Array<{ url: string }>;
         artists?: Array<{ name: string }>;
     }>;
+    title?: string;
 }>();
 
 const formatReleaseDate = (releaseDate: string): string => {

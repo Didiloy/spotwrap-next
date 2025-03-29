@@ -26,6 +26,11 @@
     },
     "ArtistsRow": {
       "title": "Artistes"
+    },
+    "ArtistDetails": {
+      "following": "Suivi",
+      "follow": "Suivre",
+      "singles": "Singles"
     }
   },
   "en": {
@@ -55,6 +60,11 @@
     },
     "ArtistsRow": {
       "title": "Artists"
+    },
+    "ArtistDetails": {
+      "following": "Following",
+      "follow": "Follow",
+      "singles": "Singles"
     }
   }
 }

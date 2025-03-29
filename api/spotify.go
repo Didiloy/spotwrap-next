@@ -16,6 +16,7 @@ const (
 	TokenURL  = "https://accounts.spotify.com/api/token"
 	BaseURL   = "https://api.spotify.com/v1"
 	SearchURL = BaseURL + "/search"
+	ArtistURL = BaseURL + "/artists"
 )
 
 type TokenResponse struct {
@@ -95,6 +96,64 @@ func Search(query string, token string) (map[string]any, error) {
 
 	var result map[string]any
 	if err := json.Unmarshal(body, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func GetArtistDetails(id string, token string) (map[string]any, error) {
+	artistData := make(map[string]any)
+
+	// Get basic artist info using ArtistURL
+	basicInfoURL := fmt.Sprintf("%s/%s", ArtistURL, id)
+	basicInfo, err := makeRequest(basicInfoURL, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get basic artist info: %v", err)
+	}
+	artistData["artist"] = basicInfo
+
+	// Get artist's top tracks
+	topTracksURL := fmt.Sprintf("%s/%s/top-tracks?market=US", ArtistURL, id)
+	topTracks, err := makeRequest(topTracksURL, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get top tracks: %v", err)
+	}
+	artistData["top_tracks"] = topTracks["tracks"]
+
+	// Get artist's albums
+	albumsURL := fmt.Sprintf("%s/%s/albums?include_groups=album,single&market=US&limit=10", ArtistURL, id)
+	albums, err := makeRequest(albumsURL, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get albums: %v", err)
+	}
+	artistData["albums"] = albums["items"]
+
+	return artistData, nil
+}
+
+func makeRequest(url string, token string) (map[string]any, error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer "+token)
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("unexpected status code %d: %s", resp.StatusCode, string(body))
+	}
+
+	var result map[string]any
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, err
 	}
 

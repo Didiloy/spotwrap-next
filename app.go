@@ -61,3 +61,13 @@ func (a *App) Search(query string) map[string]any {
 	}
 	return result
 }
+
+// Get Artist Data
+func (a *App) GetArtist(id string) map[string]any {
+	result, err := api.GetArtistDetails(id, a.spotifyAccessToken)
+	if err != nil {
+		fmt.Println("Error getting artist:", err)
+		return map[string]any{}
+	}
+	return result
+}
