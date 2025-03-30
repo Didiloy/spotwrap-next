@@ -1,40 +1,46 @@
 <template>
     <div class="artist-detail h-full overflow-y-auto">
         <!-- Hero Section -->
-        <div
-            class="relative w-full aspect-square max-h-[500px] bg-gray-800 overflow-hidden"
-        >
-            <img
-                :src="artist?.images[0]?.url"
-                alt="Artist image"
-                class="w-full h-full object-cover opacity-80"
-            />
-            <div
-                class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6"
-            >
-                <div class="w-full">
-                    <h1 class="text-4xl md:text-6xl font-bold text-white mb-2">
-                        {{ artist?.name }}
-                    </h1>
-                    <p class="text-gray-300 mb-6">
-                        {{ formatNumber(artist?.followers?.total) }} followers •
-                        {{ artist?.genres?.slice(0, 3).join(", ") }}
-                    </p>
-                    <Button
-                        @click="toggleFollow"
-                        class="px-8 py-3 text-lg font-bold rounded-full"
-                        :variant="isFollowing ? 'default' : 'outline'"
+        <div class="w-full flex justify-center">
+            <div class="w-11/12 max-w-[1800px] mt-2 rounded-xl">
+                <div
+                    class="relative w-full aspect-square max-h-[300px] overflow-hidden rounded-xl"
+                >
+                    <img
+                        :src="artist?.images[0]?.url"
+                        alt="Artist image"
+                        class="w-full h-full object-cover opacity-80"
+                    />
+                    <div
+                        class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6"
                     >
-                        {{
-                            isFollowing
-                                ? i18n.t("ArtistDetails.following")
-                                : i18n.t("ArtistDetails.follow")
-                        }}
-                    </Button>
+                        <div class="w-full">
+                            <h1
+                                class="text-4xl md:text-6xl font-bold text-white mb-2"
+                            >
+                                {{ artist?.name }}
+                            </h1>
+                            <p class="text-gray-300 mb-6">
+                                {{ formatNumber(artist?.followers?.total) }}
+                                followers •
+                                {{ artist?.genres?.slice(0, 5).join(", ") }}
+                            </p>
+                            <Button
+                                @click="toggleFollow"
+                                class="px-8 py-3 text-lg font-bold rounded-full"
+                                :variant="isFollowing ? 'default' : 'outline'"
+                            >
+                                {{
+                                    isFollowing
+                                        ? i18n.t("ArtistDetails.following")
+                                        : i18n.t("ArtistDetails.follow")
+                                }}
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
         <!-- Content Section -->
         <div class="p-6 space-y-8">
             <!-- Albums Section -->
@@ -65,12 +71,12 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast/use-toast";
-import { GetArtist } from "../../wailsjs/go/main/App";
+import { GetArtist } from "../../../wailsjs/go/main/App";
 import {
     AddArtist,
     RemoveArtist,
     GetArtistsFromDB,
-} from "../../wailsjs/go/database/Database";
+} from "../../../wailsjs/go/database/Database";
 import AlbumsRow from "@/components/search/AlbumsRow.vue";
 import TracksRow from "@/components/search/TracksRow.vue";
 import { useI18n } from "vue-i18n";
@@ -144,6 +150,7 @@ const toggleFollow = async () => {
 onMounted(async () => {
     const artistId = route.params.id as string;
     const data = await getArtistDetails(artistId);
+    console.log(data);
     const subbed_artists = await GetArtistsFromDB();
     const isSubbed = subbed_artists.some(
         (artist: { SpotifyID: string; LastChecked: Date }) =>

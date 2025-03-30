@@ -16,6 +16,7 @@
                         v-for="album in props.albums"
                         :key="album.id"
                         class="pl-1 basis-[180px] max-w-[180px] hover:cursor-pointer"
+                        @click="navigateToAlbum(album.id)"
                     >
                         <div
                             class="group relative p-2 transition-all duration-300 hover:scale-[1.03] active:scale-95"
@@ -77,6 +78,9 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 const props = defineProps<{
     albums: Array<{
@@ -88,6 +92,10 @@ const props = defineProps<{
     }>;
     title?: string;
 }>();
+
+const navigateToAlbum = (albumId: string) => {
+    router.push(`/album/${albumId}`);
+};
 
 const formatReleaseDate = (releaseDate: string): string => {
     try {

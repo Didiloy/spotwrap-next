@@ -35,6 +35,19 @@
       "error_following": "Erreur lors de l'abonnement, veuillez réessayer plus tard.",
       "error_unfollowing": "Erreur lors de la suppression de l'abonnement, veuillez réessayer plus tard.",
       "error_getting": "Erreur lors de la récupération des informations de l'artiste, veuillez réessayer plus tard."
+    },
+    "AlbumDetails": {
+      "tracks": "Titres",
+      "download": "Télécharger",
+      "select_path": "Sélectionner un chemin",
+      "bitrate": "Bitrate",
+      "format": "Format",
+      "about": "À propos de l'album",
+      "release_date": "Date de sortie",
+      "label": "Label",
+      "popularity": "Popularité",
+      "copyright": "Copyright",
+      "no_path_selected": "Aucun chemin sélectionné"
     }
   },
   "en": {
@@ -73,6 +86,19 @@
       "error_following": "Error following artist, please try again later.",
       "error_unfollowing": "Error unfollowing artist, please try again later.",
       "error_getting": "Error while getting artist information, please try again later."
+    },
+    "AlbumDetails": {
+      "tracks": "Tracks",
+      "download": "Download",
+      "select_path": "Select Path",
+      "bitrate": "Bitrate",
+      "format": "Format",
+      "about": "About the album",
+      "release_date": "Release Date",
+      "label": "Label",
+      "popularity": "Popularity",
+      "copyright": "Copyright",
+      "no_path_selected": "No path selected"
     }
   }
 }

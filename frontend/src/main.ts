@@ -4,7 +4,9 @@ import Home from "./views/Home.vue";
 import Settings from "./views/Settings.vue";
 import Search from "./views/Search.vue";
 import Subscriptions from "./views/Subscriptions.vue";
-import ArtistDetail from "./views/ArtistDetail.vue";
+import ArtistDetail from "./views/details/ArtistDetail.vue";
+import AlbumDetail from "./views/details/AlbumDetails.vue";
+
 import "./style.css";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { createI18n } from "vue-i18n";
@@ -16,6 +18,7 @@ const routes = [
   { path: "/search", component: Search },
   { path: "/subscriptions", component: Subscriptions },
   { path: "/artist/:id", component: ArtistDetail },
+  { path: "/album/:id", component: AlbumDetail },
 ];
 
 const router = createRouter({
