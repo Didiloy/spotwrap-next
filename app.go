@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"spotwrap-next/api"
+	"spotwrap-next/utils"
 	"time"
+
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App struct
@@ -70,4 +73,33 @@ func (a *App) GetArtist(id string) map[string]any {
 		return map[string]any{}
 	}
 	return result
+}
+
+// Get Album Data
+func (a *App) GetAlbum(id string) map[string]any {
+	result, err := api.GetAlbumDetails(id, a.spotifyAccessToken)
+	if err != nil {
+		fmt.Println("Error getting album:", err)
+		return map[string]any{}
+	}
+	return result
+}
+
+func (a *App) GetDominantColor(imageLink string) ([]string, error) {
+	colors, err := utils.GetDominantColor(imageLink)
+	if err != nil {
+		fmt.Printf("Could not get dominant colors for image %v: %v\n", imageLink, err)
+		return []string{}, nil
+	}
+	return colors, nil
+}
+
+func (a *App) ChooseDirectory() string {
+	dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select Directory",
+	})
+	if err != nil {
+		return ""
+	}
+	return dir
 }

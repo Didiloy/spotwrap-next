@@ -15,6 +15,7 @@ const (
 	BaseURL   = "https://api.spotify.com/v1"
 	SearchURL = BaseURL + "/search"
 	ArtistURL = BaseURL + "/artists"
+	AlbumURL  = BaseURL + "/albums"
 )
 
 type TokenResponse struct {
@@ -123,6 +124,28 @@ func GetArtistDetails(id string, token string) (map[string]any, error) {
 	artistData["albums"] = albums["items"]
 
 	return artistData, nil
+}
+
+func GetAlbumDetails(id string, token string) (map[string]any, error) {
+	albumData := make(map[string]any)
+
+	// Get basic album info
+	albumURL := fmt.Sprintf("%s/albums/%s", BaseURL, id)
+	albumInfo, err := makeRequest(albumURL, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get album info: %v", err)
+	}
+	albumData["album"] = albumInfo
+
+	// Get album tracks
+	tracksURL := fmt.Sprintf("%s/albums/%s/tracks?limit=50", BaseURL, id)
+	tracks, err := makeRequest(tracksURL, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get album tracks: %v", err)
+	}
+	albumData["tracks"] = tracks["items"]
+
+	return albumData, nil
 }
 
 func makeRequest(url string, token string) (map[string]any, error) {
