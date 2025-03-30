@@ -7,58 +7,53 @@
                 {{ i18n.t("TracksRow.title") }}
             </h2>
         </div>
-        <div
-            class="bg-white dark:bg-gray-800/50 p-4 rounded-xl shadow-sm w-full mx-auto overflow-hidden"
-        >
-            <div
-                v-for="(track, index) in tracks"
-                :key="track.id"
-                class="group w-full grid grid-cols-[40px_1fr_auto] items-center p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors duration-200 cursor-pointer"
-                @click="handleTrackClick(track.id)"
-            >
-                <p
-                    class="text-gray-500 dark:text-gray-400 text-sm font-medium text-center"
+        <div class="p-2">
+            <div class="space-y-2">
+                <div
+                    v-for="(track, index) in tracks"
+                    :key="track.id"
+                    class="flex items-center p-4 hover:bg-gray-800/50 rounded-lg transition-colors"
+                    @click="handleTrackClick(track.id)"
                 >
-                    {{ index + 1 }}
-                </p>
-
-                <!-- Track Info -->
-                <div class="flex items-center gap-3 ml-2 overflow-hidden">
                     <img
-                        :src="track.album.images[0]?.url"
+                        v-if="track.album?.images[0]?.url"
+                        :src="track.album?.images[0]?.url"
                         loading="lazy"
                         alt="Track Cover"
-                        class="w-10 h-10 rounded-md flex-shrink-0 object-cover shadow-sm"
+                        class="w-10 h-10 rounded-md flex-shrink-0 object-cover"
                     />
-                    <div class="min-w-0 overflow-hidden">
-                        <p
-                            class="font-medium truncate text-gray-900 dark:text-gray-100"
-                        >
-                            {{ track.name }}
-                        </p>
-                        <p
-                            class="text-sm text-gray-500 dark:text-gray-400 truncate"
-                        >
-                            {{ formatArtists(track.artists) }}
-                        </p>
+                    <div class="w-8 text-gray-400 text-center mr-4">
+                        {{ index + 1 }}
                     </div>
-                </div>
-
-                <!-- Duration & Action -->
-                <div class="flex items-center gap-4 ml-auto">
-                    <p
-                        class="text-sm text-gray-600 dark:text-gray-300 min-w-[50px] text-right"
-                    >
+                    <div class="flex-grow">
+                        <div class="font-medium">{{ track.name }}</div>
+                        <div class="text-sm text-gray-400">
+                            {{
+                                track.artists
+                                    ?.map((a: any) => a.name)
+                                    .join(", ")
+                            }}
+                        </div>
+                    </div>
+                    <div class="text-gray-400 text-sm">
                         {{ formatDuration(track.duration_ms) }}
-                    </p>
+                    </div>
                     <Button
-                        @click.stop="handleArrowClick(track.id)"
+                        @click="handleTrackClick(track.id)"
                         variant="ghost"
                         size="sm"
-                        class="opacity-0 group-hover:opacity-100 text-[var(--accent-color)] hover:bg-[var(--accent-color)] hover:text-white transition-opacity duration-200"
+                        class="ml-4"
                     >
-                        <ArrowRight class="w-4 h-4" />
+                        <ArrowRight class="h-4 w-4" />
                     </Button>
+                    <!-- <Button
+                        @click.stop="downloadTrack(track)"
+                        variant="ghost"
+                        size="sm"
+                        class="ml-2"
+                    >
+                        <DownloadIcon class="h-4 w-4" />
+                    </Button> -->
                 </div>
             </div>
         </div>
@@ -68,8 +63,13 @@
 <script lang="ts" setup>
 import { useI18n } from "vue-i18n";
 const i18n = useI18n();
-import { ArrowRight, Clock } from "lucide-vue-next";
+import { ArrowRight } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
+import { onMounted } from "vue";
+
+onMounted(() => {
+    console.log("TracksRow mounted");
+});
 
 defineProps<{
     tracks: Array<{

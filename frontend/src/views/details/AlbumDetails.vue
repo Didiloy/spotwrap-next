@@ -129,49 +129,7 @@
             </div>
         </div>
 
-        <!-- Tracks List -->
-        <div class="p-6">
-            <div class="space-y-2">
-                <div
-                    v-for="(track, index) in album?.tracks || []"
-                    :key="track.id"
-                    class="flex items-center p-4 hover:bg-gray-800/50 rounded-lg transition-colors"
-                >
-                    <div class="w-8 text-gray-400 text-center mr-4">
-                        {{ index + 1 }}
-                    </div>
-                    <div class="flex-grow">
-                        <div class="font-medium">{{ track.name }}</div>
-                        <div class="text-sm text-gray-400">
-                            {{
-                                track.artists
-                                    ?.map((a: any) => a.name)
-                                    .join(", ")
-                            }}
-                        </div>
-                    </div>
-                    <div class="text-gray-400 text-sm">
-                        {{ formatDuration(track.duration_ms) }}
-                    </div>
-                    <Button
-                        @click="goToTrack(track.id)"
-                        variant="ghost"
-                        size="sm"
-                        class="ml-4"
-                    >
-                        <ArrowRightIcon class="h-4 w-4" />
-                    </Button>
-                    <Button
-                        @click.stop="downloadTrack(track)"
-                        variant="ghost"
-                        size="sm"
-                        class="ml-2"
-                    >
-                        <DownloadIcon class="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-        </div>
+        <TracksRow :tracks="album?.tracks || []" class="p-2" />
 
         <!-- Album Info -->
         <div class="p-6 border-t border-gray-800">
@@ -226,6 +184,7 @@ import {
 } from "../../../wailsjs/go/main/App";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import TracksRow from "@/components/search/TracksRow.vue";
 import {
     Select,
     SelectContent,
