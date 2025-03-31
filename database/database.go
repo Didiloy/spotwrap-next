@@ -102,5 +102,9 @@ func (d *Database) GetArtistsFromDB() ([]Artist, error) {
 		}
 		artists = append(artists, a)
 	}
+
+	if len(artists) == 0 {
+		artists = make([]Artist, 0)
+	}
 	return artists, nil
 }
