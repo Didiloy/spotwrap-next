@@ -150,12 +150,20 @@ const toggleFollow = async () => {
 onMounted(async () => {
     const artistId = route.params.id as string;
     const data = await getArtistDetails(artistId);
-    console.log(data);
     const subbed_artists = await GetArtistsFromDB();
-    const isSubbed = subbed_artists.some(
-        (artist: { SpotifyID: string; LastChecked: Date }) =>
-            artist.SpotifyID === artistId,
-    );
+    console.log(subbed_artists);
+    let isSubbed = false;
+    try {
+        isSubbed = subbed_artists.some(
+            (artist: { SpotifyID: string; LastChecked: Date }) =>
+                artist.SpotifyID === artistId,
+        );
+    } catch (error) {
+        console.error(
+            "Error checking artist subscription: must be null",
+            error,
+        );
+    }
     artistData.value = data;
     artist.value = data.artist;
     isFollowing.value = isSubbed;
