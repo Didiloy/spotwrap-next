@@ -12,7 +12,7 @@
                 <div
                     v-for="(track, index) in tracks"
                     :key="track.id"
-                    class="flex items-center p-4 hover:bg-gray-800/50 rounded-lg transition-colors"
+                    class="flex items-center p-4 hover:bg-zinc-400/50 rounded-lg transition-colors"
                     @click="handleTrackClick(track.id)"
                 >
                     <img
