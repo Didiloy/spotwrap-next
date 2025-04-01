@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast/use-toast";
@@ -177,8 +177,22 @@ const toggleFollow = async () => {
     isFollowing.value = !isFollowing.value;
 };
 
+watch(
+    () => route.params.id,
+    async (newId) => {
+        if (newId) {
+            await loadArtistData(newId as string);
+        }
+    },
+    { immediate: true },
+);
+
 onMounted(async () => {
     const artistId = route.params.id as string;
+    await loadArtistData(artistId);
+});
+
+const loadArtistData = async (artistId: string) => {
     const data = await getArtistDetails(artistId);
     const subbed_artists = await GetArtistsFromDB();
     let isSubbed = false;
@@ -195,7 +209,7 @@ onMounted(async () => {
             artist.value.images[0].url,
         );
     }
-});
+};
 
 const getArtistDetails = async (id: string) => {
     try {

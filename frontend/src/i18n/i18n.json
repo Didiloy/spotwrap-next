@@ -32,10 +32,11 @@
       "follow": "Suivre",
       "followers": "Abonnés",
       "singles": "Singles",
-      "error_title": "Quelque chose c'est mal passé",
+      "error_title": "Quelque chose c'est maPopular Tracksl passé",
       "error_following": "Erreur lors de l'abonnement, veuillez réessayer plus tard.",
       "error_unfollowing": "Erreur lors de la suppression de l'abonnement, veuillez réessayer plus tard.",
-      "error_getting": "Erreur lors de la récupération des informations de l'artiste, veuillez réessayer plus tard."
+      "error_getting": "Erreur lors de la récupération des informations de l'artiste, veuillez réessayer plus tard.",
+      "popular_tracks": "Titres populaires"
     },
     "AlbumDetails": {
       "tracks": "Titres",
@@ -116,7 +117,8 @@
       "error_title": "Something went wrong",
       "error_following": "Error following artist, please try again later.",
       "error_unfollowing": "Error unfollowing artist, please try again later.",
-      "error_getting": "Error while getting artist information, please try again later."
+      "error_getting": "Error while getting artist information, please try again later.",
+      "popular_tracks": "Popular Tracks"
     },
     "AlbumDetails": {
       "tracks": "Tracks",
