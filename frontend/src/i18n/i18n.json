@@ -71,7 +71,13 @@
     },
     "Home": {
       "title": "Actualité des artistes",
-      "subtitle": "Découvrez les dernières sorties des artistes que vous suivez"
+      "subtitle": "Découvrez les dernières sorties des artistes que vous suivez",
+      "loading": "Chargement des artistes...",
+      "emptyTitle": "Aucun artiste",
+      "emptySubtitle": "Vous n'avez pas encore ajouté d'artistes à suivre. Suivez de nouveaux artistes pour voir leurs dernières sorties ici.",
+      "discoverArtists": "Découvrir des artistes",
+      "tracks": "Titres",
+      "viewAlbum": "Voir l'album"
     }
   },
   "en": {
@@ -145,5 +151,15 @@
     "duration": "Duration",
     "track_number": "Track Number",
     "from_album": "From the album"
+  },
+  "Home": {
+    "title": "Artist Updates",
+    "subtitle": "Discover the latest releases from artists you follow",
+    "loading": "Loading artists...",
+    "emptyTitle": "No artists",
+    "emptySubtitle": "You haven't added any artists to follow yet. Follow new artists to see their latest releases here.",
+    "discoverArtists": "Discover Artists",
+    "tracks": "Tracks",
+    "viewAlbum": "View Album"
   }
 }

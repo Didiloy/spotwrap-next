@@ -10,8 +10,52 @@
             </p>
         </div>
 
+        <!-- Loading state -->
+        <div
+            v-if="loading"
+            class="flex flex-col items-center justify-center py-12"
+        >
+            <div
+                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"
+            ></div>
+            <p class="text-gray-400">{{ $t("Home.loading") }}</p>
+        </div>
+
+        <!-- Empty state -->
+        <div
+            v-else-if="!loading && timelineItems.length === 0"
+            class="flex flex-col items-center justify-center py-12"
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-16 w-16 text-gray-400 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="1.5"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+            </svg>
+            <h3 class="text-xl font-medium text-gray-300 mb-2">
+                {{ $t("Home.emptyTitle") }}
+            </h3>
+            <p class="text-gray-400 text-center max-w-md">
+                {{ $t("Home.emptySubtitle") }}
+            </p>
+            <Button
+                class="mt-4 rounded-full bg-purple-600 hover:bg-purple-700 transition-colors"
+                @click="goToSearch"
+            >
+                {{ $t("Home.discoverArtists") }}
+            </Button>
+        </div>
+
         <!-- Timeline -->
-        <div class="relative">
+        <div v-else class="relative">
             <!-- Timeline line -->
             <div
                 class="absolute left-3 top-0 h-full w-0.5 bg-gradient-to-b from-purple-500/30 via-purple-500/50 to-purple-500/30"
@@ -89,7 +133,11 @@
                                         v-if="artist.album.total_tracks"
                                         class="text-xs px-3 py-1 rounded-full bg-white/10 text-gray-300"
                                     >
-                                        {{ artist.album.total_tracks }} tracks
+                                        {{
+                                            artist.album.total_tracks +
+                                            " " +
+                                            $t("Home.tracks")
+                                        }}
                                     </span>
                                 </div>
 
@@ -98,14 +146,7 @@
                                         size="sm"
                                         class="rounded-full bg-purple-600 hover:bg-purple-700 transition-colors"
                                     >
-                                        View Album
-                                    </Button>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        class="rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                                    >
-                                        Download
+                                        {{ $t("Home.viewAlbum") }}
                                     </Button>
                                 </div>
                             </div>
@@ -122,6 +163,9 @@ import { ref, onMounted } from "vue";
 import { Button } from "@/components/ui/button";
 import { GetArtist, GetDominantColor } from "../../wailsjs/go/main/App";
 import { GetArtistsFromDB } from "../../wailsjs/go/database/Database";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
 
 interface TimelineItem {
     artist: {
@@ -142,6 +186,7 @@ interface TimelineItem {
     dominantColors?: string[];
 }
 
+const loading = ref(true);
 const timelineItems = ref<(TimelineItem & { dominantColors?: string[] })[]>([]);
 
 const formatReleaseDate = (dateString: string) => {
@@ -160,50 +205,80 @@ const getCardStyle = (imageUrl: string, index: number) => {
             background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
         };
     }
+    // Fallback to default gradient if colors not loaded yet
     return {
         background: "linear-gradient(135deg, #4f46e5 0%, #1e40af 100%)",
     };
 };
 
+async function loadDominantColorsForItem(item: TimelineItem, index: number) {
+    try {
+        if (item.album.images?.[0]?.url) {
+            const colors = await GetDominantColor(item.album.images[0].url);
+            timelineItems.value = timelineItems.value.map((el, i) =>
+                i === index ? { ...el, dominantColors: colors } : el,
+            );
+        }
+    } catch (error) {
+        console.error("Error loading dominant colors:", error);
+    }
+}
+
 onMounted(async () => {
-    const artists = await GetArtistsFromDB();
-    const allAlbums: TimelineItem[] = [];
+    try {
+        const artists = await GetArtistsFromDB();
 
-    for (const artist of artists) {
-        const artistData = await GetArtist(artist.SpotifyID);
+        if (artists.length === 0) {
+            loading.value = false;
+            return;
+        }
 
-        if (artistData.albums) {
-            for (const album of artistData.albums) {
-                const dominantColors = album.images?.[0]?.url
-                    ? await GetDominantColor(album.images[0].url)
-                    : [];
+        const allAlbums: TimelineItem[] = [];
 
-                allAlbums.push({
-                    artist: {
-                        id: artistData.artist.id,
-                        name: artistData.artist.name,
-                        images: artistData.artist.images,
-                    },
-                    album: {
-                        id: album.id,
-                        name: album.name,
-                        album_type: album.album_type,
-                        release_date: album.release_date,
-                        total_tracks: album.total_tracks,
-                        images: album.images,
-                    },
-                    type: album.album_type === "album" ? "album" : "single",
-                    date: new Date(album.release_date),
-                    dominantColors,
-                });
+        for (const artist of artists) {
+            const artistData = await GetArtist(artist.SpotifyID);
+
+            if (artistData.albums) {
+                for (const album of artistData.albums) {
+                    allAlbums.push({
+                        artist: {
+                            id: artistData.artist.id,
+                            name: artistData.artist.name,
+                            images: artistData.artist.images,
+                        },
+                        album: {
+                            id: album.id,
+                            name: album.name,
+                            album_type: album.album_type,
+                            release_date: album.release_date,
+                            total_tracks: album.total_tracks,
+                            images: album.images,
+                        },
+                        type: album.album_type === "album" ? "album" : "single",
+                        date: new Date(album.release_date),
+                    });
+                }
             }
         }
-    }
 
-    timelineItems.value = allAlbums
-        .sort((a, b) => b.date.getTime() - a.date.getTime())
-        .slice(0, 20);
+        // Sort and set initial items
+        timelineItems.value = allAlbums
+            .sort((a, b) => b.date.getTime() - a.date.getTime())
+            .slice(0, 20);
+
+        timelineItems.value.forEach((item, index) => {
+            loadDominantColorsForItem(item, index);
+        });
+    } catch (error) {
+        console.error("Error fetching artist data:", error);
+    } finally {
+        loading.value = false;
+    }
 });
+
+function goToSearch() {
+    router.push("/search");
+}
 </script>
 
 <style scoped>
