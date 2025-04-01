@@ -145,6 +145,7 @@
                                     <Button
                                         size="sm"
                                         class="rounded-full bg-purple-600 hover:bg-purple-700 transition-colors"
+                                        @click="goToAlbum(artist.album.id)"
                                     >
                                         {{ $t("Home.viewAlbum") }}
                                     </Button>
@@ -278,6 +279,10 @@ onMounted(async () => {
 
 function goToSearch() {
     router.push("/search");
+}
+
+function goToAlbum(id: string) {
+    router.push(`/album/${id}`);
 }
 </script>
 
