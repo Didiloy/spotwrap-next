@@ -9,4 +9,6 @@ export function GetArtist(arg1:string):Promise<Record<string, any>>;
 
 export function GetDominantColor(arg1:string):Promise<Array<string>>;
 
+export function GetTrack(arg1:string):Promise<Record<string, any>>;
+
 export function Search(arg1:string):Promise<Record<string, any>>;

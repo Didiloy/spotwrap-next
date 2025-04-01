@@ -204,8 +204,8 @@ const getArtistDetails = async (id: string) => {
     } catch (error) {
         console.error("Error fetching artist details:", error);
         toast({
-            title: i18n.t("ArtistDetails.error_title"),
-            description: i18n.t("ArtistDetails.error_getting"),
+            title: i18n.t("TrackDetails.error_title"),
+            description: i18n.t("TrackDetails.error_getting"),
             variant: "destructive",
         });
         return {};

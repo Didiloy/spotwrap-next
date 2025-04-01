@@ -49,6 +49,25 @@
       "popularity": "Popularité",
       "copyright": "Copyright",
       "no_path_selected": "Aucun chemin sélectionné"
+    },
+    "TrackDetails": {
+      "download": "Télécharger",
+      "select_path": "Sélectionner un chemin",
+      "bitrate": "Bitrate",
+      "format": "Format",
+      "about": "À propos du titre",
+      "release_date": "Date de sortie",
+      "label": "Label",
+      "popularity": "Popularité",
+      "copyright": "Copyright",
+      "no_path_selected": "Aucun chemin sélectionné",
+      "error_title": "Quelque chose c'est mal passé",
+      "error_getting": "Erreur lors de la récupération des informations du titre, veuillez réessayer plus tard.",
+      "artists": "Artistes",
+      "album": "Album",
+      "duration": "Durée",
+      "track_number": "Numéro de titre",
+      "from_album": "De l'album"
     }
   },
   "en": {
@@ -102,5 +121,25 @@
       "copyright": "Copyright",
       "no_path_selected": "No path selected"
     }
+  },
+  "TrackDetails": {
+    "tracks": "Tracks",
+    "download": "Download",
+    "select_path": "Select Path",
+    "bitrate": "Bitrate",
+    "format": "Format",
+    "about": "About the album",
+    "release_date": "Release Date",
+    "label": "Label",
+    "popularity": "Popularity",
+    "copyright": "Copyright",
+    "no_path_selected": "No path selected",
+    "error_title": "Something went wrong",
+    "error_getting": "Error while getting track information, please try again later.",
+    "artists": "Artists",
+    "album": "Album",
+    "duration": "Duration",
+    "track_number": "Track Number",
+    "from_album": "From the album"
   }
 }

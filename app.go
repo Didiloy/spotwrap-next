@@ -85,6 +85,16 @@ func (a *App) GetAlbum(id string) map[string]any {
 	return result
 }
 
+// Get Track Data
+func (a *App) GetTrack(id string) map[string]any {
+	result, err := api.GetTrackDetails(id, a.spotifyAccessToken)
+	if err != nil {
+		fmt.Println("Error getting Track:", err)
+		return map[string]any{}
+	}
+	return result
+}
+
 func (a *App) GetDominantColor(imageLink string) ([]string, error) {
 	colors, err := utils.GetDominantColor(imageLink)
 	if err != nil {

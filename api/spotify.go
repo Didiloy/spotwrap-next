@@ -16,6 +16,7 @@ const (
 	SearchURL = BaseURL + "/search"
 	ArtistURL = BaseURL + "/artists"
 	AlbumURL  = BaseURL + "/albums"
+	TrackURL  = BaseURL + "/tracks"
 )
 
 type TokenResponse struct {
@@ -146,6 +147,20 @@ func GetAlbumDetails(id string, token string) (map[string]any, error) {
 	albumData["tracks"] = tracks["items"]
 
 	return albumData, nil
+}
+
+func GetTrackDetails(id string, token string) (map[string]any, error) {
+	trackData := make(map[string]any)
+
+	// Get basic track info
+	trackURL := fmt.Sprintf("%s/%s", TrackURL, id)
+	trackInfo, err := makeRequest(trackURL, token)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get track info: %v", err)
+	}
+	trackData["track"] = trackInfo
+
+	return trackData, nil
 }
 
 func makeRequest(url string, token string) (map[string]any, error) {

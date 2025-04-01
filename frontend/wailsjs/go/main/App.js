@@ -18,6 +18,10 @@ export function GetDominantColor(arg1) {
   return window['go']['main']['App']['GetDominantColor'](arg1);
 }
 
+export function GetTrack(arg1) {
+  return window['go']['main']['App']['GetTrack'](arg1);
+}
+
 export function Search(arg1) {
   return window['go']['main']['App']['Search'](arg1);
 }

@@ -66,10 +66,11 @@ const i18n = useI18n();
 import { ArrowRight } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { onMounted } from "vue";
+import { useRouter } from "vue-router";
 
-onMounted(() => {
-    console.log("TracksRow mounted");
-});
+const router = useRouter();
+
+onMounted(() => {});
 
 defineProps<{
     tracks: Array<{
@@ -93,11 +94,7 @@ const formatArtists = (artists: Array<{ name: string }>): string => {
     return artists.map((artist) => artist.name).join(", ");
 };
 
-const handleArrowClick = (trackId: string) => {
-    console.log("Arrow clicked for track:", trackId);
-};
-
 const handleTrackClick = (trackId: string) => {
-    console.log("Track clicked:", trackId);
+    router.push(`/track/${trackId}`);
 };
 </script>

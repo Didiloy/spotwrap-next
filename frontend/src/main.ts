@@ -4,8 +4,9 @@ import Home from "./views/Home.vue";
 import Settings from "./views/Settings.vue";
 import Search from "./views/Search.vue";
 import Subscriptions from "./views/Subscriptions.vue";
-import ArtistDetail from "./views/details/ArtistDetail.vue";
-import AlbumDetail from "./views/details/AlbumDetails.vue";
+import ArtistDetails from "./views/details/ArtistDetails.vue";
+import AlbumDetails from "./views/details/AlbumDetails.vue";
+import TrackDetails from "./views/details/TrackDetails.vue";
 
 import "./style.css";
 import { createMemoryHistory, createRouter } from "vue-router";
@@ -17,8 +18,9 @@ const routes = [
   { path: "/settings", component: Settings },
   { path: "/search", component: Search },
   { path: "/subscriptions", component: Subscriptions },
-  { path: "/artist/:id", component: ArtistDetail },
-  { path: "/album/:id", component: AlbumDetail },
+  { path: "/artist/:id", component: ArtistDetails },
+  { path: "/album/:id", component: AlbumDetails },
+  { path: "/track/:id", component: TrackDetails },
 ];
 
 const router = createRouter({
