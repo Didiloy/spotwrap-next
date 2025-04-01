@@ -95,13 +95,13 @@ func (a *App) GetTrack(id string) map[string]any {
 	return result
 }
 
-func (a *App) GetDominantColor(imageLink string) ([]string, error) {
+func (a *App) GetDominantColor(imageLink string) []string {
 	colors, err := utils.GetDominantColor(imageLink)
 	if err != nil {
 		fmt.Printf("Could not get dominant colors for image %v: %v\n", imageLink, err)
-		return []string{}, nil
+		return make([]string, 0)
 	}
-	return colors, nil
+	return colors
 }
 
 func (a *App) ChooseDirectory() string {

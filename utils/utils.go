@@ -4,13 +4,20 @@ import (
 	"fmt"
 	"image"
 	"io"
-	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/EdlinOrg/prominentcolor"
 )
+
+var counter int
+
+func getCounter() int {
+	counter++
+	return counter
+}
 
 // GetDominantColor extracts the most dominant colors from an image URL
 func GetDominantColor(imageLink string) ([]string, error) {
@@ -34,9 +41,13 @@ func GetDominantColor(imageLink string) ([]string, error) {
 		return nil, fmt.Errorf("failed to read image data: %w", err)
 	}
 
-	filename := "album_cover"
+	os.MkdirAll("album_cover", os.ModePerm)
+	filename := "album_cover/cover" + strconv.Itoa(getCounter())
 	//forced to write the image file, otherwise it will not work
-	os.WriteFile(filename, imgData, 0666)
+	err = os.WriteFile(filename, imgData, 0666)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write image file: %w", err)
+	}
 
 	img, err := loadImage(filename)
 	if err != nil {
@@ -45,7 +56,8 @@ func GetDominantColor(imageLink string) ([]string, error) {
 
 	colours, err := prominentcolor.Kmeans(img)
 	if err != nil {
-		log.Fatal("Failed to process image", err)
+		os.Remove(filename)
+		return nil, fmt.Errorf("Failed to process image: %v", err)
 	}
 
 	var colors []string
@@ -54,9 +66,16 @@ func GetDominantColor(imageLink string) ([]string, error) {
 	}
 
 	//delete the image file
-	os.Remove(filename)
+	err = os.Remove(filename)
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete image file: %w", err)
+	}
 
 	return colors, nil
+}
+
+func CleanUp() {
+	os.RemoveAll("album_cover")
 }
 
 func loadImage(fileInput string) (image.Image, error) {

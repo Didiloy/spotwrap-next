@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"spotwrap-next/database"
+	"spotwrap-next/utils"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -58,6 +59,7 @@ func main() {
 		EnableDefaultContextMenu: false,
 		OnShutdown: func(ctx context.Context) {
 			database.Close()
+			utils.CleanUp() //clean the cover directory
 		},
 	})
 

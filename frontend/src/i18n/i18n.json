@@ -68,6 +68,10 @@
       "duration": "Durée",
       "track_number": "Numéro de titre",
       "from_album": "De l'album"
+    },
+    "Home": {
+      "title": "Actualité des artistes",
+      "subtitle": "Découvrez les dernières sorties des artistes que vous suivez"
     }
   },
   "en": {
