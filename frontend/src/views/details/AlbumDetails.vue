@@ -193,9 +193,10 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { ArrowRightIcon, DownloadIcon } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
+import { useToast } from "@/components/ui/toast/use-toast";
 
+const { toast } = useToast();
 const i18n = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -251,21 +252,14 @@ const selectDownloadPath = async () => {
 };
 
 const downloadAlbum = () => {
-    console.log("Downloading album with options:", downloadOptions.value);
-};
-
-const downloadTrack = (track: any) => {
     if (!downloadOptions.value.path) {
-        alert("Please select a download path first");
+        toast({
+            title: i18n.t("AlbumDetails.no_path_selected"),
+            variant: "destructive",
+        });
         return;
     }
-    // Implement single track download logic
-    console.log(
-        "Downloading track:",
-        track.name,
-        "with options:",
-        downloadOptions.value,
-    );
+    console.log("Downloading album with options:", downloadOptions.value);
 };
 
 const dominantColors = ref<string[]>([]);
