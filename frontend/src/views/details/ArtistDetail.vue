@@ -1,46 +1,64 @@
 <template>
     <div class="artist-detail h-full overflow-y-auto">
         <!-- Hero Section -->
-        <div class="w-full flex justify-center">
-            <div class="w-11/12 max-w-[1800px] mt-2 rounded-xl">
+        <div class="relative w-full" :style="heroSectionStyle">
+            <div
+                class="container mx-auto px-6 py-12 flex flex-col md:flex-row items-start gap-8"
+            >
                 <div
-                    class="relative w-full aspect-square max-h-[300px] overflow-hidden rounded-xl"
+                    class="relative w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 flex-shrink-0"
                 >
                     <img
                         :src="artist?.images[0]?.url"
                         alt="Artist image"
-                        class="w-full h-full object-cover opacity-80"
+                        class="w-full h-full object-cover rounded-lg shadow-2xl"
                     />
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6"
-                    >
-                        <div class="w-full">
-                            <h1
-                                class="text-4xl md:text-6xl font-bold text-white mb-2"
-                            >
-                                {{ artist?.name }}
-                            </h1>
-                            <p class="text-gray-300 mb-6">
+                        class="absolute inset-0 rounded-lg ring-1 ring-inset ring-white/10"
+                    ></div>
+                </div>
+
+                <!-- Artist Info -->
+                <div class="flex-1 space-y-4 text-white pt-4">
+                    <div>
+                        <h1 class="text-4xl font-bold mt-1 mb-2">
+                            {{ artist?.name }}
+                        </h1>
+                        <div
+                            class="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-300"
+                        >
+                            <span class="text-sm">
                                 {{ formatNumber(artist?.followers?.total) }}
-                                followers •
-                                {{ artist?.genres?.slice(0, 5).join(", ") }}
-                            </p>
-                            <Button
-                                @click="toggleFollow"
-                                class="px-8 py-3 text-lg font-bold rounded-full"
-                                :variant="isFollowing ? 'default' : 'outline'"
-                            >
-                                {{
-                                    isFollowing
-                                        ? i18n.t("ArtistDetails.following")
-                                        : i18n.t("ArtistDetails.follow")
-                                }}
-                            </Button>
+                                {{ i18n.t("ArtistDetails.followers") }}
+                            </span>
+                            <span class="text-sm">
+                                {{ artist?.genres?.slice(0, 3).join(", ") }}
+                            </span>
                         </div>
+                    </div>
+                    <!-- Action Button -->
+                    <div class="flex flex-col items-start gap-4 pt-4">
+                        <Button
+                            @click="toggleFollow"
+                            :variant="isFollowing ? 'default' : 'outline'"
+                            class="px-8 py-3 text-lg font-bold rounded-full transition-colors"
+                            :class="{
+                                'bg-purple-600 hover:bg-purple-700':
+                                    isFollowing,
+                                'bg-white/10 hover:bg-white/20': !isFollowing,
+                            }"
+                        >
+                            {{
+                                isFollowing
+                                    ? i18n.t("ArtistDetails.following")
+                                    : i18n.t("ArtistDetails.follow")
+                            }}
+                        </Button>
                     </div>
                 </div>
             </div>
         </div>
+
         <!-- Content Section -->
         <div class="p-6 space-y-8">
             <!-- Albums Section -->
@@ -52,7 +70,7 @@
             <TracksRow
                 v-if="topTracks.length"
                 :tracks="topTracks"
-                :title="'Popular Tracks'"
+                :title="i18n.t('ArtistDetails.popular_tracks')"
             />
 
             <!-- Singles Section -->
@@ -71,7 +89,7 @@ import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast/use-toast";
-import { GetArtist } from "../../../wailsjs/go/main/App";
+import { GetArtist, GetDominantColor } from "../../../wailsjs/go/main/App";
 import {
     AddArtist,
     RemoveArtist,
@@ -87,6 +105,7 @@ const artistData = ref<any>({});
 const isFollowing = ref(false);
 const i18n = useI18n();
 const { toast } = useToast();
+const dominantColors = ref<string[]>([]);
 
 const topTracks = computed(() => {
     return (
@@ -113,6 +132,17 @@ const singles = computed(() => {
             (a: any) => a.album_group === "single",
         ) || []
     );
+});
+
+const heroSectionStyle = computed(() => {
+    if (dominantColors.value.length >= 2) {
+        return {
+            background: `linear-gradient(135deg, ${dominantColors.value[0]} 0%, ${dominantColors.value[1]} 100%)`,
+        };
+    }
+    return {
+        background: "linear-gradient(135deg, #4f46e5 0%, #1e40af 100%)",
+    };
 });
 
 // Helper functions
@@ -159,6 +189,12 @@ onMounted(async () => {
     artistData.value = data;
     artist.value = data.artist;
     isFollowing.value = isSubbed;
+
+    if (artist.value?.images?.[0]?.url) {
+        dominantColors.value = await GetDominantColor(
+            artist.value.images[0].url,
+        );
+    }
 });
 
 const getArtistDetails = async (id: string) => {

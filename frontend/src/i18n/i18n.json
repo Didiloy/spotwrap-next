@@ -30,6 +30,7 @@
     "ArtistDetails": {
       "following": "Suivi",
       "follow": "Suivre",
+      "followers": "Abonnés",
       "singles": "Singles",
       "error_title": "Quelque chose c'est mal passé",
       "error_following": "Erreur lors de l'abonnement, veuillez réessayer plus tard.",
@@ -81,6 +82,7 @@
     "ArtistDetails": {
       "following": "Following",
       "follow": "Follow",
+      "followers": "Followers",
       "singles": "Singles",
       "error_title": "Something went wrong",
       "error_following": "Error following artist, please try again later.",
