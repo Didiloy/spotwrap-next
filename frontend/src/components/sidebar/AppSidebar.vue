@@ -16,9 +16,10 @@ import {
 import logo from "../../assets/images/appicon.png";
 import infos from "../../../package.json";
 import { useI18n } from "vue-i18n";
+import { ref } from "vue";
 const i18n = useI18n();
 
-const items = [
+const items = ref([
     {
         title: i18n.t("AppSidebar.home"),
         url: "/",
@@ -39,7 +40,7 @@ const items = [
         url: "/settings",
         icon: Settings,
     },
-];
+]);
 </script>
 
 <template>

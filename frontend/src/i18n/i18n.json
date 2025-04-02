@@ -87,6 +87,12 @@
       "unsubscribe": "Se désabonner",
       "error": "Erreur lors de la désinscription",
       "loading": "Chargement des artistes..."
+    },
+    "Settings": {
+      "title": "Paramètres",
+      "language": "Langue",
+      "theme": "Thème",
+      "notifications": "Notifications"
     }
   },
   "en": {
@@ -140,36 +146,50 @@
       "popularity": "Popularity",
       "copyright": "Copyright",
       "no_path_selected": "No path selected"
+    },
+    "TrackDetails": {
+      "tracks": "Tracks",
+      "download": "Download",
+      "select_path": "Select Path",
+      "bitrate": "Bitrate",
+      "format": "Format",
+      "about": "About the album",
+      "release_date": "Release Date",
+      "label": "Label",
+      "popularity": "Popularity",
+      "copyright": "Copyright",
+      "no_path_selected": "No path selected",
+      "error_title": "Something went wrong",
+      "error_getting": "Error while getting track information, please try again later.",
+      "artists": "Artists",
+      "album": "Album",
+      "duration": "Duration",
+      "track_number": "Track Number",
+      "from_album": "From the album"
+    },
+    "Home": {
+      "title": "Artist Updates",
+      "subtitle": "Discover the latest releases from artists you follow",
+      "loading": "Loading artists...",
+      "emptyTitle": "No artists",
+      "emptySubtitle": "You haven't added any artists to follow yet. Follow new artists to see their latest releases here.",
+      "discoverArtists": "Discover Artists",
+      "tracks": "Tracks",
+      "viewAlbum": "View Album"
+    },
+    "Subscriptions": {
+      "no_subscriptions": "No followed artists",
+      "no_subscriptions_description": "You haven't added any artists to follow yet.",
+      "followers": "Followers",
+      "unsubscribe": "Unsubscribe",
+      "error": "Error while unsubscribing",
+      "loading": "Loading artists..."
+    },
+    "Settings": {
+      "title": "Settings",
+      "language": "Language",
+      "theme": "Theme",
+      "notifications": "Notifications"
     }
-  },
-  "TrackDetails": {
-    "tracks": "Tracks",
-    "download": "Download",
-    "select_path": "Select Path",
-    "bitrate": "Bitrate",
-    "format": "Format",
-    "about": "About the album",
-    "release_date": "Release Date",
-    "label": "Label",
-    "popularity": "Popularity",
-    "copyright": "Copyright",
-    "no_path_selected": "No path selected",
-    "error_title": "Something went wrong",
-    "error_getting": "Error while getting track information, please try again later.",
-    "artists": "Artists",
-    "album": "Album",
-    "duration": "Duration",
-    "track_number": "Track Number",
-    "from_album": "From the album"
-  },
-  "Home": {
-    "title": "Artist Updates",
-    "subtitle": "Discover the latest releases from artists you follow",
-    "loading": "Loading artists...",
-    "emptyTitle": "No artists",
-    "emptySubtitle": "You haven't added any artists to follow yet. Follow new artists to see their latest releases here.",
-    "discoverArtists": "Discover Artists",
-    "tracks": "Tracks",
-    "viewAlbum": "View Album"
   }
 }
