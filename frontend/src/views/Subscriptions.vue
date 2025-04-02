@@ -1,9 +1,13 @@
 <template>
     <div class="p-6 w-full">
-        <div v-if="loading" class="flex justify-center items-center h-64">
+        <div
+            v-if="loading"
+            class="flex flex-col items-center justify-center py-12"
+        >
             <div
-                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"
+                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"
             ></div>
+            <p class="text-gray-400">{{ $t("Subscriptions.loading") }}</p>
         </div>
 
         <div
@@ -85,6 +89,11 @@ import {
     GetArtistsFromDB,
     RemoveArtist,
 } from "../../wailsjs/go/database/Database";
+import { useI18n } from "vue-i18n";
+import { useToast } from "@/components/ui/toast/use-toast";
+
+const { toast } = useToast();
+const i18n = useI18n();
 
 interface Artist {
     id: string;
@@ -128,6 +137,10 @@ const unsubscribe = async (artistId: string) => {
         artists.value = artists.value.filter((a) => a.id !== artistId);
     } catch (error) {
         console.error("Error unsubscribing:", error);
+        toast({
+            title: i18n.t("Subscriptions.error"),
+            variant: "destructive",
+        });
     }
 };
 

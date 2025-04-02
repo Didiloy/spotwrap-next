@@ -84,7 +84,9 @@
       "no_subscriptions": "Pas d'artistes suivis",
       "no_subscriptions_description": "Vous n'avez pas encore ajouté d'artistes à suivre.",
       "followers": "Abonnés",
-      "unsubscribe": "Se désabonner"
+      "unsubscribe": "Se désabonner",
+      "error": "Erreur lors de la désinscription",
+      "loading": "Chargement des artistes..."
     }
   },
   "en": {
