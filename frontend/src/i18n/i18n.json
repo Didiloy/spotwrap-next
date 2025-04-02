@@ -79,6 +79,12 @@
       "discoverArtists": "Découvrir des artistes",
       "tracks": "Titres",
       "viewAlbum": "Voir l'album"
+    },
+    "Subscriptions": {
+      "no_subscriptions": "Pas d'artistes suivis",
+      "no_subscriptions_description": "Vous n'avez pas encore ajouté d'artistes à suivre.",
+      "followers": "Abonnés",
+      "unsubscribe": "Se désabonner"
     }
   },
   "en": {
