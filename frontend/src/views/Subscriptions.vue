@@ -1,5 +1,5 @@
 <template>
-    <div class="p-6 w-full">
+    <div class="p-6 w-full h-full">
         <div
             v-if="loading"
             class="flex flex-col items-center justify-center py-12"
@@ -38,7 +38,8 @@
 
         <div
             v-else
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-y-auto"
+            style="max-height: calc(100vh - 50px)"
         >
             <div
                 v-for="artist in artists"
