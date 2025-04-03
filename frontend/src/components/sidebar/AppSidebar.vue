@@ -16,8 +16,33 @@ import {
 import logo from "../../assets/images/appicon.png";
 import infos from "../../../package.json";
 import { useI18n } from "vue-i18n";
-import { ref } from "vue";
+import { ref, watch } from "vue";
 const i18n = useI18n();
+
+watch(i18n.locale, () => {
+    items.value = [
+        {
+            title: i18n.t("AppSidebar.home"),
+            url: "/",
+            icon: Home,
+        },
+        {
+            title: i18n.t("AppSidebar.search"),
+            url: "/search",
+            icon: Search,
+        },
+        {
+            title: i18n.t("AppSidebar.subscriptions"),
+            url: "/subscriptions",
+            icon: Bell,
+        },
+        {
+            title: i18n.t("AppSidebar.settings"),
+            url: "/settings",
+            icon: Settings,
+        },
+    ];
+});
 
 const items = ref([
     {

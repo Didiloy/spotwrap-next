@@ -55,7 +55,6 @@ const currentLanguage = ref(
 watch(currentLanguage, (newLang) => {
     locale.value = newLang;
     localStorage.setItem("lang", newLang);
-    console.log("Language changed to:", newLang);
 });
 
 // Set initial language
