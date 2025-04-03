@@ -64,6 +64,22 @@
             <!-- Timeline items -->
             <div class="space-y-8 pl-10">
                 <div
+                    v-if="timelineItems.some((item) => item.isNewRelease)"
+                    class="relative"
+                >
+                    <div
+                        class="absolute -left-10 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full bg-gradient-to-br from-green-500 to-green-300 border-4 border-gray-900 z-10"
+                    ></div>
+                    <div
+                        class="pl-6 text-green-400 font-bold uppercase text-sm tracking-wider"
+                    >
+                        {{ $t("Home.newReleases") }}
+                    </div>
+                    <div
+                        class="h-px bg-gradient-to-r from-green-500/30 to-transparent mt-2 mb-4"
+                    ></div>
+                </div>
+                <div
                     v-for="(artist, index) in timelineItems"
                     :key="index"
                     class="relative group"
@@ -80,6 +96,12 @@
                             getCardStyle(artist.album.images[0]?.url, index)
                         "
                     >
+                        <div
+                            v-if="artist.isNewRelease"
+                            class="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full z-10 shadow-md"
+                        >
+                            {{ $t("Home.newRelease") }}
+                        </div>
                         <div class="flex flex-col md:flex-row gap-5">
                             <!-- Album cover -->
                             <div
@@ -162,7 +184,11 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { Button } from "@/components/ui/button";
-import { GetArtist, GetArtistsFromDB } from "../../wailsjs/go/main/App";
+import {
+    GetArtist,
+    GetArtistsFromDB,
+    IsANewRelease,
+} from "../../wailsjs/go/main/App";
 import { GetDominantColor } from "../../wailsjs/go/utils/Utils";
 import { useRouter } from "vue-router";
 
@@ -185,6 +211,7 @@ interface TimelineItem {
     type: "album" | "single";
     date: Date;
     dominantColors?: string[];
+    isNewRelease?: boolean;
 }
 
 const loading = ref(true);
@@ -241,6 +268,12 @@ onMounted(async () => {
 
             if (artistData.albums) {
                 for (const album of artistData.albums) {
+                    // Check if this is a new release
+                    const isNewRelease = await IsANewRelease(
+                        artist.SpotifyID,
+                        album,
+                    );
+
                     allAlbums.push({
                         artist: {
                             id: artistData.artist.id,
@@ -257,14 +290,21 @@ onMounted(async () => {
                         },
                         type: album.album_type === "album" ? "album" : "single",
                         date: new Date(album.release_date),
+                        isNewRelease: isNewRelease,
                     });
                 }
             }
         }
 
-        // Sort and set initial items
+        // Sort with new releases first
         timelineItems.value = allAlbums
-            .sort((a, b) => b.date.getTime() - a.date.getTime())
+            .sort((a, b) => {
+                // New releases come first
+                if (a.isNewRelease && !b.isNewRelease) return -1;
+                if (!a.isNewRelease && b.isNewRelease) return 1;
+                // Then sort by date
+                return b.date.getTime() - a.date.getTime();
+            })
             .slice(0, 20);
 
         timelineItems.value.forEach((item, index) => {

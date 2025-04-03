@@ -30,6 +30,10 @@ export function GetTrack(arg1) {
   return window['go']['main']['App']['GetTrack'](arg1);
 }
 
+export function IsANewRelease(arg1, arg2) {
+  return window['go']['main']['App']['IsANewRelease'](arg1, arg2);
+}
+
 export function RemoveArtist(arg1) {
   return window['go']['main']['App']['RemoveArtist'](arg1);
 }

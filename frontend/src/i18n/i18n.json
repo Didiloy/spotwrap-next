@@ -78,7 +78,9 @@
       "emptySubtitle": "Vous n'avez pas encore ajouté d'artistes à suivre. Suivez de nouveaux artistes pour voir leurs dernières sorties ici.",
       "discoverArtists": "Découvrir des artistes",
       "tracks": "Titres",
-      "viewAlbum": "Voir l'album"
+      "viewAlbum": "Voir l'album",
+      "newRelease": "Nouvelle sortie",
+      "newReleases": "Nouvelles sorties"
     },
     "Subscriptions": {
       "no_subscriptions": "Pas d'artistes suivis",
@@ -183,7 +185,9 @@
       "emptySubtitle": "You haven't added any artists to follow yet. Follow new artists to see their latest releases here.",
       "discoverArtists": "Discover Artists",
       "tracks": "Tracks",
-      "viewAlbum": "View Album"
+      "viewAlbum": "View Album",
+      "newRelease": "New Release",
+      "newReleases": "New Releases"
     },
     "Subscriptions": {
       "no_subscriptions": "No followed artists",

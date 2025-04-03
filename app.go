@@ -142,50 +142,32 @@ func (a *App) ChooseDirectory() string {
 	return dir
 }
 
-// func IsThereNewRelease(releases []map[string]any, date time.Time) (bool, map[string]any) {
+func (a *App) IsANewRelease(id string, release map[string]any) bool {
+	artist, err := a.database.GetArtistByID(id)
+	if err != nil {
+		fmt.Println("Error getting artist:", err)
+		return false
+	}
 
-// 	items, ok := albums["items"].([]any)
-// 	if !ok {
-// 		return false, nil
-// 	}
+	// Extract release date from the album
+	releaseDateStr, ok := release["release_date"].(string)
+	if !ok {
+		return false
+	}
 
-// 	// Find the most recent release after the given date
-// 	var newestRelease map[string]any
-// 	hasNewRelease := false
+	// Parse the release date (handles different formats: YYYY, YYYY-MM, YYYY-MM-DD)
+	var releaseDate time.Time
+	switch len(releaseDateStr) {
+	case 4: // YYYY
+		releaseDate, _ = time.Parse("2006", releaseDateStr)
+	case 7: // YYYY-MM
+		releaseDate, _ = time.Parse("2006-01", releaseDateStr)
+	default: // YYYY-MM-DD
+		releaseDate, _ = time.Parse("2006-01-02", releaseDateStr)
+	}
 
-// 	for _, item := range items {
-// 		album, ok := item.(map[string]any)
-// 		if !ok {
-// 			continue
-// 		}
-
-// 		releaseDateStr, ok := album["release_date"].(string)
-// 		if !ok {
-// 			continue
-// 		}
-
-// 		// Parse the release date (format can be "YYYY", "YYYY-MM", or "YYYY-MM-DD")
-// 		var releaseDate time.Time
-// 		switch len(releaseDateStr) {
-// 		case 4: // YYYY
-// 			releaseDate, _ = time.Parse("2006", releaseDateStr)
-// 		case 7: // YYYY-MM
-// 			releaseDate, _ = time.Parse("2006-01", releaseDateStr)
-// 		default: // YYYY-MM-DD
-// 			releaseDate, _ = time.Parse("2006-01-02", releaseDateStr)
-// 		}
-
-// 		if releaseDate.After(date) {
-// 			if !hasNewRelease || releaseDate.After(newestRelease["release_date"].(time.Time)) {
-// 				newestRelease = album
-// 				newestRelease["release_date"] = releaseDate
-// 				hasNewRelease = true
-// 			}
-// 		}
-// 	}
-
-// 	return hasNewRelease, newestRelease
-// }
+	return releaseDate.After(artist.LastChecked)
+}
 
 func (a *App) Close() {
 	a.database.Close()

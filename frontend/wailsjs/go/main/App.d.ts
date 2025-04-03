@@ -16,6 +16,8 @@ export function GetArtistsFromDB():Promise<Array<database.Artist>>;
 
 export function GetTrack(arg1:string):Promise<Record<string, any>>;
 
+export function IsANewRelease(arg1:string,arg2:Record<string, any>):Promise<boolean>;
+
 export function RemoveArtist(arg1:string):Promise<boolean>;
 
 export function Search(arg1:string):Promise<Record<string, any>>;

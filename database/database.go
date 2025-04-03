@@ -109,3 +109,12 @@ func (d *Database) GetArtistsFromDB() ([]Artist, error) {
 	}
 	return artists, nil
 }
+
+func (d *Database) GetArtistByID(id string) (*Artist, error) {
+	row := d.db.QueryRow("SELECT spotify_id, last_checked, created_at FROM artists WHERE spotify_id = ?", id)
+	var a Artist
+	if err := row.Scan(&a.SpotifyID, &a.LastChecked, &a.CreatedAt); err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
