@@ -36,46 +36,50 @@
             </p>
         </div>
 
-        <div
-            v-else
-            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-y-auto"
-            style="max-height: calc(100vh - 50px)"
-        >
+        <div v-else class="flex flex-col h-full">
+            <Sort @sort-change="handleSortChange" />
             <div
-                v-for="artist in artists"
-                :key="artist.id"
-                class="bg-zinc-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow"
+                class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-y-auto pb-4"
+                style="height: 100%"
             >
-                <div class="relative aspect-square">
-                    <img
-                        :src="artist.images[0]?.url"
-                        :alt="artist.name"
-                        class="w-full h-full object-cover"
-                    />
+                <div
+                    v-for="artist in sortedArtists"
+                    :key="artist.id"
+                    class="h-fit bg-zinc-300 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow flex flex-col"
+                >
                     <div
-                        class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"
-                    ></div>
-                    <div class="absolute bottom-0 left-0 p-4">
-                        <h3 class="text-xl font-bold text-white">
-                            {{ artist.name }}
-                        </h3>
-                        <p class="text-gray-300 text-sm">
-                            {{
-                                artist.followers.total.toLocaleString() +
-                                " " +
-                                $t("Subscriptions.followers")
-                            }}
-                        </p>
-                    </div>
-                </div>
-                <div class="p-4">
-                    <Button
-                        @click="unsubscribe(artist.id)"
-                        variant="destructive"
-                        class="w-full"
+                        class="relative aspect-square flex-shrink-0 rounded-xl"
                     >
-                        {{ $t("Subscriptions.unsubscribe") }}
-                    </Button>
+                        <img
+                            :src="artist.images[0]?.url"
+                            :alt="artist.name"
+                            class="w-full h-full object-cover rounded-xl"
+                        />
+                        <div
+                            class="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"
+                        ></div>
+                        <div class="absolute bottom-0 left-0 p-4">
+                            <h3 class="text-xl font-bold text-white">
+                                {{ artist.name }}
+                            </h3>
+                            <p class="text-gray-300 text-sm">
+                                {{
+                                    artist.followers.total.toLocaleString() +
+                                    " " +
+                                    $t("Subscriptions.followers")
+                                }}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="p-4 mt-auto">
+                        <Button
+                            @click="unsubscribe(artist.id)"
+                            variant="destructive"
+                            class="w-full"
+                        >
+                            {{ $t("Subscriptions.unsubscribe") }}
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,7 +87,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Button } from "@/components/ui/button";
 import { GetArtist } from "../../wailsjs/go/main/App";
 import {
@@ -92,6 +96,7 @@ import {
 } from "../../wailsjs/go/database/Database";
 import { useI18n } from "vue-i18n";
 import { useToast } from "@/components/ui/toast/use-toast";
+import Sort from "../components/subscriptions/Sort.vue";
 
 const { toast } = useToast();
 const i18n = useI18n();
@@ -105,6 +110,7 @@ interface Artist {
     images: Array<{
         url: string;
     }>;
+    createdAt: Date;
 }
 
 const loading = ref(true);
@@ -117,13 +123,15 @@ const loadArtists = async () => {
         const artistPromises = dbArtists.map((artist) =>
             GetArtist(artist.SpotifyID),
         );
+
         const artistData = await Promise.all(artistPromises);
 
-        artists.value = artistData.map((data) => ({
+        artists.value = artistData.map((data, index) => ({
             id: data.artist.id,
             name: data.artist.name,
             followers: data.artist.followers,
             images: data.artist.images,
+            createdAt: new Date(dbArtists[index].CreatedAt),
         }));
     } catch (error) {
         console.error("Error loading artists:", error);
@@ -143,6 +151,27 @@ const unsubscribe = async (artistId: string) => {
             variant: "destructive",
         });
     }
+};
+
+const sortMethod = ref("date-desc");
+const sortedArtists = computed(() => {
+    return [...artists.value].sort((a, b) => {
+        switch (sortMethod.value) {
+            case "name-asc":
+                return a.name.localeCompare(b.name);
+            case "name-desc":
+                return b.name.localeCompare(a.name);
+            case "date-asc":
+                return a.createdAt.getTime() - b.createdAt.getTime();
+            case "date-desc":
+            default:
+                return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+    });
+});
+
+const handleSortChange = (method: string) => {
+    sortMethod.value = method;
 };
 
 onMounted(() => {

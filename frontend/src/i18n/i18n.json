@@ -86,7 +86,15 @@
       "followers": "Abonnés",
       "unsubscribe": "Se désabonner",
       "error": "Erreur lors de la désinscription",
-      "loading": "Chargement des artistes..."
+      "loading": "Chargement des artistes...",
+      "Sort": {
+        "sort_by": "Trier par",
+        "select_sort": "Sélectionner une méthode",
+        "name_asc": "Nom (A-Z)",
+        "name_desc": "Nom (Z-A)",
+        "date_asc": "Date d'ajout (ancien)",
+        "date_desc": "Date d'ajout (récent)"
+      }
     },
     "Settings": {
       "title": "Paramètres",
@@ -183,7 +191,15 @@
       "followers": "Followers",
       "unsubscribe": "Unsubscribe",
       "error": "Error while unsubscribing",
-      "loading": "Loading artists..."
+      "loading": "Loading artists...",
+      "Sort": {
+        "sort_by": "Sort by",
+        "select_sort": "Select sort method",
+        "name_asc": "Name (A-Z)",
+        "name_desc": "Name (Z-A)",
+        "date_asc": "Date added (oldest)",
+        "date_desc": "Date added (newest)"
+      }
     },
     "Settings": {
       "title": "Settings",

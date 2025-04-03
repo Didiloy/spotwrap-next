@@ -17,6 +17,7 @@ type Database struct {
 type Artist struct {
 	SpotifyID   string
 	LastChecked time.Time
+	CreatedAt   time.Time
 }
 
 // New creates and initializes a new Database instance
@@ -88,7 +89,7 @@ func (d *Database) RemoveArtist(spotifyID string) (bool, error) {
 
 // GetArtists retrieves all subscribed artists
 func (d *Database) GetArtistsFromDB() ([]Artist, error) {
-	rows, err := d.db.Query("SELECT spotify_id, last_checked FROM artists")
+	rows, err := d.db.Query("SELECT spotify_id, last_checked, created_at FROM artists")
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func (d *Database) GetArtistsFromDB() ([]Artist, error) {
 	var artists []Artist
 	for rows.Next() {
 		var a Artist
-		if err := rows.Scan(&a.SpotifyID, &a.LastChecked); err != nil {
+		if err := rows.Scan(&a.SpotifyID, &a.LastChecked, &a.CreatedAt); err != nil {
 			return nil, err
 		}
 		artists = append(artists, a)

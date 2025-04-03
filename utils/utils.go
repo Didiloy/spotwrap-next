@@ -75,6 +75,7 @@ func GetDominantColor(imageLink string) ([]string, error) {
 }
 
 func CleanUp() {
+	fmt.Println("Deleting album cover directory...")
 	os.RemoveAll("album_cover")
 }
 

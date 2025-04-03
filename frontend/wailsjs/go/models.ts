@@ -4,6 +4,8 @@ export namespace database {
 	    SpotifyID: string;
 	    // Go type: time
 	    LastChecked: any;
+	    // Go type: time
+	    CreatedAt: any;
 	
 	    static createFrom(source: any = {}) {
 	        return new Artist(source);
@@ -13,6 +15,7 @@ export namespace database {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.SpotifyID = source["SpotifyID"];
 	        this.LastChecked = this.convertValues(source["LastChecked"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
