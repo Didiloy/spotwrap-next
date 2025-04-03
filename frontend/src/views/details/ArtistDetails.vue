@@ -89,12 +89,13 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast/use-toast";
-import { GetArtist, GetDominantColor } from "../../../wailsjs/go/main/App";
+import { GetDominantColor } from "../../../wailsjs/go/utils/Utils";
 import {
+    GetArtist,
     AddArtist,
     RemoveArtist,
     GetArtistsFromDB,
-} from "../../../wailsjs/go/database/Database";
+} from "../../../wailsjs/go/main/App";
 import AlbumsRow from "@/components/search/AlbumsRow.vue";
 import TracksRow from "@/components/search/TracksRow.vue";
 import { useI18n } from "vue-i18n";

@@ -233,11 +233,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {
-    GetTrack,
-    GetDominantColor,
-    ChooseDirectory,
-} from "../../../wailsjs/go/main/App";
+import { GetDominantColor } from "../../../wailsjs/go/utils/Utils";
+import { GetTrack, ChooseDirectory } from "../../../wailsjs/go/main/App";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {

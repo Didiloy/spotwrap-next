@@ -12,15 +12,30 @@ import (
 	"github.com/EdlinOrg/prominentcolor"
 )
 
-var counter int
+type Utils struct {
+	counter int
+}
 
-func getCounter() int {
-	counter++
-	return counter
+func New() *Utils {
+	return &Utils{}
+}
+
+func (u *Utils) getCounter() int {
+	u.counter++
+	return u.counter
+}
+
+func (u *Utils) GetDominantColor(imageLink string) []string {
+	colors, err := u.getDominantColor(imageLink)
+	if err != nil {
+		fmt.Printf("Could not get dominant colors for image %v: %v\n", imageLink, err)
+		return make([]string, 0)
+	}
+	return colors
 }
 
 // GetDominantColor extracts the most dominant colors from an image URL
-func GetDominantColor(imageLink string) ([]string, error) {
+func (u *Utils) getDominantColor(imageLink string) ([]string, error) {
 	// Download the image with timeout
 	client := &http.Client{
 		Timeout: 10 * time.Second,
@@ -42,7 +57,7 @@ func GetDominantColor(imageLink string) ([]string, error) {
 	}
 
 	os.MkdirAll("album_cover", os.ModePerm)
-	filename := "album_cover/cover" + strconv.Itoa(getCounter())
+	filename := "album_cover/cover" + strconv.Itoa(u.getCounter())
 	//forced to write the image file, otherwise it will not work
 	err = os.WriteFile(filename, imgData, 0666)
 	if err != nil {
@@ -74,7 +89,7 @@ func GetDominantColor(imageLink string) ([]string, error) {
 	return colors, nil
 }
 
-func CleanUp() {
+func (u *Utils) CleanUp() {
 	fmt.Println("Deleting album cover directory...")
 	os.RemoveAll("album_cover")
 }

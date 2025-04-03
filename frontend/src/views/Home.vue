@@ -162,8 +162,8 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { Button } from "@/components/ui/button";
-import { GetArtist, GetDominantColor } from "../../wailsjs/go/main/App";
-import { GetArtistsFromDB } from "../../wailsjs/go/database/Database";
+import { GetArtist, GetArtistsFromDB } from "../../wailsjs/go/main/App";
+import { GetDominantColor } from "../../wailsjs/go/utils/Utils";
 import { useRouter } from "vue-router";
 
 const router = useRouter();

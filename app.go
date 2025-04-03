@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"spotwrap-next/api"
-	"spotwrap-next/utils"
+	"spotwrap-next/database"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -15,13 +15,20 @@ type App struct {
 	ctx                 context.Context
 	spotifyAccessToken  string
 	tokenExpirationTime time.Time
+	database            *database.Database
 }
 
 // NewApp creates a new App application struct
-func NewApp() *App {
+func NewApp() (*App, error) {
 	app := &App{}
+	database, errDB := database.New()
+	app.database = database
+	if errDB != nil {
+		fmt.Printf("Could not initialize database: \n%s\n", errDB.Error())
+		return nil, errDB
+	}
 	go app.refreshTokenPeriodically() // Start automatic token refresh
-	return app
+	return app, nil
 }
 
 // startup is called when the app starts
@@ -30,6 +37,7 @@ func (a *App) startup(ctx context.Context) {
 	a.fetchSpotifyAccessToken()
 }
 
+// ================ Spotify =================
 // Fetch Spotify Access Token if expired
 func (a *App) fetchSpotifyAccessToken() {
 	if time.Now().After(a.tokenExpirationTime) { // Check if token is expired
@@ -95,15 +103,35 @@ func (a *App) GetTrack(id string) map[string]any {
 	return result
 }
 
-func (a *App) GetDominantColor(imageLink string) []string {
-	colors, err := utils.GetDominantColor(imageLink)
+// ================ Database ==============
+func (a *App) AddArtist(spotifyID string) bool {
+	success, err := a.database.AddArtist(spotifyID)
 	if err != nil {
-		fmt.Printf("Could not get dominant colors for image %v: %v\n", imageLink, err)
-		return make([]string, 0)
+		fmt.Println("Error adding artist:", err)
+		return false
 	}
-	return colors
+	return success
 }
 
+func (a *App) RemoveArtist(spotifyID string) bool {
+	success, err := a.database.RemoveArtist(spotifyID)
+	if err != nil {
+		fmt.Println("Error removing artist:", err)
+		return false
+	}
+	return success
+}
+
+func (a *App) GetArtistsFromDB() []database.Artist {
+	artists, err := a.database.GetArtistsFromDB()
+	if err != nil {
+		fmt.Println("Error getting artists:", err)
+		return nil
+	}
+	return artists
+}
+
+// ================ Utils =================
 func (a *App) ChooseDirectory() string {
 	dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
 		Title: "Select Directory",
@@ -112,4 +140,53 @@ func (a *App) ChooseDirectory() string {
 		return ""
 	}
 	return dir
+}
+
+// func IsThereNewRelease(releases []map[string]any, date time.Time) (bool, map[string]any) {
+
+// 	items, ok := albums["items"].([]any)
+// 	if !ok {
+// 		return false, nil
+// 	}
+
+// 	// Find the most recent release after the given date
+// 	var newestRelease map[string]any
+// 	hasNewRelease := false
+
+// 	for _, item := range items {
+// 		album, ok := item.(map[string]any)
+// 		if !ok {
+// 			continue
+// 		}
+
+// 		releaseDateStr, ok := album["release_date"].(string)
+// 		if !ok {
+// 			continue
+// 		}
+
+// 		// Parse the release date (format can be "YYYY", "YYYY-MM", or "YYYY-MM-DD")
+// 		var releaseDate time.Time
+// 		switch len(releaseDateStr) {
+// 		case 4: // YYYY
+// 			releaseDate, _ = time.Parse("2006", releaseDateStr)
+// 		case 7: // YYYY-MM
+// 			releaseDate, _ = time.Parse("2006-01", releaseDateStr)
+// 		default: // YYYY-MM-DD
+// 			releaseDate, _ = time.Parse("2006-01-02", releaseDateStr)
+// 		}
+
+// 		if releaseDate.After(date) {
+// 			if !hasNewRelease || releaseDate.After(newestRelease["release_date"].(time.Time)) {
+// 				newestRelease = album
+// 				newestRelease["release_date"] = releaseDate
+// 				hasNewRelease = true
+// 			}
+// 		}
+// 	}
+
+// 	return hasNewRelease, newestRelease
+// }
+
+func (a *App) Close() {
+	a.database.Close()
 }

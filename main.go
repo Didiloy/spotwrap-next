@@ -5,7 +5,6 @@ import (
 	"embed"
 	"fmt"
 	"os"
-	"spotwrap-next/database"
 	"spotwrap-next/utils"
 
 	"github.com/wailsapp/wails/v2"
@@ -33,15 +32,16 @@ func main() {
 	}
 
 	// Create an instance of the app structure
-	app := NewApp()
-	database, errDB := database.New()
-	if errDB != nil {
-		fmt.Printf("Could not initialize database: \n%s\n", errDB.Error())
+	app, err := NewApp()
+	if err != nil {
+		fmt.Printf("Could not initialize app: \n%s\n", err.Error())
 		return
 	}
 
+	utils := utils.New()
+
 	// Create application with options
-	err := wails.Run(&options.App{
+	err = wails.Run(&options.App{
 		Title:  "spotwrap-next",
 		Width:  1100,
 		Height: 600,
@@ -52,13 +52,13 @@ func main() {
 		OnStartup:        app.startup,
 		Bind: []interface{}{
 			app,
-			database,
+			utils,
 		},
 		CSSDragProperty:          "widows",
 		CSSDragValue:             "1",
 		EnableDefaultContextMenu: false,
 		OnShutdown: func(ctx context.Context) {
-			database.Close()
+			app.Close()
 			utils.CleanUp() //clean the cover directory
 		},
 	})

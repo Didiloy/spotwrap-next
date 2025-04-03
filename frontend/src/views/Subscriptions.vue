@@ -90,10 +90,7 @@
 import { ref, onMounted, computed } from "vue";
 import { Button } from "@/components/ui/button";
 import { GetArtist } from "../../wailsjs/go/main/App";
-import {
-    GetArtistsFromDB,
-    RemoveArtist,
-} from "../../wailsjs/go/database/Database";
+import { GetArtistsFromDB, RemoveArtist } from "../../wailsjs/go/main/App";
 import { useI18n } from "vue-i18n";
 import { useToast } from "@/components/ui/toast/use-toast";
 import Sort from "../components/subscriptions/Sort.vue";
