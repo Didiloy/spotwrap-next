@@ -80,7 +80,9 @@
       "tracks": "Titres",
       "viewAlbum": "Voir l'album",
       "newRelease": "Nouvelle sortie",
-      "newReleases": "Nouvelles sorties"
+      "newReleases": "Nouvelles sorties",
+      "markAsSeen": "Marquer comme vu",
+      "processing": "En cours de traitement"
     },
     "Subscriptions": {
       "no_subscriptions": "Pas d'artistes suivis",
@@ -187,7 +189,9 @@
       "tracks": "Tracks",
       "viewAlbum": "View Album",
       "newRelease": "New Release",
-      "newReleases": "New Releases"
+      "newReleases": "New Releases",
+      "markAsSeen": "Mark as seen",
+      "processing": "Processing"
     },
     "Subscriptions": {
       "no_subscriptions": "No followed artists",

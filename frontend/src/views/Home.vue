@@ -171,6 +171,22 @@
                                     >
                                         {{ $t("Home.viewAlbum") }}
                                     </Button>
+                                    <Button
+                                        v-if="artist.isNewRelease"
+                                        size="sm"
+                                        variant="outline"
+                                        class="rounded-full text-white border-white/20 bg-white/10 transition-colors"
+                                        @click="
+                                            markAsSeen(artist.artist.id, index)
+                                        "
+                                        :loading="markingAsSeenIndex === index"
+                                    >
+                                        {{
+                                            markingAsSeenIndex === index
+                                                ? $t("Home.processing")
+                                                : $t("Home.markAsSeen")
+                                        }}
+                                    </Button>
                                 </div>
                             </div>
                         </div>
@@ -188,6 +204,7 @@ import {
     GetArtist,
     GetArtistsFromDB,
     IsANewRelease,
+    AddArtist,
 } from "../../wailsjs/go/main/App";
 import { GetDominantColor } from "../../wailsjs/go/utils/Utils";
 import { useRouter } from "vue-router";
@@ -323,6 +340,19 @@ function goToSearch() {
 
 function goToAlbum(id: string) {
     router.push(`/album/${id}`);
+}
+
+const markingAsSeenIndex = ref<number | null>(null);
+
+async function markAsSeen(artistId: string, index: number) {
+    try {
+        await AddArtist(artistId);
+        timelineItems.value = timelineItems.value.map((item, i) =>
+            i === index ? { ...item, isNewRelease: false } : item,
+        );
+    } catch (error) {
+        console.error("Error marking release as seen:", error);
+    }
 }
 </script>
 
