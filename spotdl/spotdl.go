@@ -135,6 +135,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 
 	if err != nil {
 		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("Error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("command execution failed: %v", err)
 	}
 

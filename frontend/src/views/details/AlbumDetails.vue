@@ -261,9 +261,6 @@ const downloadAlbum = async () => {
         });
         return;
     }
-    console.log("Downloading album with options:", downloadOptions.value);
-    downloadStore.clearMessages();
-    // console.log("Album ID:", album.value.album.external_urls.spotify);
     const result = await Download(
         album.value.album.external_urls.spotify,
         downloadOptions.value.path,

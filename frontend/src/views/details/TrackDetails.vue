@@ -247,7 +247,9 @@ import {
 import { Label } from "@/components/ui/label";
 import { useI18n } from "vue-i18n";
 import { useToast } from "@/components/ui/toast/use-toast";
-
+import { useDownloadStore } from "@/store/download";
+import { Download } from "../../../wailsjs/go/spotdl/Downloader";
+const downloadStore = useDownloadStore();
 const i18n = useI18n();
 const route = useRoute();
 const router = useRouter();
@@ -298,7 +300,7 @@ const selectDownloadPath = async () => {
     }
 };
 
-const downloadTrack = () => {
+const downloadTrack = async () => {
     if (!downloadOptions.value.path) {
         toast({
             title: i18n.t("TrackDetails.error_title"),
@@ -307,7 +309,14 @@ const downloadTrack = () => {
         });
         return;
     }
-    console.log("Downloading track with options:", downloadOptions.value);
+    const result = await Download(
+        trackDetails.value.track.external_urls.spotify,
+        downloadOptions.value.path,
+        downloadOptions.value.format,
+        downloadOptions.value.bitrate + "k",
+        [],
+    );
+    console.log("Download result:", result);
 };
 
 const dominantColors = ref<string[]>([]);

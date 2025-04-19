@@ -22,6 +22,50 @@
                 </SelectContent>
             </Select>
         </div>
+
+        <!-- Logs Section -->
+        <div class="space-y-2">
+            <Label>{{ $t("Settings.logs") }}</Label>
+            <div class="flex gap-2">
+                <Button @click="showLogsDialog = true">
+                    {{ $t("Settings.view_logs") }}
+                </Button>
+                <Button variant="destructive" @click="clearLogs">
+                    {{ $t("Settings.clear_logs") }}
+                </Button>
+            </div>
+        </div>
+
+        <!-- Logs Dialog -->
+        <Dialog v-model:open="showLogsDialog">
+            <DialogContent class="max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>{{ $t("Settings.logs_title") }}</DialogTitle>
+                    <DialogDescription>
+                        {{ $t("Settings.logs_description") }}
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div class="font-mono text-sm space-y-1">
+                    <div
+                        v-for="(log, index) in logs"
+                        :key="index"
+                        class="py-1 border-b"
+                    >
+                        {{ log }}
+                    </div>
+                    <div v-if="logs.length === 0" class="text-muted-foreground">
+                        {{ $t("Settings.no_logs") }}
+                    </div>
+                </div>
+
+                <DialogFooter>
+                    <Button @click="showLogsDialog = false">
+                        {{ $t("Settings.close") }}
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
 </template>
 
@@ -37,10 +81,21 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useDownloadStore } from "@/store/download";
 
 const { locale, t } = useI18n();
-
+const downloadStore = useDownloadStore();
 // Available languages
 const availableLanguages = [
     { code: "en", name: "English" },
@@ -62,7 +117,25 @@ onMounted(() => {
     if (currentLanguage.value) {
         locale.value = currentLanguage.value;
     }
+    logs.value = [...downloadStore.downloadMessages];
 });
+
+// Logs dialog state
+const showLogsDialog = ref(false);
+const logs = ref<string[]>([]);
+
+watch(
+    () => downloadStore.downloadMessages,
+    (newLogs) => {
+        logs.value = [...newLogs];
+    },
+    { deep: true },
+);
+
+function clearLogs() {
+    downloadStore.clearMessages();
+    logs.value = [];
+}
 </script>
 
 <style scoped>

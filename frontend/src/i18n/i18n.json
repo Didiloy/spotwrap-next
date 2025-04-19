@@ -104,7 +104,14 @@
       "title": "Paramètres",
       "language": "Langue",
       "theme": "Thème",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "logs": "Journaux d'application",
+      "view_logs": "Voir les journaux",
+      "clear_logs": "Effacer les journaux",
+      "logs_title": "Journaux d'application",
+      "logs_description": "Activité récente de téléchargement et d'application",
+      "no_logs": "Aucun journal disponible",
+      "close": "Fermer"
     }
   },
   "en": {
@@ -213,7 +220,14 @@
       "title": "Settings",
       "language": "Language",
       "theme": "Theme",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "logs": "Application Logs",
+      "view_logs": "View Logs",
+      "clear_logs": "Clear Logs",
+      "logs_title": "Application Logs",
+      "logs_description": "Recent download and application activity",
+      "no_logs": "No logs available",
+      "close": "Close"
     }
   }
 }
