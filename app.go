@@ -16,6 +16,8 @@ type App struct {
 	spotifyAccessToken  string
 	tokenExpirationTime time.Time
 	database            *database.Database
+	backgroundTicker    *time.Ticker
+	backgroundDone      chan bool
 }
 
 // NewApp creates a new App application struct
@@ -167,6 +169,88 @@ func (a *App) IsANewRelease(id string, release map[string]any) bool {
 	}
 
 	return releaseDate.After(artist.LastChecked)
+}
+
+// Background
+func (a *App) startBackgroundChecker() {
+	a.backgroundTicker = time.NewTicker(5 * time.Hour)
+	a.backgroundDone = make(chan bool)
+
+	go func() {
+		for {
+			select {
+			case <-a.backgroundTicker.C:
+				a.checkForNewReleases()
+			case <-a.backgroundDone:
+				return
+			}
+		}
+	}()
+}
+
+func (a *App) stopBackgroundChecker() {
+	if a.backgroundTicker != nil {
+		a.backgroundTicker.Stop()
+	}
+	if a.backgroundDone != nil {
+		a.backgroundDone <- true
+	}
+}
+
+func (a *App) checkForNewReleases() {
+	fmt.Println("Starting background check for new releases...")
+
+	// Get artists that need checking
+	artists, err := a.database.GetArtistsFromDB()
+	if err != nil {
+		fmt.Printf("Error getting artists to check: %v\n", err)
+		return
+	}
+
+	if len(artists) == 0 {
+		fmt.Println("No artists need checking at this time")
+		return
+	}
+
+	a.fetchSpotifyAccessToken()
+
+	for _, artist := range artists {
+		fmt.Printf("Checking for new releases from artist %s...\n", artist.SpotifyID)
+
+		// Get artist's latest albums
+		artistData, err := api.GetArtistDetails(artist.SpotifyID, a.spotifyAccessToken)
+		if err != nil {
+			fmt.Printf("Error getting artist details for %s: %v\n", artist.SpotifyID, err)
+			continue
+		}
+
+		// Check albums for new releases
+		albums, ok := artistData["albums"].([]interface{})
+		if !ok {
+			fmt.Printf("Unexpected albums format for artist %s\n", artist.SpotifyID)
+			continue
+		}
+
+		for _, album := range albums {
+			albumMap, ok := album.(map[string]interface{})
+			if !ok {
+				continue
+			}
+
+			if a.IsANewRelease(artist.SpotifyID, albumMap) {
+				fmt.Printf("New release found for artist %s: %v\n", artist.SpotifyID, albumMap["name"])
+
+				//TODO add notification
+			}
+		}
+
+		// Update last checked time
+		if _, err := a.database.AddArtist(artist.SpotifyID); err != nil {
+			fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
+		}
+	}
+
+	fmt.Println("Background check completed")
 }
 
 func (a *App) Close() {

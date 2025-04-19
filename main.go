@@ -99,4 +99,14 @@ func startGui() error {
 
 func runInBackground() {
 	fmt.Println("Running in background mode")
+	app, err := NewApp()
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		return
+	}
+	app.startup(context.Background())
+	app.checkForNewReleases()
+	app.startBackgroundChecker()
+	<-make(chan os.Signal, 1)
+	app.stopBackgroundChecker()
 }
