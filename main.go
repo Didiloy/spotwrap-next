@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"embed"
+	"flag"
 	"fmt"
 	"os"
+	"spotwrap-next/autostart"
 	"spotwrap-next/spotdl"
 	"spotwrap-next/utils"
 
@@ -32,15 +34,33 @@ func main() {
 		}
 	}
 
+	cliMode := flag.Bool("cli", false, "Run in background mode")
+	flag.Parse()
+
+	if *cliMode {
+		runInBackground()
+		os.Exit(0)
+	}
+
+	// Normal GUI startup
+	err := startGui()
+	if err != nil {
+		fmt.Println("Error:", err.Error())
+		os.Exit(1)
+	}
+	os.Exit(0)
+}
+
+func startGui() error {
 	// Create an instance of the app structure
 	app, err := NewApp()
 	if err != nil {
-		fmt.Printf("Could not initialize app: \n%s\n", err.Error())
-		return
+		return fmt.Errorf("Could not initialize app: \n%s\n", err.Error())
 	}
 
 	utils := utils.New()
 	downloader := spotdl.NewDownloader()
+	autostart := autostart.New("spotwrap-next", "Spotwrap Next")
 
 	// Create application with options
 	err = wails.Run(&options.App{
@@ -50,7 +70,7 @@ func main() {
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		BackgroundColour: &options.RGBA{R: 255, G: 255, B: 255, A: 255},
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
 			downloader.Startup(ctx)
@@ -59,6 +79,7 @@ func main() {
 			app,
 			utils,
 			downloader,
+			autostart,
 		},
 		CSSDragProperty:          "widows",
 		CSSDragValue:             "1",
@@ -70,6 +91,12 @@ func main() {
 	})
 
 	if err != nil {
-		println("Error:", err.Error())
+		return fmt.Errorf("Error: %s", err.Error())
 	}
+
+	return nil
+}
+
+func runInBackground() {
+	fmt.Println("Running in background mode")
 }

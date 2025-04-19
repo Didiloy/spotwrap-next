@@ -23,6 +23,9 @@
             </Select>
         </div>
 
+        <!-- Autostart -->
+        <AutoStartToggle />
+
         <!-- Logs Section -->
         <div class="space-y-2">
             <Label>{{ $t("Settings.logs") }}</Label>
@@ -92,6 +95,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import AutoStartToggle from "@/components/settings/AutoStartToggle.vue";
 import { useDownloadStore } from "@/store/download";
 
 const { locale, t } = useI18n();

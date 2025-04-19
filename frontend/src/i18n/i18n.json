@@ -112,7 +112,9 @@
       "logs_title": "Journaux d'application",
       "logs_description": "Activité récente de téléchargement et d'application",
       "no_logs": "Aucun journal disponible",
-      "close": "Fermer"
+      "close": "Fermer",
+      "auto_start": "Démarrage automatique",
+      "auto_start_description": "L'application démarre automatiquement au démarrage du système pour vérifier si il y a des nouvelles sorties d'artistes que vous suivez."
     }
   },
   "en": {
@@ -229,7 +231,9 @@
       "logs_title": "Application Logs",
       "logs_description": "Recent download and application activity",
       "no_logs": "No logs available",
-      "close": "Close"
+      "close": "Close",
+      "auto_start": "Auto Start",
+      "auto_start_description": "The application starts automatically at system startup to check for new releases from artists you follow."
     }
   }
 }
