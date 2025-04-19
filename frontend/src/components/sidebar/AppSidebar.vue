@@ -14,36 +14,24 @@ import {
     SidebarFooter,
 } from "@/components/ui/sidebar";
 import logo from "../../assets/images/appicon.png";
+import { useDownloadStore } from "@/store/download";
+import { storeToRefs } from "pinia";
 import infos from "../../../package.json";
 import { useI18n } from "vue-i18n";
-import { ref, watch } from "vue";
-const i18n = useI18n();
+import { ref, watch, onMounted, computed } from "vue";
 
-watch(i18n.locale, () => {
-    items.value = [
-        {
-            title: i18n.t("AppSidebar.home"),
-            url: "/",
-            icon: Home,
-        },
-        {
-            title: i18n.t("AppSidebar.search"),
-            url: "/search",
-            icon: Search,
-        },
-        {
-            title: i18n.t("AppSidebar.subscriptions"),
-            url: "/subscriptions",
-            icon: Bell,
-        },
-        {
-            title: i18n.t("AppSidebar.settings"),
-            url: "/settings",
-            icon: Settings,
-        },
-    ];
+const i18n = useI18n();
+const downloadStore = useDownloadStore();
+const { downloadMessages, isDownloading } = storeToRefs(downloadStore);
+
+// Get the last message using a computed property
+const lastMessage = computed(() => {
+    return downloadMessages.value.length > 0
+        ? downloadMessages.value[downloadMessages.value.length - 1]
+        : "";
 });
 
+// Reactive navigation items
 const items = ref([
     {
         title: i18n.t("AppSidebar.home"),
@@ -66,6 +54,39 @@ const items = ref([
         icon: Settings,
     },
 ]);
+
+// Watch for locale changes
+watch(
+    () => i18n.locale.value,
+    () => {
+        items.value = [
+            {
+                title: i18n.t("AppSidebar.home"),
+                url: "/",
+                icon: Home,
+            },
+            {
+                title: i18n.t("AppSidebar.search"),
+                url: "/search",
+                icon: Search,
+            },
+            {
+                title: i18n.t("AppSidebar.subscriptions"),
+                url: "/subscriptions",
+                icon: Bell,
+            },
+            {
+                title: i18n.t("AppSidebar.settings"),
+                url: "/settings",
+                icon: Settings,
+            },
+        ];
+    },
+);
+
+onMounted(() => {
+    downloadStore.setupEventListener();
+});
 </script>
 
 <template>
@@ -96,7 +117,11 @@ const items = ref([
             </SidebarGroup>
         </SidebarContent>
         <SidebarFooter class="flex items-center justify-center">
-            <ProgressCard :progress="75" message="Loading..." />
+            <ProgressCard
+                :progress="50"
+                :showProgress="isDownloading"
+                :message="lastMessage"
+            />
             <span>{{ $t("AppSidebar.version") }} {{ infos.version }}</span>
         </SidebarFooter>
     </Sidebar>

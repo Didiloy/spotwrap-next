@@ -11,9 +11,13 @@ const props = defineProps({
         type: Number,
         default: null, // Null means no progress to show
     },
+    showProgress: {
+        type: Boolean,
+        default: true,
+    },
 });
 
-const isVisible = computed(() => props.progress !== null);
+const isVisible = computed(() => props.progress !== null && props.showProgress);
 </script>
 
 <template>

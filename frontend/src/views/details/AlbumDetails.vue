@@ -179,6 +179,7 @@ import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { GetAlbum, ChooseDirectory } from "../../../wailsjs/go/main/App";
 import { GetDominantColor } from "../../../wailsjs/go/utils/Utils";
+import { Download } from "../../../wailsjs/go/spotdl/Downloader";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import TracksRow from "@/components/search/TracksRow.vue";
@@ -192,6 +193,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useI18n } from "vue-i18n";
 import { useToast } from "@/components/ui/toast/use-toast";
+import { useDownloadStore } from "@/store/download";
 
 const { toast } = useToast();
 const i18n = useI18n();
@@ -208,12 +210,15 @@ const downloadOptions = ref({
     path: "",
 });
 
+const downloadStore = useDownloadStore();
+
 const BITRATE_OPTIONS = ["320", "256", "192", "128", "96"];
 const FORMAT_OPTIONS = ["mp3", "flac", "m4a", "ogg", "opus"];
 
 onMounted(async () => {
     const albumId = route.params.id as string;
     album.value = await GetAlbum(albumId);
+    console.log("Album:", album.value);
     dominantColors.value = await GetDominantColor(
         album.value.album.images[0].url,
     );
@@ -248,7 +253,7 @@ const selectDownloadPath = async () => {
     }
 };
 
-const downloadAlbum = () => {
+const downloadAlbum = async () => {
     if (!downloadOptions.value.path) {
         toast({
             title: i18n.t("AlbumDetails.no_path_selected"),
@@ -257,6 +262,16 @@ const downloadAlbum = () => {
         return;
     }
     console.log("Downloading album with options:", downloadOptions.value);
+    downloadStore.clearMessages();
+    // console.log("Album ID:", album.value.album.external_urls.spotify);
+    const result = await Download(
+        album.value.album.external_urls.spotify,
+        downloadOptions.value.path,
+        downloadOptions.value.format,
+        downloadOptions.value.bitrate + "k",
+        [],
+    );
+    console.log("Download result:", result);
 };
 
 const dominantColors = ref<string[]>([]);

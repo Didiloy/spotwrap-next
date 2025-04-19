@@ -10,7 +10,7 @@
         <div class="p-2">
             <div class="space-y-2">
                 <div
-                    v-for="(track, index) in tracks"
+                    v-for="(track, index) in props.tracks"
                     :key="track.id"
                     class="flex items-center p-4 hover:bg-zinc-400/50 rounded-lg transition-colors"
                     @click="handleTrackClick(track.id)"
@@ -68,10 +68,11 @@ const i18n = useI18n();
 import { ArrowRight } from "lucide-vue-next";
 import { Button } from "@/components/ui/button";
 import { useRouter, RouterLink } from "vue-router";
+import { onMounted } from "vue";
 
 const router = useRouter();
 
-defineProps<{
+const props = defineProps<{
     tracks: Array<{
         id: string;
         name: string;
@@ -83,6 +84,11 @@ defineProps<{
     }>;
     title?: string;
 }>();
+
+onMounted(() => {
+    console.log("TracksRow mounted");
+    console.log(props.tracks);
+});
 
 const formatDuration = (durationMs: number): string => {
     const minutes = Math.floor(durationMs / 60000);

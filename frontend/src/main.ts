@@ -12,6 +12,7 @@ import "./style.css";
 import { createMemoryHistory, createRouter } from "vue-router";
 import { createI18n } from "vue-i18n";
 import messages from "./i18n/i18n.json";
+import { createPinia } from "pinia";
 
 const routes = [
   { path: "/", component: Home },
@@ -34,4 +35,6 @@ const i18n = createI18n({
   messages: messages,
 });
 
-createApp(App).use(i18n).use(router).mount("#app");
+const pinia = createPinia();
+
+createApp(App).use(i18n).use(router).use(pinia).mount("#app");
