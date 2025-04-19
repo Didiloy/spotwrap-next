@@ -33,6 +33,8 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	// Extract the spotdl binary to a temporary location
 	tmpDir, err := os.MkdirTemp("", "spotdl")
 	if err != nil {
+		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("failed to create temp directory: %v", err)
 	}
 	defer os.RemoveAll(tmpDir)
@@ -45,12 +47,16 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	// Get the embedded binary
 	binData, err := spotdlBinary.ReadFile("assets/spotdl_linux")
 	if err != nil {
+		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("failed to read embedded binary: %v", err)
 	}
 
 	// Write the binary to the temp location
 	err = os.WriteFile(spotdlPath, binData, 0755)
 	if err != nil {
+		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("failed to write binary to temp location: %v", err)
 	}
 
@@ -77,11 +83,15 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	// Set up stdout and stderr pipes
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
+		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("failed to create stdout pipe: %v", err)
 	}
 
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
+		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("failed to create stderr pipe: %v", err)
 	}
 
@@ -134,7 +144,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	wg.Wait()
 
 	if err != nil {
-		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("Error: %v", err))
+		runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %v", err))
 		runtime.EventsEmit(d.ctx, "update_in_download", "Done")
 		return fmt.Errorf("command execution failed: %v", err)
 	}

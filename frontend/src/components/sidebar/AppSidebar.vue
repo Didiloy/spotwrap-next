@@ -19,6 +19,9 @@ import { storeToRefs } from "pinia";
 import infos from "../../../package.json";
 import { useI18n } from "vue-i18n";
 import { ref, watch, onMounted, computed } from "vue";
+import { useToast } from "@/components/ui/toast/use-toast";
+
+const { toast } = useToast();
 
 const i18n = useI18n();
 const downloadStore = useDownloadStore();
@@ -86,6 +89,16 @@ watch(
 
 onMounted(() => {
     downloadStore.setupEventListener();
+});
+
+watch(downloadStore.downloadMessages, (messages) => {
+    if (messages.includes("fatal_error")) {
+        toast({
+            description: i18n.t("AppSidebar.download_error"),
+            variant: "destructive",
+        });
+        downloadStore.isDownloading = false;
+    }
 });
 </script>
 

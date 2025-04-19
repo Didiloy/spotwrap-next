@@ -5,7 +5,8 @@
       "settings": "Paramètres",
       "search": "Recherche",
       "subscriptions": "Abonnements",
-      "version": "Version"
+      "version": "Version",
+      "download_error": "Erreur lors du téléchargement, consulter les logs dans les paramètres pour plus d'informations."
     },
     "Search": {
       "placeholder": "Rechercher...",
@@ -120,7 +121,8 @@
       "settings": "Settings",
       "search": "Search",
       "subscriptions": "Subscriptions",
-      "version": "Version"
+      "version": "Version",
+      "download_error": "Error downloading, check logs in settings for more information."
     },
     "Search": {
       "placeholder": "Search...",

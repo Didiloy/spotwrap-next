@@ -85,10 +85,7 @@ const props = defineProps<{
     title?: string;
 }>();
 
-onMounted(() => {
-    console.log("TracksRow mounted");
-    console.log(props.tracks);
-});
+onMounted(() => {});
 
 const formatDuration = (durationMs: number): string => {
     const minutes = Math.floor(durationMs / 60000);
