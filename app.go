@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"spotwrap-next/api"
 	"spotwrap-next/database"
+	"spotwrap-next/notifications"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -225,14 +226,14 @@ func (a *App) checkForNewReleases() {
 		}
 
 		// Check albums for new releases
-		albums, ok := artistData["albums"].([]interface{})
+		albums, ok := artistData["albums"].([]any)
 		if !ok {
 			fmt.Printf("Unexpected albums format for artist %s\n", artist.SpotifyID)
 			continue
 		}
 
 		for _, album := range albums {
-			albumMap, ok := album.(map[string]interface{})
+			albumMap, ok := album.(map[string]any)
 			if !ok {
 				continue
 			}
@@ -240,7 +241,15 @@ func (a *App) checkForNewReleases() {
 			if a.IsANewRelease(artist.SpotifyID, albumMap) {
 				fmt.Printf("New release found for artist %s: %v\n", artist.SpotifyID, albumMap["name"])
 
-				//TODO add notification
+				albumName := albumMap["name"].(string)
+				artistName := artistData["artist"].(map[string]any)["name"].(string)
+				message := fmt.Sprintf("%s has released %s", artistName, albumName)
+
+				// Send desktop notification
+				err := notifications.Notify("New Release!", message)
+				if err != nil {
+					fmt.Printf("Failed to send notification: %v\n", err)
+				}
 			}
 		}
 
