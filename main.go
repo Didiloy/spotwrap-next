@@ -34,10 +34,10 @@ func main() {
 		}
 	}
 
-	cliMode := flag.Bool("cli", false, "Run in background mode")
+	no_gui_mode := flag.Bool("no-gui", false, "Run in background mode")
 	flag.Parse()
 
-	if *cliMode {
+	if *no_gui_mode {
 		runInBackground()
 		os.Exit(0)
 	}

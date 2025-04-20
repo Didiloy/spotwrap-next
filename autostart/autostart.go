@@ -86,7 +86,7 @@ func (a *AutoStart) enableLinux() error {
 	desktopFile := `[Desktop Entry]
 Type=Application
 Name=` + a.DisplayName + `
-Exec=` + a.Executable + ` --cli
+Exec=` + a.Executable + ` --no-gui
 X-GNOME-Autostart-enabled=true
 `
 	homeDir, err := os.UserHomeDir()
