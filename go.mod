@@ -7,7 +7,6 @@ toolchain go1.23.7
 require (
 	github.com/EdlinOrg/prominentcolor v1.0.0
 	github.com/gen2brain/beeep v0.0.0-20240516210008-9c006672e7f4
-	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/wailsapp/wails/v2 v2.10.1
 )

@@ -1,7 +1,22 @@
 <script lang="ts" setup>
+import { onMounted } from "vue";
 import AppSidebar from "@/components/sidebar/AppSidebar.vue";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Toaster from "@/components/ui/toast/Toaster.vue";
+import SpotifyCredentialsModal from "@/components/settings/SpotifyCredentialsModal.vue";
+import { useSettingsStore } from "@/store/settings";
+
+const settingsStore = useSettingsStore();
+
+onMounted(async () => {
+  // Check if Spotify credentials are valid
+  await settingsStore.loadSpotifyCredentials();
+  const hasValidCredentials = await settingsStore.checkCredentialsValidity();
+  
+  if (!hasValidCredentials) {
+    settingsStore.showCredentialsModal = true;
+  }
+});
 </script>
 
 <template>
@@ -15,6 +30,8 @@ import Toaster from "@/components/ui/toast/Toaster.vue";
             <router-view class="w-full h-full" />
         </main>
     </SidebarProvider>
+    
+    <SpotifyCredentialsModal v-model:open="settingsStore.showCredentialsModal" />
 </template>
 
 <style></style>

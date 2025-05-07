@@ -13,27 +13,12 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-
-	"github.com/joho/godotenv"
 )
-
-//go:embed .env
-var envFile embed.FS
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
-	//env file
-	if data, err := envFile.ReadFile(".env"); err == nil {
-		envMap, err := godotenv.Unmarshal(string(data))
-		if err == nil {
-			for k, v := range envMap {
-				os.Setenv(k, v)
-			}
-		}
-	}
-
 	no_gui_mode := flag.Bool("no-gui", false, "Run in background mode")
 	flag.Parse()
 
@@ -55,7 +40,7 @@ func startGui() error {
 	// Create an instance of the app structure
 	app, err := NewApp()
 	if err != nil {
-		return fmt.Errorf("Could not initialize app: \n%s\n", err.Error())
+		return fmt.Errorf("could not initialize app: %s", err.Error())
 	}
 
 	utils := utils.New()
@@ -91,7 +76,7 @@ func startGui() error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Error: %s", err.Error())
+		return fmt.Errorf("error: %s", err.Error())
 	}
 
 	return nil

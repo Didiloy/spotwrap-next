@@ -26,6 +26,24 @@
         <!-- Autostart -->
         <AutoStartToggle />
 
+        <!-- Spotify API Credentials -->
+        <div class="space-y-2">
+            <Label>{{ $t("Settings.spotify_api") }}</Label>
+            <div class="flex flex-col gap-2">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium">{{ $t("Settings.spotify_credentials") }}</p>
+                        <p class="text-xs text-muted-foreground">
+                            {{ settingsStore.hasValidCredentials ? $t("Settings.spotify_credentials_set") : $t("Settings.spotify_credentials_not_set") }}
+                        </p>
+                    </div>
+                    <Button @click="settingsStore.showCredentialsModal = true">
+                        {{ settingsStore.hasValidCredentials ? $t("Settings.update_credentials") : $t("Settings.set_credentials") }}
+                    </Button>
+                </div>
+            </div>
+        </div>
+
         <!-- Logs Section -->
         <div class="space-y-2">
             <Label>{{ $t("Settings.logs") }}</Label>
@@ -69,6 +87,9 @@
                 </DialogFooter>
             </DialogContent>
         </Dialog>
+
+        <!-- Spotify Credentials Modal -->
+        <SpotifyCredentialsModal v-model:open="settingsStore.showCredentialsModal" @saved="checkCredentials" />
     </div>
 </template>
 
@@ -96,10 +117,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import AutoStartToggle from "@/components/settings/AutoStartToggle.vue";
+import SpotifyCredentialsModal from "@/components/settings/SpotifyCredentialsModal.vue";
 import { useDownloadStore } from "@/store/download";
+import { useSettingsStore } from "@/store/settings";
 
 const { locale, t } = useI18n();
 const downloadStore = useDownloadStore();
+const settingsStore = useSettingsStore();
 // Available languages
 const availableLanguages = [
     { code: "en", name: "English" },
@@ -116,12 +140,19 @@ watch(currentLanguage, (newLang) => {
     localStorage.setItem("lang", newLang);
 });
 
+// Spotify credentials state
+function checkCredentials() {
+    settingsStore.checkCredentialsValidity();
+}
+
 // Set initial language
-onMounted(() => {
+onMounted(async () => {
     if (currentLanguage.value) {
         locale.value = currentLanguage.value;
     }
     logs.value = [...downloadStore.downloadMessages];
+    await settingsStore.loadSpotifyCredentials();
+    await settingsStore.checkCredentialsValidity();
 });
 
 // Logs dialog state

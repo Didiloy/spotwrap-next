@@ -44,7 +44,14 @@ func (a *App) startup(ctx context.Context) {
 // Fetch Spotify Access Token if expired
 func (a *App) fetchSpotifyAccessToken() {
 	if time.Now().After(a.tokenExpirationTime) { // Check if token is expired
-		token, expiresIn, err := api.GetToken()
+		// Get credentials from database
+		creds, err := a.database.GetSpotifyCredentials()
+		if err != nil {
+			fmt.Println("Error fetching credentials:", err)
+			return
+		}
+
+		token, expiresIn, err := api.GetToken(creds.ClientID, creds.ClientSecret)
 		if err != nil {
 			fmt.Println("Error fetching token:", err)
 			return
@@ -132,6 +139,56 @@ func (a *App) GetArtistsFromDB() []database.Artist {
 		return nil
 	}
 	return artists
+}
+
+// ================ Spotify Credentials =================
+// Get Spotify credentials
+func (a *App) GetSpotifyCredentials() map[string]string {
+	creds, err := a.database.GetSpotifyCredentials()
+	if err != nil {
+		fmt.Println("Error getting Spotify credentials:", err)
+		return map[string]string{
+			"clientId":     "",
+			"clientSecret": "",
+		}
+	}
+
+	return map[string]string{
+		"clientId":     creds.ClientID,
+		"clientSecret": creds.ClientSecret,
+	}
+}
+
+// Set Spotify credentials
+func (a *App) SetSpotifyCredentials(clientID, clientSecret string) bool {
+	// First check if the credentials are valid by trying to get a token
+	token, _, err := api.GetToken(clientID, clientSecret)
+	if err != nil || token == "" {
+		return false
+	}
+
+	// Store credentials in database
+	err = a.database.StoreSpotifyCredentials(clientID, clientSecret)
+	if err != nil {
+		fmt.Println("Error storing Spotify credentials:", err)
+		return false
+	}
+
+	// If credentials are valid, refresh the token immediately
+	a.fetchSpotifyAccessToken()
+	return true
+}
+
+// Check if Spotify credentials are valid
+func (a *App) HasValidSpotifyCredentials() bool {
+	creds, err := a.database.GetSpotifyCredentials()
+	if err != nil {
+		fmt.Println("Error getting Spotify credentials:", err)
+		return false
+	}
+
+	token, _, err := api.GetToken(creds.ClientID, creds.ClientSecret)
+	return err == nil && token != ""
 }
 
 // ================ Utils =================

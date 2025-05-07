@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"os"
 )
 
 const (
@@ -25,12 +24,9 @@ type TokenResponse struct {
 	ExpiresIn   int    `json:"expires_in"`
 }
 
-func GetToken() (string, int, error) {
-	clientID := os.Getenv("SPOTIFY_CLIENT_ID")
-	clientSecret := os.Getenv("SPOTIFY_CLIENT_SECRET")
-
+func GetToken(clientID, clientSecret string) (string, int, error) {
 	if clientID == "" || clientSecret == "" {
-		return "", 0, fmt.Errorf("Missing SPOTIFY_CLIENT_ID or SPOTIFY_CLIENT_SECRET")
+		return "", 0, fmt.Errorf("Missing Spotify client ID or client secret")
 	}
 
 	// Prepare request body

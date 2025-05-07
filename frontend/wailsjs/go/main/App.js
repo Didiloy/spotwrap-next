@@ -26,8 +26,16 @@ export function GetArtistsFromDB() {
   return window['go']['main']['App']['GetArtistsFromDB']();
 }
 
+export function GetSpotifyCredentials() {
+  return window['go']['main']['App']['GetSpotifyCredentials']();
+}
+
 export function GetTrack(arg1) {
   return window['go']['main']['App']['GetTrack'](arg1);
+}
+
+export function HasValidSpotifyCredentials() {
+  return window['go']['main']['App']['HasValidSpotifyCredentials']();
 }
 
 export function IsANewRelease(arg1, arg2) {
@@ -40,4 +48,8 @@ export function RemoveArtist(arg1) {
 
 export function Search(arg1) {
   return window['go']['main']['App']['Search'](arg1);
+}
+
+export function SetSpotifyCredentials(arg1, arg2) {
+  return window['go']['main']['App']['SetSpotifyCredentials'](arg1, arg2);
 }

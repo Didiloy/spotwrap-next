@@ -20,6 +20,11 @@ type Artist struct {
 	CreatedAt   time.Time
 }
 
+type SpotifyCredentials struct {
+	ClientID     string
+	ClientSecret string
+}
+
 // New creates and initializes a new Database instance
 func New() (*Database, error) {
 	// Get user config directory
@@ -41,7 +46,8 @@ func New() (*Database, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	createTableSQL := `
+	// Create artists table
+	createArtistsTableSQL := `
 	CREATE TABLE IF NOT EXISTS artists (
 		spotify_id TEXT PRIMARY KEY,
 		last_checked TIMESTAMP NOT NULL,
@@ -49,9 +55,22 @@ func New() (*Database, error) {
 	);
 	`
 
-	if _, err := db.Exec(createTableSQL); err != nil {
+	if _, err := db.Exec(createArtistsTableSQL); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("failed to create table: %w", err)
+		return nil, fmt.Errorf("failed to create artists table: %w", err)
+	}
+
+	// Create settings table for Spotify credentials
+	createSettingsTableSQL := `
+	CREATE TABLE IF NOT EXISTS settings (
+		key TEXT PRIMARY KEY,
+		value TEXT NOT NULL
+	);
+	`
+
+	if _, err := db.Exec(createSettingsTableSQL); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to create settings table: %w", err)
 	}
 
 	fmt.Printf("Database initialized at %s\n", dbPath)
@@ -117,4 +136,61 @@ func (d *Database) GetArtistByID(id string) (*Artist, error) {
 		return nil, err
 	}
 	return &a, nil
+}
+
+// StoreSpotifyCredentials saves Spotify API credentials to the database
+func (d *Database) StoreSpotifyCredentials(clientID, clientSecret string) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Store client ID
+	_, err = tx.Exec(
+		"INSERT INTO settings (key, value) VALUES ('spotify_client_id', ?) ON CONFLICT(key) DO UPDATE SET value = ?",
+		clientID, clientID,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Store client secret
+	_, err = tx.Exec(
+		"INSERT INTO settings (key, value) VALUES ('spotify_client_secret', ?) ON CONFLICT(key) DO UPDATE SET value = ?",
+		clientSecret, clientSecret,
+	)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit()
+}
+
+// GetSpotifyCredentials retrieves Spotify API credentials from the database
+func (d *Database) GetSpotifyCredentials() (SpotifyCredentials, error) {
+	var creds SpotifyCredentials
+
+	// Get client ID
+	var clientID sql.NullString
+	err := d.db.QueryRow("SELECT value FROM settings WHERE key = 'spotify_client_id'").Scan(&clientID)
+	if err != nil && err != sql.ErrNoRows {
+		return creds, err
+	}
+	if clientID.Valid {
+		creds.ClientID = clientID.String
+	}
+
+	// Get client secret
+	var clientSecret sql.NullString
+	err = d.db.QueryRow("SELECT value FROM settings WHERE key = 'spotify_client_secret'").Scan(&clientSecret)
+	if err != nil && err != sql.ErrNoRows {
+		return creds, err
+	}
+	if clientSecret.Valid {
+		creds.ClientSecret = clientSecret.String
+	}
+
+	return creds, nil
 }
