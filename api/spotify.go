@@ -54,8 +54,8 @@ func makeRequestWithRetry(req *http.Request, maxRetries int) (*http.Response, er
 				return nil, fmt.Errorf("hit rate limit after %d retries", maxRetries)
 			}
 
-			// Get retry-after header, default to 5 seconds if not present
-			retryAfter := 5
+			// Get retry-after header, default to 1 seconds if not present
+			retryAfter := 1
 			if s := resp.Header.Get("Retry-After"); s != "" {
 				fmt.Sscanf(s, "%d", &retryAfter)
 			}
@@ -72,7 +72,7 @@ func makeRequestWithRetry(req *http.Request, maxRetries int) (*http.Response, er
 
 func GetToken(clientID, clientSecret string) (string, int, error) {
 	if clientID == "" || clientSecret == "" {
-		return "", 0, fmt.Errorf("Missing Spotify client ID or client secret")
+		return "", 0, fmt.Errorf("missing Spotify client ID or client secret")
 	}
 
 	// Prepare request body
@@ -138,7 +138,7 @@ func Search(query string, token string) (map[string]any, error) {
 	return result, nil
 }
 
-func GetArtistDetails(id string, token string) (map[string]any, error) {
+func GetArtistDetails(id string, token string, noTopTracks bool) (map[string]any, error) {
 	artistData := make(map[string]any)
 
 	// Get basic artist info using ArtistURL
@@ -149,14 +149,15 @@ func GetArtistDetails(id string, token string) (map[string]any, error) {
 	}
 	artistData["artist"] = basicInfo
 
-	// Get artist's top tracks
-	topTracksURL := fmt.Sprintf("%s/%s/top-tracks?market=US", ArtistURL, id)
-	topTracks, err := makeRequest(topTracksURL, token)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get top tracks: %v", err)
+	if !noTopTracks {
+		// Get artist's top tracks
+		topTracksURL := fmt.Sprintf("%s/%s/top-tracks?market=US", ArtistURL, id)
+		topTracks, err := makeRequest(topTracksURL, token)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get top tracks: %v", err)
+		}
+		artistData["top_tracks"] = topTracks["tracks"]
 	}
-	artistData["top_tracks"] = topTracks["tracks"]
-
 	// Get artist's albums
 	albumsURL := fmt.Sprintf("%s/%s/albums?include_groups=album,single&market=US&limit=10", ArtistURL, id)
 	albums, err := makeRequest(albumsURL, token)

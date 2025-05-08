@@ -249,11 +249,13 @@ const getCardStyle = (imageUrl: string, index: number) => {
     if (colors && colors.length >= 2) {
         return {
             background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
+            backdropFilter: 'blur(8px)',
         };
     }
     // Fallback to default gradient if colors not loaded yet
     return {
-        background: "linear-gradient(135deg, #4f46e5 0%, #1e40af 100%)",
+        background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(30, 64, 175, 0.2) 100%)',
+        backdropFilter: 'blur(8px)',
     };
 };
 
@@ -325,12 +327,15 @@ onMounted(async () => {
             })
             .slice(0, 20);
 
+        // Set loading to false immediately after setting timelineItems
+        loading.value = false;
+
+        // Load dominant colors asynchronously
         timelineItems.value.forEach((item, index) => {
             loadDominantColorsForItem(item, index);
         });
     } catch (error) {
         console.error("Error fetching artist data:", error);
-    } finally {
         loading.value = false;
     }
 });

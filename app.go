@@ -85,7 +85,7 @@ func (a *App) Search(query string) map[string]any {
 
 // Get Artist Data
 func (a *App) GetArtist(id string) map[string]any {
-	result, err := api.GetArtistDetails(id, a.spotifyAccessToken)
+	result, err := api.GetArtistDetails(id, a.spotifyAccessToken, false)
 	if err != nil {
 		fmt.Println("Error getting artist:", err)
 		return map[string]any{}
@@ -276,7 +276,7 @@ func (a *App) checkForNewReleases() {
 		fmt.Printf("Checking for new releases from artist %s...\n", artist.SpotifyID)
 
 		// Get artist's latest albums with retry mechanism
-		artistData, err := api.GetArtistDetails(artist.SpotifyID, a.spotifyAccessToken)
+		artistData, err := api.GetArtistDetails(artist.SpotifyID, a.spotifyAccessToken, true)
 		if err != nil {
 			fmt.Printf("Error getting artist details for %s: %v\n", artist.SpotifyID, err)
 			continue
