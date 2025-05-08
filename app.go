@@ -275,7 +275,7 @@ func (a *App) checkForNewReleases() {
 	for _, artist := range artists {
 		fmt.Printf("Checking for new releases from artist %s...\n", artist.SpotifyID)
 
-		// Get artist's latest albums
+		// Get artist's latest albums with retry mechanism
 		artistData, err := api.GetArtistDetails(artist.SpotifyID, a.spotifyAccessToken)
 		if err != nil {
 			fmt.Printf("Error getting artist details for %s: %v\n", artist.SpotifyID, err)

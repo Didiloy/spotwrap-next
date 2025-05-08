@@ -7,7 +7,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"time"
+
+	"golang.org/x/time/rate"
 )
+
+// Global rate limiter: 1 request per second with burst of 2
+var limiter = rate.NewLimiter(rate.Every(time.Second), 2)
 
 const (
 	TokenURL  = "https://accounts.spotify.com/api/token"
@@ -22,6 +28,46 @@ type TokenResponse struct {
 	AccessToken string `json:"access_token"`
 	TokenType   string `json:"token_type"`
 	ExpiresIn   int    `json:"expires_in"`
+}
+
+// makeRequestWithRetry makes an HTTP request with rate limiting and retries
+func makeRequestWithRetry(req *http.Request, maxRetries int) (*http.Response, error) {
+	var lastErr error
+	for i := 0; i <= maxRetries; i++ {
+		// Wait for rate limiter
+		err := limiter.Wait(req.Context())
+		if err != nil {
+			return nil, fmt.Errorf("rate limiter error: %v", err)
+		}
+
+		// Make the request
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		// Check if we hit the rate limit
+		if resp.StatusCode == 429 {
+			if i == maxRetries {
+				return nil, fmt.Errorf("hit rate limit after %d retries", maxRetries)
+			}
+
+			// Get retry-after header, default to 5 seconds if not present
+			retryAfter := 5
+			if s := resp.Header.Get("Retry-After"); s != "" {
+				fmt.Sscanf(s, "%d", &retryAfter)
+			}
+
+			time.Sleep(time.Duration(retryAfter) * time.Second)
+			continue
+		}
+
+		return resp, nil
+	}
+
+	return nil, fmt.Errorf("request failed after %d retries: %v", maxRetries, lastErr)
 }
 
 func GetToken(clientID, clientSecret string) (string, int, error) {
@@ -41,9 +87,8 @@ func GetToken(clientID, clientSecret string) (string, int, error) {
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	// Send request
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	// Send request with retry
+	resp, err := makeRequestWithRetry(req, 3)
 	if err != nil {
 		return "", 0, err
 	}
@@ -159,6 +204,7 @@ func GetTrackDetails(id string, token string) (map[string]any, error) {
 	return trackData, nil
 }
 
+// makeRequest makes an API request with rate limiting and retries
 func makeRequest(url string, token string) (map[string]any, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -167,8 +213,8 @@ func makeRequest(url string, token string) (map[string]any, error) {
 
 	req.Header.Set("Authorization", "Bearer "+token)
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	// Send request with retry
+	resp, err := makeRequestWithRetry(req, 3)
 	if err != nil {
 		return nil, err
 	}
