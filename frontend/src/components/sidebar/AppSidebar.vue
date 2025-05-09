@@ -104,19 +104,20 @@ watch(downloadStore.downloadMessages, (messages) => {
 
 <template>
     <Sidebar>
-        <SidebarHeader>
+        <SidebarHeader class="p-4">
             <div class="flex flex-row items-center justify-center w-full">
                 <img :src="logo" alt="Logo" class="w-8 h-8 mr-2" />
                 <span class="text-xl font-bold">spotwrap-next</span>
             </div>
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent class="px-2">
             <SidebarGroup>
                 <SidebarGroupContent>
                     <SidebarMenu>
                         <SidebarMenuItem
                             v-for="item in items"
                             :key="item.title"
+                            class="my-1"
                         >
                             <SidebarMenuButton asChild>
                                 <router-link :to="item.url">
@@ -129,14 +130,15 @@ watch(downloadStore.downloadMessages, (messages) => {
                 </SidebarGroupContent>
             </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter class="flex items-center justify-center">
+        <SidebarFooter class="flex flex-col items-center justify-center p-4 space-y-3">
             <ProgressCard
                 :progress="50"
                 :showProgress="isDownloading"
                 :message="lastMessage"
                 :maxLength="30"
+                class="w-full mb-2"
             />
-            <span>{{ $t("AppSidebar.version") }} {{ infos.version }}</span>
+            <span class="text-xs text-sidebar-foreground/70">{{ $t("AppSidebar.version") }} {{ infos.version }}</span>
         </SidebarFooter>
     </Sidebar>
 </template>
