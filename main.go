@@ -65,7 +65,7 @@ func startGUI() error {
 			downloader,
 			autostartSvc,
 		},
-		CSSDragProperty:          "widows",
+		CSSDragProperty:          "windows",
 		CSSDragValue:             "1",
 		EnableDefaultContextMenu: false,
 		OnShutdown: func(ctx context.Context) {
