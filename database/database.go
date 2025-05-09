@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"time"
@@ -79,7 +80,7 @@ func New() (*Database, error) {
 
 // Close closes the database connection
 func (d *Database) Close() error {
-	fmt.Println("Closing database connection...")
+	log.Println("Closing database connection...")
 	return d.db.Close()
 }
 
