@@ -1,45 +1,58 @@
+// Package utils provides utility functions for the application
 package utils
 
 import (
 	"fmt"
 	"image"
 	"io"
+	"log"
 	"net/http"
 	"os"
-	"strconv"
+	"path/filepath"
 	"time"
 
 	"github.com/EdlinOrg/prominentcolor"
 )
 
+const (
+	coverDirName = "album_cover"
+	timeout      = 10 * time.Second
+)
+
+// Utils provides utility functions for the application
 type Utils struct {
 	counter int
 }
 
+// New creates a new Utils instance
 func New() *Utils {
 	return &Utils{}
 }
 
-func (u *Utils) getCounter() int {
+// incrementCounter increments and returns the counter value
+func (u *Utils) incrementCounter() int {
 	u.counter++
 	return u.counter
 }
 
+// GetDominantColor extracts the dominant colors from an image URL
+// It returns a slice of hex color codes representing the most prominent colors
 func (u *Utils) GetDominantColor(imageLink string) []string {
-	colors, err := u.getDominantColor(imageLink)
+	colors, err := u.extractDominantColors(imageLink)
 	if err != nil {
-		fmt.Printf("Could not get dominant colors for image %v: %v\n", imageLink, err)
-		return make([]string, 0)
+		log.Printf("Could not get dominant colors for image %v: %v\n", imageLink, err)
+		return []string{}
 	}
 	return colors
 }
 
-// GetDominantColor extracts the most dominant colors from an image URL
-func (u *Utils) getDominantColor(imageLink string) ([]string, error) {
+// extractDominantColors downloads an image and extracts its dominant colors
+func (u *Utils) extractDominantColors(imageLink string) ([]string, error) {
 	// Download the image with timeout
 	client := &http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: timeout,
 	}
+
 	resp, err := client.Get(imageLink)
 	if err != nil {
 		return nil, fmt.Errorf("failed to download image: %w", err)
@@ -56,23 +69,28 @@ func (u *Utils) getDominantColor(imageLink string) ([]string, error) {
 		return nil, fmt.Errorf("failed to read image data: %w", err)
 	}
 
-	os.MkdirAll("album_cover", os.ModePerm)
-	filename := "album_cover/cover" + strconv.Itoa(u.getCounter())
-	//forced to write the image file, otherwise it will not work
-	err = os.WriteFile(filename, imgData, 0666)
-	if err != nil {
+	// Ensure the cover directory exists
+	if err := os.MkdirAll(coverDirName, os.ModePerm); err != nil {
+		return nil, fmt.Errorf("failed to create cover directory: %w", err)
+	}
+
+	// Create a temporary file for the image
+	filename := filepath.Join(coverDirName, fmt.Sprintf("cover%d", u.incrementCounter()))
+	if err := os.WriteFile(filename, imgData, 0666); err != nil {
 		return nil, fmt.Errorf("failed to write image file: %w", err)
 	}
 
+	// Ensure the file is deleted when we're done
+	defer os.Remove(filename)
+
 	img, err := loadImage(filename)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to load image: %w", err)
+		return nil, fmt.Errorf("failed to load image: %w", err)
 	}
 
 	colours, err := prominentcolor.Kmeans(img)
 	if err != nil {
-		os.Remove(filename)
-		return nil, fmt.Errorf("Failed to process image: %v", err)
+		return nil, fmt.Errorf("failed to process image: %w", err)
 	}
 
 	var colors []string
@@ -80,26 +98,29 @@ func (u *Utils) getDominantColor(imageLink string) ([]string, error) {
 		colors = append(colors, "#"+colour.AsString())
 	}
 
-	//delete the image file
-	err = os.Remove(filename)
-	if err != nil {
-		return nil, fmt.Errorf("failed to delete image file: %w", err)
-	}
-
 	return colors, nil
 }
 
+// CleanUp removes the album cover directory and its contents
 func (u *Utils) CleanUp() {
-	fmt.Println("Deleting album cover directory...")
-	os.RemoveAll("album_cover")
+	log.Println("Cleaning up album cover directory...")
+	if err := os.RemoveAll(coverDirName); err != nil {
+		log.Printf("Failed to remove album cover directory: %v", err)
+	}
 }
 
-func loadImage(fileInput string) (image.Image, error) {
-	f, err := os.Open(fileInput)
+// loadImage loads an image from a file path
+func loadImage(filePath string) (image.Image, error) {
+	f, err := os.Open(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to open image file: %w", err)
 	}
 	defer f.Close()
+
 	img, _, err := image.Decode(f)
-	return img, err
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode image: %w", err)
+	}
+
+	return img, nil
 }

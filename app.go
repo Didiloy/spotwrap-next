@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"spotwrap-next/api"
 	"spotwrap-next/database"
 	"spotwrap-next/notifications"
@@ -11,26 +12,31 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-// App struct
+// App represents the main application structure
 type App struct {
 	ctx                 context.Context
 	spotifyAccessToken  string
 	tokenExpirationTime time.Time
-	database            *database.Database
+	db                  *database.Database
 	backgroundTicker    *time.Ticker
 	backgroundDone      chan bool
 }
 
 // NewApp creates a new App application struct
 func NewApp() (*App, error) {
-	app := &App{}
-	database, errDB := database.New()
-	app.database = database
-	if errDB != nil {
-		fmt.Printf("Could not initialize database: \n%s\n", errDB.Error())
-		return nil, errDB
+	db, err := database.New()
+	if err != nil {
+		return nil, fmt.Errorf("database initialization failed: %w", err)
 	}
-	go app.refreshTokenPeriodically() // Start automatic token refresh
+
+	app := &App{
+		db:             db,
+		backgroundDone: make(chan bool),
+	}
+
+	// Start automatic token refresh in a goroutine
+	go app.refreshTokenPeriodically()
+
 	return app, nil
 }
 
@@ -40,113 +46,117 @@ func (a *App) startup(ctx context.Context) {
 	a.fetchSpotifyAccessToken()
 }
 
-// ================ Spotify =================
-// Fetch Spotify Access Token if expired
+// fetchSpotifyAccessToken retrieves and updates the Spotify access token if it has expired
 func (a *App) fetchSpotifyAccessToken() {
-	if time.Now().After(a.tokenExpirationTime) { // Check if token is expired
-		// Get credentials from database
-		creds, err := a.database.GetSpotifyCredentials()
-		if err != nil {
-			fmt.Println("Error fetching credentials:", err)
-			return
-		}
-
-		token, expiresIn, err := api.GetToken(creds.ClientID, creds.ClientSecret)
-		if err != nil {
-			fmt.Println("Error fetching token:", err)
-			return
-		}
-		a.spotifyAccessToken = token
-		a.tokenExpirationTime = time.Now().Add(time.Duration(expiresIn) * time.Second)
+	if time.Now().Before(a.tokenExpirationTime) {
+		// Token still valid
+		return
 	}
+
+	// Get credentials from database
+	creds, err := a.db.GetSpotifyCredentials()
+	if err != nil {
+		log.Printf("Error fetching credentials: %v", err)
+		return
+	}
+
+	token, expiresIn, err := api.GetToken(creds.ClientID, creds.ClientSecret)
+	if err != nil {
+		log.Printf("Error fetching token: %v", err)
+		return
+	}
+
+	a.spotifyAccessToken = token
+	a.tokenExpirationTime = time.Now().Add(time.Duration(expiresIn) * time.Second)
 }
 
-// Goroutine to refresh token every 55 minutes
+// refreshTokenPeriodically refreshes the Spotify token every 55 minutes
 func (a *App) refreshTokenPeriodically() {
 	ticker := time.NewTicker(55 * time.Minute) // Refresh 5 min before expiry
 	defer ticker.Stop()
 
-	for {
-		<-ticker.C
+	for range ticker.C {
 		a.fetchSpotifyAccessToken()
-		fmt.Println("Token refreshed")
+		log.Println("Token refreshed")
 	}
 }
 
-// Search Spotify API for query
+// Search queries the Spotify API with the given query string
 func (a *App) Search(query string) map[string]any {
 	result, err := api.Search(query, a.spotifyAccessToken)
 	if err != nil {
-		fmt.Println("Error searching:", err)
+		log.Printf("Error searching: %v", err)
 		return map[string]any{}
 	}
 	return result
 }
 
-// Get Artist Data
+// GetArtist retrieves artist data from Spotify by ID
 func (a *App) GetArtist(id string) map[string]any {
 	result, err := api.GetArtistDetails(id, a.spotifyAccessToken, false)
 	if err != nil {
-		fmt.Println("Error getting artist:", err)
+		log.Printf("Error getting artist: %v", err)
 		return map[string]any{}
 	}
 	return result
 }
 
-// Get Album Data
+// GetAlbum retrieves album data from Spotify by ID
 func (a *App) GetAlbum(id string) map[string]any {
 	result, err := api.GetAlbumDetails(id, a.spotifyAccessToken)
 	if err != nil {
-		fmt.Println("Error getting album:", err)
+		log.Printf("Error getting album: %v", err)
 		return map[string]any{}
 	}
 	return result
 }
 
-// Get Track Data
+// GetTrack retrieves track data from Spotify by ID
 func (a *App) GetTrack(id string) map[string]any {
 	result, err := api.GetTrackDetails(id, a.spotifyAccessToken)
 	if err != nil {
-		fmt.Println("Error getting Track:", err)
+		log.Printf("Error getting track: %v", err)
 		return map[string]any{}
 	}
 	return result
 }
 
-// ================ Database ==============
+// AddArtist adds an artist to the database by Spotify ID
 func (a *App) AddArtist(spotifyID string) bool {
-	success, err := a.database.AddArtist(spotifyID)
+	success, err := a.db.AddArtist(spotifyID)
 	if err != nil {
-		fmt.Println("Error adding artist:", err)
+		log.Printf("Error adding artist: %v", err)
 		return false
 	}
 	return success
 }
 
+// RemoveArtist removes an artist from the database by Spotify ID
 func (a *App) RemoveArtist(spotifyID string) bool {
-	success, err := a.database.RemoveArtist(spotifyID)
+	success, err := a.db.RemoveArtist(spotifyID)
 	if err != nil {
-		fmt.Println("Error removing artist:", err)
+		log.Printf("Error removing artist: %v", err)
 		return false
 	}
 	return success
 }
 
+// GetArtistsFromDB retrieves all artists from the database
 func (a *App) GetArtistsFromDB() []database.Artist {
-	artists, err := a.database.GetArtistsFromDB()
+	artists, err := a.db.GetArtistsFromDB()
 	if err != nil {
-		fmt.Println("Error getting artists:", err)
+		log.Printf("Error getting artists: %v", err)
 		return nil
 	}
 	return artists
 }
 
 // ================ Spotify Credentials =================
-// Get Spotify credentials
+// GetSpotifyCredentials retrieves Spotify credentials from the database
 func (a *App) GetSpotifyCredentials() map[string]string {
-	creds, err := a.database.GetSpotifyCredentials()
+	creds, err := a.db.GetSpotifyCredentials()
 	if err != nil {
-		fmt.Println("Error getting Spotify credentials:", err)
+		log.Printf("Error getting Spotify credentials: %v", err)
 		return map[string]string{
 			"clientId":     "",
 			"clientSecret": "",
@@ -159,7 +169,7 @@ func (a *App) GetSpotifyCredentials() map[string]string {
 	}
 }
 
-// Set Spotify credentials
+// SetSpotifyCredentials validates and stores Spotify credentials
 func (a *App) SetSpotifyCredentials(clientID, clientSecret string) bool {
 	// First check if the credentials are valid by trying to get a token
 	token, _, err := api.GetToken(clientID, clientSecret)
@@ -168,9 +178,8 @@ func (a *App) SetSpotifyCredentials(clientID, clientSecret string) bool {
 	}
 
 	// Store credentials in database
-	err = a.database.StoreSpotifyCredentials(clientID, clientSecret)
-	if err != nil {
-		fmt.Println("Error storing Spotify credentials:", err)
+	if err := a.db.StoreSpotifyCredentials(clientID, clientSecret); err != nil {
+		log.Printf("Error storing Spotify credentials: %v", err)
 		return false
 	}
 
@@ -179,11 +188,11 @@ func (a *App) SetSpotifyCredentials(clientID, clientSecret string) bool {
 	return true
 }
 
-// Check if Spotify credentials are valid
+// HasValidSpotifyCredentials checks if the stored credentials are valid
 func (a *App) HasValidSpotifyCredentials() bool {
-	creds, err := a.database.GetSpotifyCredentials()
+	creds, err := a.db.GetSpotifyCredentials()
 	if err != nil {
-		fmt.Println("Error getting Spotify credentials:", err)
+		log.Printf("Error getting Spotify credentials: %v", err)
 		return false
 	}
 
@@ -191,7 +200,7 @@ func (a *App) HasValidSpotifyCredentials() bool {
 	return err == nil && token != ""
 }
 
-// ================ Utils =================
+// ChooseDirectory opens a directory selection dialog
 func (a *App) ChooseDirectory() string {
 	dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
 		Title: "Select Directory",
@@ -202,8 +211,9 @@ func (a *App) ChooseDirectory() string {
 	return dir
 }
 
+// ================ Utils =================
 func (a *App) IsANewRelease(id string, release map[string]any) bool {
-	artist, err := a.database.GetArtistByID(id)
+	artist, err := a.db.GetArtistByID(id)
 	if err != nil {
 		fmt.Println("Error getting artist:", err)
 		return false
@@ -259,7 +269,7 @@ func (a *App) checkForNewReleases() {
 	fmt.Println("Starting background check for new releases...")
 
 	// Get artists that need checking
-	artists, err := a.database.GetArtistsFromDB()
+	artists, err := a.db.GetArtistsFromDB()
 	if err != nil {
 		fmt.Printf("Error getting artists to check: %v\n", err)
 		return
@@ -311,7 +321,7 @@ func (a *App) checkForNewReleases() {
 		}
 
 		// Update last checked time
-		if _, err := a.database.AddArtist(artist.SpotifyID); err != nil {
+		if _, err := a.db.AddArtist(artist.SpotifyID); err != nil {
 			fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
 		}
 	}
@@ -320,5 +330,5 @@ func (a *App) checkForNewReleases() {
 }
 
 func (a *App) Close() {
-	a.database.Close()
+	a.db.Close()
 }

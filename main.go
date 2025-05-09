@@ -5,10 +5,13 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"log"
 	"os"
+	"os/signal"
 	"spotwrap-next/autostart"
 	"spotwrap-next/spotdl"
 	"spotwrap-next/utils"
+	"syscall"
 
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -19,33 +22,29 @@ import (
 var assets embed.FS
 
 func main() {
-	no_gui_mode := flag.Bool("no-gui", false, "Run in background mode")
+	noGUI := flag.Bool("no-gui", false, "Run in background mode")
 	flag.Parse()
 
-	if *no_gui_mode {
+	if *noGUI {
 		runInBackground()
-		os.Exit(0)
+		return
 	}
 
-	// Normal GUI startup
-	err := startGui()
-	if err != nil {
-		fmt.Println("Error:", err.Error())
-		os.Exit(1)
+	if err := startGUI(); err != nil {
+		log.Fatalf("Error: %v", err)
 	}
-	os.Exit(0)
 }
 
-func startGui() error {
+func startGUI() error {
 	// Create an instance of the app structure
 	app, err := NewApp()
 	if err != nil {
-		return fmt.Errorf("could not initialize app: %s", err.Error())
+		return fmt.Errorf("failed to initialize app: %w", err)
 	}
 
 	utils := utils.New()
 	downloader := spotdl.NewDownloader()
-	autostart := autostart.New("spotwrap-next", "Spotwrap Next")
+	autostartSvc := autostart.New("spotwrap-next", "Spotwrap Next")
 
 	// Create application with options
 	err = wails.Run(&options.App{
@@ -64,34 +63,42 @@ func startGui() error {
 			app,
 			utils,
 			downloader,
-			autostart,
+			autostartSvc,
 		},
 		CSSDragProperty:          "widows",
 		CSSDragValue:             "1",
 		EnableDefaultContextMenu: false,
 		OnShutdown: func(ctx context.Context) {
 			app.Close()
-			utils.CleanUp() //clean the cover directory
+			utils.CleanUp() // clean the cover directory
 		},
 	})
 
 	if err != nil {
-		return fmt.Errorf("error: %s", err.Error())
+		return fmt.Errorf("error running application: %w", err)
 	}
 
 	return nil
 }
 
 func runInBackground() {
-	fmt.Println("Running in background mode")
+	log.Println("Running in background mode")
+
 	app, err := NewApp()
 	if err != nil {
-		fmt.Println("Error:", err.Error())
-		return
+		log.Fatalf("Error initializing app: %v", err)
 	}
+
 	app.startup(context.Background())
 	app.checkForNewReleases()
 	app.startBackgroundChecker()
-	<-make(chan os.Signal, 1)
+
+	// Set up signal handling for graceful shutdown
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	<-sigCh // Wait for termination signal
+
+	log.Println("Shutting down background service")
 	app.stopBackgroundChecker()
 }
