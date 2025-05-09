@@ -12,6 +12,8 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarFooter,
+    SidebarTrigger,
+    useSidebar
 } from "@/components/ui/sidebar";
 import logo from "../../assets/images/appicon.png";
 import { useDownloadStore } from "@/store/download";
@@ -105,9 +107,12 @@ watch(downloadStore.downloadMessages, (messages) => {
 <template>
     <Sidebar>
         <SidebarHeader class="p-4">
-            <div class="flex flex-row items-center justify-center w-full">
-                <img :src="logo" alt="Logo" class="w-8 h-8 mr-2" />
-                <span class="text-xl font-bold">spotwrap-next</span>
+            <div class="flex flex-row items-center justify-between w-full">
+                <SidebarTrigger variant="sidebar" class="mr-2" />
+                <div class="flex items-center">
+                    <img :src="logo" alt="Logo" class="w-8 h-8 mr-2" />
+                    <span class="text-xl font-bold">spotwrap-next</span>
+                </div>
             </div>
         </SidebarHeader>
         <SidebarContent class="px-2">
