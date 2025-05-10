@@ -1,29 +1,67 @@
 package notifications
 
 import (
-	"github.com/gen2brain/beeep"
+	_ "embed"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"sync"
 )
 
-func Notify(title, message string) error {
-	err := beeep.Notify(title, message, "")
-	return err
+const appName = "Spotwrap Next"
 
-	// Special cases for different platforms
-	// switch runtime.GOOS {
-	// case "linux":
-	// 	// Additional Linux-specific notification handling if needed
-	// 	return notifyLinux(title, message)
-	// case "windows":
-	// 	// Additional Windows-specific notification handling if needed
-	// 	return notifyWindows(title, message)
-	// default:
-	// 	return nil
-	// }
+//go:embed assets/appicon.png
+var appIconData []byte
+
+var (
+	iconPath string
+	iconOnce sync.Once
+)
+
+func getIconPath() string {
+	iconOnce.Do(func() {
+		dir := os.TempDir()
+		path := filepath.Join(dir, "spotwrap-appicon.png")
+		_ = os.WriteFile(path, appIconData, 0644)
+		iconPath = path
+	})
+	return iconPath
 }
 
-// func notifyLinux(title, message string) error {
-// 	return nil
-// }
+func Notify(title, message string) error {
+	switch runtime.GOOS {
+	case "linux":
+		return notifyLinux(title, message)
+	default:
+		// Use default notification system for other platforms
+		return notifyDefault(title, message)
+	}
+}
+
+func notifyLinux(title, message string) error {
+	// Use notify-send with:
+	// -t 0: make notifications persistent
+	// -a: specify application name
+	// -i: specify icon
+	cmd := exec.Command("notify-send",
+		"-t", "0",
+		"-a", appName,
+		"-i", getIconPath(),
+		title,
+		message)
+	return cmd.Run()
+}
+
+func notifyDefault(title, message string) error {
+	// Use default notification system for other platforms
+	cmd := exec.Command("notify-send",
+		"-a", appName,
+		"-i", getIconPath(),
+		title,
+		message)
+	return cmd.Run()
+}
 
 // func notifyWindows(title, message string) error {
 // 	return nil
