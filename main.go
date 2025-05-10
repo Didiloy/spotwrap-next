@@ -59,7 +59,7 @@ func startGUI() error {
 			app.startup(ctx)
 			downloader.Startup(ctx)
 		},
-		Bind: []interface{}{
+		Bind: []any{
 			app,
 			utils,
 			downloader,

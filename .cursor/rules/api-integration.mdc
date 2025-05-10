@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# API Integration and Rate Limiting
+
+## Spotify API Integration
+
+The application integrates with the Spotify Web API through the following key components:
+
+### Rate Limiting Implementation
+
+- Rate limiting is implemented in [api/spotify.go](mdc:api/spotify.go)
+- Uses a token bucket algorithm for rate limiting
+- Default rate limit: 100 requests per minute
+- Automatic retry mechanism with exponential backoff
+- Graceful handling of rate limit responses
+
+### API Endpoints
+
+Key endpoints used:
+- Artist details: `/v1/artists/{id}`
+- Artist albums: `/v1/artists/{id}/albums`
+- Artist top tracks: `/v1/artists/{id}/top-tracks`
+- Album details: `/v1/albums/{id}`
+- Track details: `/v1/tracks/{id}`
+
+### Token Management
+
+- Access tokens are automatically refreshed every 55 minutes
+- Token refresh is handled in [app.go](mdc:app.go)
+- Credentials are securely stored in the database
+- Token expiration is tracked and managed
+
+## Best Practices
+
+1. Always use the rate limiter for API calls
+2. Implement retry logic for failed requests
+3. Handle rate limit responses gracefully
+4. Cache responses when appropriate
+5. Use background processing for non-critical updates

@@ -1,0 +1,51 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Background Processes and Notifications
+
+## Background Checking
+
+The application implements background processes for checking new releases:
+
+### Implementation Details
+
+- Background checker runs every 5 hours
+- Managed in [app.go](mdc:app.go)
+- Uses goroutines for concurrent processing
+- Graceful shutdown handling
+- Tracks last checked time for each artist
+
+### Process Flow
+
+1. Fetch artists from database
+2. Check each artist's latest releases
+3. Compare release dates with last checked time
+4. Send notifications for new releases
+5. Update last checked timestamp
+
+## Notification System
+
+### Desktop Notifications
+
+- Implemented in [notifications/notifications.go](mdc:notifications/notifications.go)
+- Cross-platform support
+- Customizable notification content
+- Handles notification permissions
+
+### Notification Content
+
+- Artist name
+- Release name
+- Release type (album/single)
+- Release date
+- Optional: Album artwork
+
+## Best Practices
+
+1. Use background processing for non-blocking operations
+2. Implement proper error handling
+3. Log background process activities
+4. Handle application shutdown gracefully
+5. Respect system notification settings
