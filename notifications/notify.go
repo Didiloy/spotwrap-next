@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/go-toast/toast"
 )
 
 const appName = "Spotwrap Next"
@@ -33,6 +35,8 @@ func Notify(title, message string) error {
 	switch runtime.GOOS {
 	case "linux":
 		return notifyLinux(title, message)
+	case "windows":
+		return notifyWindows(title, message)
 	default:
 		// Use default notification system for other platforms
 		return notifyDefault(title, message)
@@ -63,6 +67,12 @@ func notifyDefault(title, message string) error {
 	return cmd.Run()
 }
 
-// func notifyWindows(title, message string) error {
-// 	return nil
-// }
+func notifyWindows(title, message string) error {
+	notification := toast.Notification{
+		AppID:   appName,
+		Title:   title,
+		Message: message,
+		Icon:    getIconPath(),
+	}
+	return notification.Push()
+}
