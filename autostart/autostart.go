@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+
+	"golang.org/x/sys/windows/registry"
 )
 
 // Common errors
@@ -74,17 +76,47 @@ func (a *AutoStart) Disable() error {
 
 // Windows implementation
 func (a *AutoStart) isEnabledWindows() bool {
-	// TODO: Check registry for startup entry
-	return false
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.QUERY_VALUE)
+	if err != nil {
+		return false
+	}
+	defer k.Close()
+
+	val, _, err := k.GetStringValue(a.DisplayName)
+	if err != nil {
+		return false
+	}
+
+	return val == fmt.Sprintf(`"%s" --no-gui`, a.Executable)
 }
 
 func (a *AutoStart) enableWindows() error {
-	// TODO: Create registry entry in HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.SET_VALUE)
+	if err != nil {
+		return fmt.Errorf("failed to open registry key: %w", err)
+	}
+	defer k.Close()
+
+	err = k.SetStringValue(a.DisplayName, fmt.Sprintf(`"%s" --no-gui`, a.Executable))
+	if err != nil {
+		return fmt.Errorf("failed to set registry value: %w", err)
+	}
+
 	return nil
 }
 
 func (a *AutoStart) disableWindows() error {
-	// TODO: Remove registry entry
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Run`, registry.SET_VALUE)
+	if err != nil {
+		return fmt.Errorf("failed to open registry key: %w", err)
+	}
+	defer k.Close()
+
+	err = k.DeleteValue(a.DisplayName)
+	if err != nil && err != registry.ErrNotExist {
+		return fmt.Errorf("failed to delete registry value: %w", err)
+	}
+
 	return nil
 }
 
@@ -153,10 +185,10 @@ func (a *AutoStart) isEnabledMacOS() bool {
 
 func (a *AutoStart) enableMacOS() error {
 	// TODO: Create a LaunchAgent plist file
-	return nil
+	return ErrUnsupportedOS
 }
 
 func (a *AutoStart) disableMacOS() error {
 	// TODO: Remove the LaunchAgent plist file
-	return nil
+	return ErrUnsupportedOS
 }
