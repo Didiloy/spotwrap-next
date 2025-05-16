@@ -10,9 +10,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"sync"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 	filenameFormat = "{artist} - {title}.{output-ext}"
 )
 
-//go:embed assets/spotdl_linux
+//go:embed assets/spotdl_linux assets/windows/spotdl.exe assets/windows/ffmpeg.exe assets/windows/ffplay.exe assets/windows/ffprobe.exe
 var spotdlBinary embed.FS
 
 // Downloader handles downloading of tracks from Spotify
@@ -54,19 +55,39 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	}
 	defer os.RemoveAll(tmpDir)
 
-	spotdlPath := filepath.Join(tmpDir, "spotdl")
+	// Determine file paths based on OS
+	var spotdlPath string
+	var binPath string
+	var ffmpegPath, ffplayPath, ffprobePath string
+	isWindows := runtime.GOOS == "windows"
 
-	// Get the embedded binary
-	binData, err := spotdlBinary.ReadFile("assets/spotdl_linux")
-	if err != nil {
-		d.emitErrorEvent(fmt.Sprintf("failed to read embedded binary: %v", err))
-		return fmt.Errorf("failed to read embedded binary: %w", err)
+	if isWindows {
+		binPath = "assets/windows/spotdl.exe"
+		spotdlPath = filepath.Join(tmpDir, "spotdl.exe")
+
+		// Extract FFmpeg binaries for Windows
+		ffmpegPath = filepath.Join(tmpDir, "ffmpeg.exe")
+		ffplayPath = filepath.Join(tmpDir, "ffplay.exe")
+		ffprobePath = filepath.Join(tmpDir, "ffprobe.exe")
+
+		// Extract FFmpeg binaries
+		if err := d.extractBinary("assets/windows/ffmpeg.exe", ffmpegPath); err != nil {
+			return err
+		}
+		if err := d.extractBinary("assets/windows/ffplay.exe", ffplayPath); err != nil {
+			return err
+		}
+		if err := d.extractBinary("assets/windows/ffprobe.exe", ffprobePath); err != nil {
+			return err
+		}
+	} else {
+		binPath = "assets/spotdl_linux"
+		spotdlPath = filepath.Join(tmpDir, "spotdl")
 	}
 
-	// Write the binary to the temp location
-	if err := os.WriteFile(spotdlPath, binData, 0755); err != nil {
-		d.emitErrorEvent(fmt.Sprintf("failed to write binary to temp location: %v", err))
-		return fmt.Errorf("failed to write binary to temp location: %w", err)
+	// Get the embedded binary
+	if err := d.extractBinary(binPath, spotdlPath); err != nil {
+		return err
 	}
 
 	// Prepare arguments
@@ -101,7 +122,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	}
 
 	// Start the command
-	runtime.EventsEmit(d.ctx, "update_in_download", "Downloading")
+	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Downloading")
 	if err := cmd.Start(); err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to start command: %v", err))
 		return fmt.Errorf("failed to start command: %w", err)
@@ -126,7 +147,24 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 		return fmt.Errorf("command execution failed: %w", err)
 	}
 
-	runtime.EventsEmit(d.ctx, "update_in_download", "Done")
+	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Done")
+	return nil
+}
+
+// extractBinary extracts a binary from the embedded FS to the target path
+func (d *Downloader) extractBinary(embeddedPath, targetPath string) error {
+	binData, err := spotdlBinary.ReadFile(embeddedPath)
+	if err != nil {
+		d.emitErrorEvent(fmt.Sprintf("failed to read embedded binary %s: %v", embeddedPath, err))
+		return fmt.Errorf("failed to read embedded binary %s: %w", embeddedPath, err)
+	}
+
+	// Write the binary to the temp location
+	if err := os.WriteFile(targetPath, binData, 0755); err != nil {
+		d.emitErrorEvent(fmt.Sprintf("failed to write binary to temp location: %v", err))
+		return fmt.Errorf("failed to write binary to temp location: %w", err)
+	}
+
 	return nil
 }
 
@@ -140,7 +178,7 @@ func (d *Downloader) pipeReader(wg *sync.WaitGroup, pipe io.ReadCloser) {
 		if n > 0 {
 			output := string(buf[:n])
 			log.Print(output)
-			runtime.EventsEmit(d.ctx, "update_in_download", output)
+			wailsruntime.EventsEmit(d.ctx, "update_in_download", output)
 		}
 		if err != nil {
 			break
@@ -150,6 +188,6 @@ func (d *Downloader) pipeReader(wg *sync.WaitGroup, pipe io.ReadCloser) {
 
 // emitErrorEvent emits a fatal error event and a done event
 func (d *Downloader) emitErrorEvent(errMsg string) {
-	runtime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %s", errMsg))
-	runtime.EventsEmit(d.ctx, "update_in_download", "Done")
+	wailsruntime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %s", errMsg))
+	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Done")
 }
