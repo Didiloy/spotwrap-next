@@ -97,7 +97,7 @@
                     <div
                         class="backdrop-blur-sm rounded-xl p-5 border border-gray-700/50 transition-all duration-300 group-hover:border-purple-500/50"
                         :style="
-                            getCardStyle(artist.album.images[0]?.url, index)
+                            getCardStyle(index)
                         "
                     >
                         <div
@@ -248,7 +248,7 @@ const formatReleaseDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const getCardStyle = (imageUrl: string, index: number) => {
+const getCardStyle = ( index: number) => {
     const colors = timelineItems.value[index]?.dominantColors;
     if (colors && colors.length >= 2) {
         return {
