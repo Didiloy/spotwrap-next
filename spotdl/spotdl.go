@@ -46,12 +46,13 @@ func (d *Downloader) Startup(ctx context.Context) {
 // - format: output format (mp3, wav, etc.)
 // - bitrate: quality of the output (128k, 320k, etc.)
 // - songsToDelete: optional list of songs to delete after download
-func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToDelete []string) error {
+// Returns: boolean indicating whether the download was successful
+func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToDelete []string) bool {
 	// Extract the spotdl binary to a temporary location
 	tmpDir, err := os.MkdirTemp("", "spotdl")
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to create temp directory: %v", err))
-		return fmt.Errorf("failed to create temp directory: %w", err)
+		return false
 	}
 	defer os.RemoveAll(tmpDir)
 
@@ -72,13 +73,16 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 
 		// Extract FFmpeg binaries
 		if err := d.extractBinary("assets/windows/ffmpeg.exe", ffmpegPath); err != nil {
-			return err
+			d.emitErrorEvent(fmt.Sprintf("failed to extract ffmpeg binary: %v", err))
+			return false
 		}
 		if err := d.extractBinary("assets/windows/ffplay.exe", ffplayPath); err != nil {
-			return err
+			d.emitErrorEvent(fmt.Sprintf("failed to extract ffplay binary: %v", err))
+			return false
 		}
 		if err := d.extractBinary("assets/windows/ffprobe.exe", ffprobePath); err != nil {
-			return err
+			d.emitErrorEvent(fmt.Sprintf("failed to extract ffprobe binary: %v", err))
+			return false
 		}
 	} else {
 		binPath = "assets/spotdl_linux"
@@ -87,7 +91,8 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 
 	// Get the embedded binary
 	if err := d.extractBinary(binPath, spotdlPath); err != nil {
-		return err
+		d.emitErrorEvent(fmt.Sprintf("failed to extract spotdl binary: %v", err))
+		return false
 	}
 
 	// Prepare arguments
@@ -112,20 +117,20 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	stdoutPipe, err := cmd.StdoutPipe()
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to create stdout pipe: %v", err))
-		return fmt.Errorf("failed to create stdout pipe: %w", err)
+		return false
 	}
 
 	stderrPipe, err := cmd.StderrPipe()
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to create stderr pipe: %v", err))
-		return fmt.Errorf("failed to create stderr pipe: %w", err)
+		return false
 	}
 
 	// Start the command
 	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Downloading")
 	if err := cmd.Start(); err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to start command: %v", err))
-		return fmt.Errorf("failed to start command: %w", err)
+		return false
 	}
 
 	// Create a wait group to wait for the goroutines to finish
@@ -144,11 +149,11 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("command execution failed: %v", err))
-		return fmt.Errorf("command execution failed: %w", err)
+		return false
 	}
 
 	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Done")
-	return nil
+	return true
 }
 
 // extractBinary extracts a binary from the embedded FS to the target path

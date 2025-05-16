@@ -50,7 +50,11 @@
       "label": "Label",
       "popularity": "Popularité",
       "copyright": "Copyright",
-      "no_path_selected": "Aucun chemin sélectionné"
+      "no_path_selected": "Aucun chemin sélectionné",
+      "download_complete": "Téléchargement terminé",
+      "download_complete_message": "{name} a été téléchargé",
+      "download_error": "Erreur de téléchargement",
+      "download_error_message": "Une erreur est survenue lors du téléchargement de l'album"
     },
     "TrackDetails": {
       "download": "Télécharger",
@@ -69,7 +73,11 @@
       "album": "Album",
       "duration": "Durée",
       "track_number": "Numéro de titre",
-      "from_album": "De l'album"
+      "from_album": "De l'album",
+      "download_complete": "Téléchargement terminé",
+      "download_complete_message": "{name} a été téléchargé",
+      "download_error": "Erreur de téléchargement",
+      "download_error_message": "Une erreur est survenue lors du téléchargement du titre"
     },
     "Home": {
       "title": "Accueil",
@@ -193,7 +201,11 @@
       "label": "Label",
       "popularity": "Popularity",
       "copyright": "Copyright",
-      "no_path_selected": "No path selected"
+      "no_path_selected": "No path selected",
+      "download_complete": "Download Complete",
+      "download_complete_message": "{name} has been downloaded",
+      "download_error": "Download Error",
+      "download_error_message": "There was an error downloading the album"
     },
     "TrackDetails": {
       "tracks": "Tracks",
@@ -213,7 +225,11 @@
       "album": "Album",
       "duration": "Duration",
       "track_number": "Track Number",
-      "from_album": "From the album"
+      "from_album": "From the album",
+      "download_complete": "Download Complete",
+      "download_complete_message": "{name} has been downloaded",
+      "download_error": "Download Error",
+      "download_error_message": "There was an error downloading the track"
     },
     "Home": {
       "title": "Home",

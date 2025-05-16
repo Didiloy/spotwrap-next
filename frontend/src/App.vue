@@ -5,11 +5,16 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Toaster from "@/components/ui/toast/Toaster.vue";
 import SpotifyCredentialsModal from "@/components/settings/SpotifyCredentialsModal.vue";
 import { useSettingsStore } from "@/store/settings";
+import { useDownloadStore } from "@/store/download";
 
 const settingsStore = useSettingsStore();
+const downloadStore = useDownloadStore();
 const showMainTrigger = ref(true); // Default to showing the trigger
 
 onMounted(async () => {
+  // Initialize download store event listener
+  downloadStore.setupEventListener();
+  
   // Check if Spotify credentials are valid
   await settingsStore.loadSpotifyCredentials();
   const hasValidCredentials = await settingsStore.checkCredentialsValidity();

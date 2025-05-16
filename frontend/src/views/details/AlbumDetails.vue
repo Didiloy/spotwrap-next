@@ -175,7 +175,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { GetAlbum, ChooseDirectory } from "../../../wailsjs/go/main/App";
 import { GetDominantColor } from "../../../wailsjs/go/utils/Utils";
@@ -261,14 +261,48 @@ const downloadAlbum = async () => {
         });
         return;
     }
-    const result = await Download(
-        album.value.album.external_urls.spotify,
-        downloadOptions.value.path,
-        downloadOptions.value.format,
-        downloadOptions.value.bitrate + "k",
-        [],
-    );
-    console.log("Download result:", result);
+    
+    try {
+        // Setup event listener for download updates
+        downloadStore.clearMessages();
+        downloadStore.setupEventListener();
+        
+        // Download album - now returns a boolean
+        const success = await Download(
+            album.value.album.external_urls.spotify,
+            downloadOptions.value.path,
+            downloadOptions.value.format,
+            downloadOptions.value.bitrate + "k",
+            [],
+        );
+        
+        // Show success toast immediately if Download function returned true
+        if (success) {
+            toast({
+                title: i18n.t("AlbumDetails.download_complete"),
+                description: i18n.t("AlbumDetails.download_complete_message", {
+                    name: album.value.album.name
+                }),
+                variant: "default",
+            });
+        } else {
+            // Show error toast immediately if Download function returned false
+            toast({
+                title: i18n.t("AlbumDetails.download_error"),
+                description: i18n.t("AlbumDetails.download_error_message"),
+                variant: "destructive",
+            });
+        }
+        
+        console.log("Download result:", success);
+    } catch (error) {
+        console.error("Download error:", error);
+        toast({
+            title: i18n.t("AlbumDetails.download_error"),
+            description: i18n.t("AlbumDetails.download_error_message"),
+            variant: "destructive",
+        });
+    }
 };
 
 const dominantColors = ref<string[]>([]);
