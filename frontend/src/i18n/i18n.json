@@ -6,7 +6,8 @@
       "search": "Rechercher",
       "subscriptions": "Abonnements",
       "version": "Version",
-      "download_error": "Erreur lors du téléchargement, consultez les journaux dans les paramètres pour plus d'informations."
+      "download_error": "Erreur lors du téléchargement, consultez les journaux dans les paramètres pour plus d'informations.",
+      "downloading": "Téléchargement en cours..."
     },
     "Search": {
       "placeholder": "Rechercher...",
@@ -157,7 +158,8 @@
       "search": "Search",
       "subscriptions": "Subscriptions",
       "version": "Version",
-      "download_error": "Error downloading, check logs in settings for more information."
+      "download_error": "Error downloading, check logs in settings for more information.",
+      "downloading": "Downloading..."
     },
     "Search": {
       "placeholder": "Search...",

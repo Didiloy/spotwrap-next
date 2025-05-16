@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { Progress } from "@/components/ui/progress";
+import { useI18n } from "vue-i18n";
+
+const i18n = useI18n();
 
 const props = defineProps({
     message: {
@@ -34,7 +37,7 @@ const truncatedMessage = computed(() => {
 <template>
     <div
         v-if="isVisible"
-        class="w-full h-24 bg-zinc-100 rounded-2xl p-4 flex flex-col justify-between border border-zinc-400"
+        class="w-full h-28 bg-zinc-100 rounded-2xl p-4 flex flex-col justify-between border border-zinc-400"
     >
         <span
             class="text-zinc-900 text-sm text-center truncate"
@@ -42,6 +45,11 @@ const truncatedMessage = computed(() => {
         >
             {{ truncatedMessage }}
         </span>
-        <Progress :infinite="true" class="w-full h-2" />
+        <div class="flex flex-col gap-1">
+            <Progress :infinite="true" class="w-full h-2" />
+            <span class="text-xs text-zinc-500 text-center">
+                {{ i18n.t("AppSidebar.downloading") }}
+            </span>
+        </div>
     </div>
 </template>
