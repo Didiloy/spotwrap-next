@@ -93,7 +93,8 @@
       "newRelease": "Nouvelle sortie",
       "newReleases": "Nouvelles sorties",
       "markAsSeen": "Marquer comme vu",
-      "processing": "En cours..."
+      "processing": "En cours...",
+      "checking_artist": "Vérification de {name}..."
     },
     "Subscriptions": {
       "loading": "Chargement...",
@@ -246,7 +247,8 @@
       "newRelease": "New Release",
       "newReleases": "New Releases",
       "markAsSeen": "Mark as Seen",
-      "processing": "Processing..."
+      "processing": "Processing...",
+      "checking_artist": "Checking {name}..."
     },
     "Subscriptions": {
       "loading": "Loading...",

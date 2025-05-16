@@ -20,6 +20,9 @@
             ></div>
             <p class="text-gray-400">{{ $t("Home.loading") }}</p>
             <p class="text-gray-400 text-sm mt-2 max-w-md text-center">{{ $t("Home.loading_rate_limit") }}</p>
+            <p v-if="currentCheckingArtist" class="text-purple-400 text-sm mt-3 font-medium">
+                {{ $t("Home.checking_artist", { name: currentCheckingArtist }) }}
+            </p>
         </div>
 
         <!-- Empty state -->
@@ -233,6 +236,7 @@ interface TimelineItem {
 }
 
 const loading = ref(true);
+const currentCheckingArtist = ref<string>("");
 const timelineItems = ref<(TimelineItem & { dominantColors?: string[] })[]>([]);
 
 const formatReleaseDate = (dateString: string) => {
@@ -284,7 +288,9 @@ onMounted(async () => {
         const allAlbums: TimelineItem[] = [];
 
         for (const artist of artists) {
+            // Set the current checking artist name
             const artistData = await GetArtist(artist.SpotifyID);
+            currentCheckingArtist.value = artistData.artist.name;
 
             if (artistData.albums) {
                 for (const album of artistData.albums) {
@@ -327,7 +333,8 @@ onMounted(async () => {
             })
             .slice(0, 20);
 
-        // Set loading to false immediately after setting timelineItems
+        // Clear current checking artist and set loading to false
+        currentCheckingArtist.value = "";
         loading.value = false;
 
         // Load dominant colors asynchronously
@@ -336,6 +343,7 @@ onMounted(async () => {
         });
     } catch (error) {
         console.error("Error fetching artist data:", error);
+        currentCheckingArtist.value = "";
         loading.value = false;
     }
 });
