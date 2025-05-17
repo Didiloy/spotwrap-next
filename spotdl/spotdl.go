@@ -55,6 +55,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 
 	// Determine file paths based on OS
 	var spotdlPath string
+	var ffmpegPath string
 	isWindows := runtime.GOOS == "windows"
 
 	if isWindows {
@@ -62,6 +63,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 			return false
 		}
 		spotdlPath = filepath.Join(tmpDir, "spotdl.exe")
+		ffmpegPath = filepath.Join(tmpDir, "ffmpeg.exe")
 	} else {
 		if success := extractLinuxBinaries(d, tmpDir); !success {
 			return false
@@ -82,6 +84,11 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 		outputFilePath = filepath.Join(outputPath, filenameFormat)
 	}
 	args = append(args, outputFilePath)
+
+	// Add ffmpeg path argument for Windows
+	if isWindows && ffmpegPath != "" {
+		args = append(args, "--ffmpeg", ffmpegPath)
+	}
 
 	// Execute spotdl
 	cmd := exec.Command(spotdlPath, args...)
