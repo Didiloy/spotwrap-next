@@ -74,7 +74,6 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 		link,
 		"--bitrate", bitrate,
 		"--format", format,
-		"--print-errors",
 		"--output",
 	}
 
