@@ -21,9 +21,6 @@ const (
 	filenameFormat = "{artist} - {title}.{output-ext}"
 )
 
-//go:embed assets/spotdl_linux assets/windows/spotdl.exe assets/windows/ffmpeg.exe assets/windows/ffplay.exe assets/windows/ffprobe.exe
-var spotdlBinary embed.FS
-
 // Downloader handles downloading of tracks from Spotify
 type Downloader struct {
 	ctx context.Context
@@ -58,41 +55,18 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 
 	// Determine file paths based on OS
 	var spotdlPath string
-	var binPath string
-	var ffmpegPath, ffplayPath, ffprobePath string
 	isWindows := runtime.GOOS == "windows"
 
 	if isWindows {
-		binPath = "assets/windows/spotdl.exe"
+		if success := extractWindowsBinaries(d, tmpDir); !success {
+			return false
+		}
 		spotdlPath = filepath.Join(tmpDir, "spotdl.exe")
-
-		// Extract FFmpeg binaries for Windows
-		ffmpegPath = filepath.Join(tmpDir, "ffmpeg.exe")
-		ffplayPath = filepath.Join(tmpDir, "ffplay.exe")
-		ffprobePath = filepath.Join(tmpDir, "ffprobe.exe")
-
-		// Extract FFmpeg binaries
-		if err := d.extractBinary("assets/windows/ffmpeg.exe", ffmpegPath); err != nil {
-			d.emitErrorEvent(fmt.Sprintf("failed to extract ffmpeg binary: %v", err))
-			return false
-		}
-		if err := d.extractBinary("assets/windows/ffplay.exe", ffplayPath); err != nil {
-			d.emitErrorEvent(fmt.Sprintf("failed to extract ffplay binary: %v", err))
-			return false
-		}
-		if err := d.extractBinary("assets/windows/ffprobe.exe", ffprobePath); err != nil {
-			d.emitErrorEvent(fmt.Sprintf("failed to extract ffprobe binary: %v", err))
-			return false
-		}
 	} else {
-		binPath = "assets/spotdl_linux"
+		if success := extractLinuxBinaries(d, tmpDir); !success {
+			return false
+		}
 		spotdlPath = filepath.Join(tmpDir, "spotdl")
-	}
-
-	// Get the embedded binary
-	if err := d.extractBinary(binPath, spotdlPath); err != nil {
-		d.emitErrorEvent(fmt.Sprintf("failed to extract spotdl binary: %v", err))
-		return false
 	}
 
 	// Prepare arguments
@@ -157,8 +131,8 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 }
 
 // extractBinary extracts a binary from the embedded FS to the target path
-func (d *Downloader) extractBinary(embeddedPath, targetPath string) error {
-	binData, err := spotdlBinary.ReadFile(embeddedPath)
+func (d *Downloader) extractBinary(embeddedFS embed.FS, embeddedPath, targetPath string) error {
+	binData, err := embeddedFS.ReadFile(embeddedPath)
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to read embedded binary %s: %v", embeddedPath, err))
 		return fmt.Errorf("failed to read embedded binary %s: %w", embeddedPath, err)
