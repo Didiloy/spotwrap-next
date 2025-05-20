@@ -13,7 +13,7 @@ import {
     SidebarMenuItem,
     SidebarFooter,
     SidebarTrigger,
-    useSidebar
+    useSidebar,
 } from "@/components/ui/sidebar";
 import logo from "../../assets/images/appicon.png";
 import { useDownloadStore } from "@/store/download";
@@ -21,9 +21,11 @@ import { storeToRefs } from "pinia";
 import infos from "../../../package.json";
 import { useI18n } from "vue-i18n";
 import { ref, watch, onMounted, computed } from "vue";
+import { useRoute } from "vue-router";
 import { useToast } from "@/components/ui/toast/use-toast";
 
 const { toast } = useToast();
+const route = useRoute();
 
 const i18n = useI18n();
 const downloadStore = useDownloadStore();
@@ -125,7 +127,14 @@ watch(downloadStore.downloadMessages, (messages) => {
                             class="my-1"
                         >
                             <SidebarMenuButton asChild>
-                                <router-link :to="item.url">
+                                <router-link
+                                    :to="item.url"
+                                    :class="[
+                                        route.path === item.url
+                                            ? 'bg-zinc-200 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-700'
+                                            : 'hover:bg-zinc-100 dark:hover:bg-zinc-800',
+                                    ]"
+                                >
                                     <component :is="item.icon" />
                                     <span>{{ item.title }}</span>
                                 </router-link>
@@ -135,7 +144,9 @@ watch(downloadStore.downloadMessages, (messages) => {
                 </SidebarGroupContent>
             </SidebarGroup>
         </SidebarContent>
-        <SidebarFooter class="flex flex-col items-center justify-center p-4 space-y-3">
+        <SidebarFooter
+            class="flex flex-col items-center justify-center p-4 space-y-3"
+        >
             <ProgressCard
                 :progress="50"
                 :showProgress="isDownloading"
@@ -143,7 +154,9 @@ watch(downloadStore.downloadMessages, (messages) => {
                 :maxLength="30"
                 class="w-full mb-2"
             />
-            <span class="text-xs text-sidebar-foreground/70">{{ $t("AppSidebar.version") }} {{ infos.version }}</span>
+            <span class="text-xs text-sidebar-foreground/70"
+                >{{ $t("AppSidebar.version") }} {{ infos.version }}</span
+            >
         </SidebarFooter>
     </Sidebar>
 </template>
