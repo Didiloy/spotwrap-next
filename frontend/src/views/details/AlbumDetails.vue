@@ -28,9 +28,16 @@
                             class="flex flex-wrap items-center gap-x-4 gap-y-2 text-gray-300"
                         >
                             <span class="flex items-center">
-                                <span class="text-purple-400 mr-2">{{
-                                    album?.album?.artists[0]?.name
-                                }}</span>
+                                <router-link
+                                    v-if="album?.album?.artists?.[0]?.id"
+                                    :to="`/artist/${album?.album?.artists[0]?.id}`"
+                                    class="text-purple-400 mr-2 hover:underline"
+                                >
+                                    {{ album?.album?.artists[0]?.name }}
+                                </router-link>
+                                <span v-else class="text-purple-400 mr-2">
+                                    {{ album?.album?.artists[0]?.name }}
+                                </span>
                             </span>
                             <span class="text-sm">{{
                                 new Date(
@@ -261,12 +268,12 @@ const downloadAlbum = async () => {
         });
         return;
     }
-    
+
     try {
         // Setup event listener for download updates
         downloadStore.clearMessages();
         downloadStore.setupEventListener();
-        
+
         // Download album - now returns a boolean
         const success = await Download(
             album.value.album.external_urls.spotify,
@@ -275,13 +282,13 @@ const downloadAlbum = async () => {
             downloadOptions.value.bitrate + "k",
             [],
         );
-        
+
         // Show success toast immediately if Download function returned true
         if (success) {
             toast({
                 title: i18n.t("AlbumDetails.download_complete"),
                 description: i18n.t("AlbumDetails.download_complete_message", {
-                    name: album.value.album.name
+                    name: album.value.album.name,
                 }),
                 variant: "default",
             });
@@ -293,7 +300,7 @@ const downloadAlbum = async () => {
                 variant: "destructive",
             });
         }
-        
+
         console.log("Download result:", success);
     } catch (error) {
         console.error("Download error:", error);
