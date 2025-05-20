@@ -1,5 +1,5 @@
 <template>
-    <div class="artist-detail h-full overflow-y-auto">
+    <div ref="artistDetailRef" class="artist-detail h-full overflow-y-auto">
         <!-- Hero Section -->
         <div class="relative w-full" :style="heroSectionStyle">
             <div
@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast/use-toast";
@@ -101,6 +101,7 @@ import TracksRow from "@/components/search/TracksRow.vue";
 import { useI18n } from "vue-i18n";
 
 const route = useRoute();
+const artistDetailRef = ref<HTMLDivElement | null>(null);
 const artist = ref<any>(null);
 const artistData = ref<any>({});
 const isFollowing = ref(false);
@@ -182,10 +183,15 @@ watch(
     () => route.params.id,
     async (newId) => {
         if (newId) {
+            console.log("newId", newId);
             await loadArtistData(newId as string);
+            nextTick(() => {
+                if (artistDetailRef.value) {
+                    artistDetailRef.value.scrollTop = 0;
+                }
+            });
         }
     },
-    { immediate: true },
 );
 
 onMounted(async () => {
