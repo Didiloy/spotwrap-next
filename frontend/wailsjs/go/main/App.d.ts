@@ -10,6 +10,8 @@ export function Close():Promise<void>;
 
 export function GetAlbum(arg1:string):Promise<Record<string, any>>;
 
+export function GetAppendArtistAlbumToPath():Promise<boolean>;
+
 export function GetArtist(arg1:string):Promise<Record<string, any>>;
 
 export function GetArtistsFromDB():Promise<Array<database.Artist>>;
@@ -25,6 +27,8 @@ export function HasValidSpotifyCredentials():Promise<boolean>;
 export function IsANewRelease(arg1:string,arg2:Record<string, any>):Promise<boolean>;
 
 export function RemoveArtist(arg1:string):Promise<boolean>;
+
+export function SaveAppendArtistAlbumToPath(arg1:boolean):Promise<void>;
 
 export function SaveLastDownloadPath(arg1:string):Promise<void>;
 

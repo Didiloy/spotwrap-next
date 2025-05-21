@@ -18,6 +18,10 @@ export function GetAlbum(arg1) {
   return window['go']['main']['App']['GetAlbum'](arg1);
 }
 
+export function GetAppendArtistAlbumToPath() {
+  return window['go']['main']['App']['GetAppendArtistAlbumToPath']();
+}
+
 export function GetArtist(arg1) {
   return window['go']['main']['App']['GetArtist'](arg1);
 }
@@ -48,6 +52,10 @@ export function IsANewRelease(arg1, arg2) {
 
 export function RemoveArtist(arg1) {
   return window['go']['main']['App']['RemoveArtist'](arg1);
+}
+
+export function SaveAppendArtistAlbumToPath(arg1) {
+  return window['go']['main']['App']['SaveAppendArtistAlbumToPath'](arg1);
 }
 
 export function SaveLastDownloadPath(arg1) {

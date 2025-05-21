@@ -103,7 +103,7 @@
                                 v-if="downloadOptions.path"
                                 class="inline-block px-4 py-2 text-sm font-medium rounded-full bg-green-600/20 text-green-400 transition-colors"
                             >
-                                {{ downloadOptions.path }}
+                                {{ effectiveDownloadPath }}
                             </span>
                             <span
                                 v-else
@@ -320,6 +320,8 @@ const downloadTrack = async () => {
         return;
     }
     
+    const pathToUse = effectiveDownloadPath.value;
+
     try {
         // Setup event listener for download updates
         downloadStore.clearMessages();
@@ -328,7 +330,7 @@ const downloadTrack = async () => {
         // Download track - now returns a boolean
         const success = await Download(
             trackDetails.value.track.external_urls.spotify,
-            downloadOptions.value.path,
+            pathToUse,
             downloadOptions.value.format,
             downloadOptions.value.bitrate + "k",
             [],
@@ -389,6 +391,27 @@ const getTrackDetails = async (id: string) => {
         return {};
     }
 };
+
+const sanitizeFilename = (name: string): string => {
+    if (!name) return "";
+    return name.replace(/[\\/:*?"<>|]/g, '-');
+};
+
+const effectiveDownloadPath = computed(() => {
+    const basePath = downloadOptions.value.path;
+    if (!basePath) return "";
+
+    if (settingsStore.appendArtistAlbumToPath) {
+        const artistName = trackDetails.value?.track?.artists?.[0]?.name;
+        const albumName = trackDetails.value?.track?.album?.name;
+        if (artistName && albumName) {
+            const saneArtistName = sanitizeFilename(artistName);
+            const saneAlbumName = sanitizeFilename(albumName);
+            return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
+        }
+    }
+    return basePath;
+});
 </script>
 
 <style scoped>

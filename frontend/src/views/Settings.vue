@@ -26,6 +26,23 @@
         <!-- Autostart -->
         <AutoStartToggle />
 
+        <!-- Append Artist/Album Path Toggle -->
+        <div class="space-y-2">
+            <Label class="text-base">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium">{{ $t("Settings.appendPathTitle") }}</p>
+                    <p class="text-xs text-muted-foreground">
+                        {{ $t("Settings.appendPathDescription") }}
+                    </p>
+                </div>
+                <Switch 
+                    :model-value="settingsStore.appendArtistAlbumToPath"
+                    @update:model-value="settingsStore.toggleAppendArtistAlbumToPath"
+                />
+            </div>
+        </div>
+
         <!-- Spotify API Credentials -->
         <div class="space-y-2">
             <Label>{{ $t("Settings.spotify_api") }}</Label>
@@ -116,6 +133,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import AutoStartToggle from "@/components/settings/AutoStartToggle.vue";
 import SpotifyCredentialsModal from "@/components/settings/SpotifyCredentialsModal.vue";
 import { useDownloadStore } from "@/store/download";
@@ -151,8 +169,7 @@ onMounted(async () => {
         locale.value = currentLanguage.value;
     }
     logs.value = [...downloadStore.downloadMessages];
-    await settingsStore.loadSpotifyCredentials();
-    await settingsStore.checkCredentialsValidity();
+    await settingsStore.initSettings();
 });
 
 // Logs dialog state

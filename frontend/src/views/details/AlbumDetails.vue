@@ -81,7 +81,7 @@
                                 v-if="downloadOptions.path"
                                 class="inline-block px-4 py-2 text-sm font-medium rounded-full bg-green-600/20 text-green-400 transition-colors"
                             >
-                                {{ downloadOptions.path }}
+                                {{ effectiveDownloadPath }}
                             </span>
                             <span
                                 v-else
@@ -224,14 +224,33 @@ const downloadStore = useDownloadStore();
 const BITRATE_OPTIONS = ["320", "256", "192", "128", "96"];
 const FORMAT_OPTIONS = ["mp3", "flac", "m4a", "ogg", "opus"];
 
+const artistName = ref("");
+const albumName = ref("");
+
 onMounted(async () => {
     const albumId = route.params.id as string;
     album.value = await GetAlbum(albumId);
-    console.log("Album:", album.value);
     dominantColors.value = await GetDominantColor(
         album.value.album.images[0].url,
     );
     await settingsStore.fetchLastDownloadPath();
+    artistName.value = album.value?.album?.artists?.[0]?.name;
+    albumName.value = album.value?.album?.name;
+    console.log(`${artistName.value} - ${albumName.value}`);
+});
+
+const effectiveDownloadPath = computed(() => {
+    const basePath = downloadOptions.value.path;
+    if (!basePath) return "";
+
+    if (settingsStore.appendArtistAlbumToPath) {
+            const saneArtistName = sanitizeFilename(artistName.value);
+            const saneAlbumName = sanitizeFilename(albumName.value);
+            console.log(`${basePath}/${saneArtistName} - ${saneAlbumName}`);
+            return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
+        
+    }
+    return basePath;
 });
 
 watch(() => settingsStore.lastDownloadPath, (newPath) => {
@@ -279,6 +298,8 @@ const downloadAlbum = async () => {
         return;
     }
 
+    const pathToUse = effectiveDownloadPath.value;
+
     try {
         // Setup event listener for download updates
         downloadStore.clearMessages();
@@ -287,7 +308,7 @@ const downloadAlbum = async () => {
         // Download album - now returns a boolean
         const success = await Download(
             album.value.album.external_urls.spotify,
-            downloadOptions.value.path,
+            pathToUse,
             downloadOptions.value.format,
             downloadOptions.value.bitrate + "k",
             [],
@@ -333,6 +354,12 @@ const heroSectionStyle = computed(() => {
         background: "linear-gradient(135deg, #4f46e5 0%, #1e40af 100%)",
     };
 });
+
+const sanitizeFilename = (name: string): string => {
+    if (!name) return "";
+    return name.replace(/[\\/:*?"<>|]/g, '-');
+};
+
 </script>
 
 <style scoped>

@@ -5,7 +5,9 @@ import {
     SetSpotifyCredentials, 
     HasValidSpotifyCredentials,
     SaveLastDownloadPath,
-    GetLastDownloadPath
+    GetLastDownloadPath,
+    SaveAppendArtistAlbumToPath,
+    GetAppendArtistAlbumToPath
 } from "../../wailsjs/go/main/App";
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -14,6 +16,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const hasValidCredentials = ref(false);
   const showCredentialsModal = ref(false);
   const lastDownloadPath = ref("");
+  const appendArtistAlbumToPath = ref(false);
 
   async function loadSpotifyCredentials() {
     const credentials = await GetSpotifyCredentials();
@@ -56,16 +59,46 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  async function loadAppendArtistAlbumToPathSetting() {
+    try {
+      appendArtistAlbumToPath.value = await GetAppendArtistAlbumToPath();
+    } catch (error) {
+      console.error("Error loading appendArtistAlbumToPath setting:", error);
+      appendArtistAlbumToPath.value = false;
+    }
+  }
+
+  async function toggleAppendArtistAlbumToPath() {
+    const oldValue = appendArtistAlbumToPath.value;
+    appendArtistAlbumToPath.value = !oldValue;
+    try {
+      await SaveAppendArtistAlbumToPath(appendArtistAlbumToPath.value);
+    } catch (error) {
+      console.error("Error saving appendArtistAlbumToPath setting:", error);
+      appendArtistAlbumToPath.value = oldValue;
+    }
+  }
+
+  async function initSettings() {
+    await loadSpotifyCredentials();
+    await fetchLastDownloadPath();
+    await loadAppendArtistAlbumToPathSetting();
+  }
+
+
   return {
+    initSettings,
     spotifyClientId,
     spotifyClientSecret,
     hasValidCredentials,
     showCredentialsModal,
     lastDownloadPath,
+    appendArtistAlbumToPath,
     loadSpotifyCredentials, 
     saveSpotifyCredentials,
     checkCredentialsValidity,
     fetchLastDownloadPath,
-    updateLastDownloadPath
+    updateLastDownloadPath,
+    toggleAppendArtistAlbumToPath
   };
 }); 

@@ -260,6 +260,30 @@ func (a *App) GetLastDownloadPath() (string, error) {
 	return path, nil
 }
 
+// SaveAppendArtistAlbumToPath saves the user's preference for appending artist/album to the download path.
+func (a *App) SaveAppendArtistAlbumToPath(enabled bool) error {
+	stringValue := "false"
+	if enabled {
+		stringValue = "true"
+	}
+	err := a.db.SetSetting("appendArtistAlbumToPath", stringValue)
+	if err != nil {
+		log.Printf("Error saving appendArtistAlbumToPath setting: %v", err)
+	}
+	return err
+}
+
+// GetAppendArtistAlbumToPath retrieves the user's preference for appending artist/album to the download path.
+// Defaults to false if not set or on error.
+func (a *App) GetAppendArtistAlbumToPath() (bool, error) {
+	stringValue, err := a.db.GetSetting("appendArtistAlbumToPath")
+	if err != nil {
+		log.Printf("Error getting appendArtistAlbumToPath setting: %v. Defaulting to false.", err)
+		return false, err // Propagate error but still return a default
+	}
+	return stringValue == "true", nil
+}
+
 // Background
 func (a *App) startBackgroundChecker() {
 	a.backgroundTicker = time.NewTicker(5 * time.Hour)
