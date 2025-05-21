@@ -20,8 +20,8 @@
             ></div>
             <p class="text-gray-400">{{ $t("Home.loading") }}</p>
             <p class="text-gray-400 text-sm mt-2 max-w-md text-center">{{ $t("Home.loading_rate_limit") }}</p>
-            <p v-if="currentCheckingArtist" class="text-purple-400 text-sm mt-3 font-medium">
-                {{ $t("Home.checking_artist", { name: currentCheckingArtist }) }}
+            <p v-if="currentCheckingArtist && totalArtistsToCheck > 0" class="text-purple-400 text-sm mt-3 font-medium">
+                {{ $t("Home.checking_artist_progress", { name: currentCheckingArtist, index: currentArtistProgressIndex, total: totalArtistsToCheck }) }}
             </p>
         </div>
 
@@ -237,6 +237,8 @@ interface TimelineItem {
 
 const loading = ref(true);
 const currentCheckingArtist = ref<string>("");
+const totalArtistsToCheck = ref(0);
+const currentArtistProgressIndex = ref(0);
 const timelineItems = ref<(TimelineItem & { dominantColors?: string[] })[]>([]);
 
 const formatReleaseDate = (dateString: string) => {
@@ -285,9 +287,13 @@ onMounted(async () => {
             return;
         }
 
+        totalArtistsToCheck.value = artists.length;
         const allAlbums: TimelineItem[] = [];
 
-        for (const artist of artists) {
+        for (let i = 0; i < artists.length; i++) {
+            const artist = artists[i];
+            currentArtistProgressIndex.value = i + 1;
+
             // Set the current checking artist name
             const artistData = await GetArtist(artist.SpotifyID);
             currentCheckingArtist.value = artistData.artist.name;
@@ -344,6 +350,8 @@ onMounted(async () => {
     } catch (error) {
         console.error("Error fetching artist data:", error);
         currentCheckingArtist.value = "";
+        totalArtistsToCheck.value = 0;
+        currentArtistProgressIndex.value = 0;
         loading.value = false;
     }
 });
