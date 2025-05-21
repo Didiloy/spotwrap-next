@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	coverDirName = "album_cover"
-	timeout      = 10 * time.Second
+	// coverDirName = "album_cover" // Removed constant
+	timeout = 10 * time.Second
 )
 
 // Utils provides utility functions for the application
@@ -46,6 +46,16 @@ func (u *Utils) GetDominantColor(imageLink string) []string {
 	return colors
 }
 
+// getAppAlbumCoverDir constructs and returns the path to the app-specific album cover directory.
+func getAppAlbumCoverDir() string {
+	userConfigDir, err := os.UserConfigDir()
+	if err != nil {
+		return "./album_covers"
+	}
+	appCoverDir := filepath.Join(userConfigDir, "spotwrap-next", "album_covers")
+	return appCoverDir
+}
+
 // extractDominantColors downloads an image and extracts its dominant colors
 func (u *Utils) extractDominantColors(imageLink string) ([]string, error) {
 	// Download the image with timeout
@@ -69,15 +79,18 @@ func (u *Utils) extractDominantColors(imageLink string) ([]string, error) {
 		return nil, fmt.Errorf("failed to read image data: %w", err)
 	}
 
+	// Get the application-specific album cover directory
+	albumCoverDir := getAppAlbumCoverDir()
+
 	// Ensure the cover directory exists
-	if err := os.MkdirAll(coverDirName, os.ModePerm); err != nil {
-		return nil, fmt.Errorf("failed to create cover directory: %w", err)
+	if err := os.MkdirAll(albumCoverDir, os.ModePerm); err != nil {
+		return nil, fmt.Errorf("failed to create cover directory '%s': %w", albumCoverDir, err)
 	}
 
 	// Create a temporary file for the image
-	filename := filepath.Join(coverDirName, fmt.Sprintf("cover%d", u.incrementCounter()))
+	filename := filepath.Join(albumCoverDir, fmt.Sprintf("cover%d.tmp", u.incrementCounter())) // Added .tmp extension for clarity
 	if err := os.WriteFile(filename, imgData, 0666); err != nil {
-		return nil, fmt.Errorf("failed to write image file: %w", err)
+		return nil, fmt.Errorf("failed to write image file '%s': %w", filename, err)
 	}
 
 	// Ensure the file is deleted when we're done
@@ -101,11 +114,13 @@ func (u *Utils) extractDominantColors(imageLink string) ([]string, error) {
 	return colors, nil
 }
 
-// CleanUp removes the album cover directory and its contents
+// CleanUp removes the album cover directory and its contents from the user config directory
 func (u *Utils) CleanUp() {
-	log.Println("Cleaning up album cover directory...")
-	if err := os.RemoveAll(coverDirName); err != nil {
-		log.Printf("Failed to remove album cover directory: %v", err)
+	albumCoverDir := getAppAlbumCoverDir()
+
+	log.Printf("Cleaning up album cover directory: %s...", albumCoverDir)
+	if err := os.RemoveAll(albumCoverDir); err != nil {
+		log.Printf("Failed to remove album cover directory '%s': %v", albumCoverDir, err)
 	}
 }
 
