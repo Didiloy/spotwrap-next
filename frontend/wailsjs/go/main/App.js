@@ -26,6 +26,10 @@ export function GetArtistsFromDB() {
   return window['go']['main']['App']['GetArtistsFromDB']();
 }
 
+export function GetLastDownloadPath() {
+  return window['go']['main']['App']['GetLastDownloadPath']();
+}
+
 export function GetSpotifyCredentials() {
   return window['go']['main']['App']['GetSpotifyCredentials']();
 }
@@ -44,6 +48,10 @@ export function IsANewRelease(arg1, arg2) {
 
 export function RemoveArtist(arg1) {
   return window['go']['main']['App']['RemoveArtist'](arg1);
+}
+
+export function SaveLastDownloadPath(arg1) {
+  return window['go']['main']['App']['SaveLastDownloadPath'](arg1);
 }
 
 export function Search(arg1) {

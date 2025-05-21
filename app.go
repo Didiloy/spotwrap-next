@@ -239,6 +239,27 @@ func (a *App) IsANewRelease(id string, release map[string]any) bool {
 	return releaseDate.After(artist.LastChecked)
 }
 
+// ================ Settings =================
+
+// SaveLastDownloadPath saves the most recently used download path.
+func (a *App) SaveLastDownloadPath(path string) error {
+	err := a.db.SetSetting("lastDownloadPath", path)
+	if err != nil {
+		log.Printf("Error saving last download path: %v", err)
+	}
+	return err
+}
+
+// GetLastDownloadPath retrieves the most recently used download path.
+func (a *App) GetLastDownloadPath() (string, error) {
+	path, err := a.db.GetSetting("lastDownloadPath")
+	if err != nil {
+		log.Printf("Error getting last download path: %v", err)
+		return "", err
+	}
+	return path, nil
+}
+
 // Background
 func (a *App) startBackgroundChecker() {
 	a.backgroundTicker = time.NewTicker(5 * time.Hour)

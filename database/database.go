@@ -195,3 +195,29 @@ func (d *Database) GetSpotifyCredentials() (SpotifyCredentials, error) {
 
 	return creds, nil
 }
+
+// SetSetting saves a key-value pair to the settings table.
+func (d *Database) SetSetting(key string, value string) error {
+	_, err := d.db.Exec(
+		"INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?",
+		key, value, value,
+	)
+	return err
+}
+
+// GetSetting retrieves a value from the settings table by its key.
+// It returns an empty string and no error if the key is not found.
+func (d *Database) GetSetting(key string) (string, error) {
+	var val sql.NullString
+	err := d.db.QueryRow("SELECT value FROM settings WHERE key = ?", key).Scan(&val)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil // Key not found, return empty string and no error
+		}
+		return "", err // Other error
+	}
+	if val.Valid {
+		return val.String, nil
+	}
+	return "", nil // Should not happen if ErrNoRows is handled, but as a fallback
+}

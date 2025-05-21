@@ -3,7 +3,9 @@ import { ref } from 'vue';
 import { 
     GetSpotifyCredentials, 
     SetSpotifyCredentials, 
-    HasValidSpotifyCredentials 
+    HasValidSpotifyCredentials,
+    SaveLastDownloadPath,
+    GetLastDownloadPath
 } from "../../wailsjs/go/main/App";
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -11,6 +13,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const spotifyClientSecret = ref("");
   const hasValidCredentials = ref(false);
   const showCredentialsModal = ref(false);
+  const lastDownloadPath = ref("");
 
   async function loadSpotifyCredentials() {
     const credentials = await GetSpotifyCredentials();
@@ -34,13 +37,35 @@ export const useSettingsStore = defineStore('settings', () => {
     return hasValidCredentials.value;
   }
 
+  async function fetchLastDownloadPath() {
+    try {
+      const path = await GetLastDownloadPath();
+      lastDownloadPath.value = path || "";
+    } catch (error) {
+      console.error("Error fetching last download path:", error);
+      lastDownloadPath.value = "";
+    }
+  }
+
+  async function updateLastDownloadPath(newPath: string) {
+    try {
+      await SaveLastDownloadPath(newPath);
+      lastDownloadPath.value = newPath;
+    } catch (error) {
+      console.error("Error updating last download path:", error);
+    }
+  }
+
   return {
     spotifyClientId,
     spotifyClientSecret,
     hasValidCredentials,
     showCredentialsModal,
+    lastDownloadPath,
     loadSpotifyCredentials, 
     saveSpotifyCredentials,
-    checkCredentialsValidity
+    checkCredentialsValidity,
+    fetchLastDownloadPath,
+    updateLastDownloadPath
   };
 }); 

@@ -201,11 +201,13 @@ import { Label } from "@/components/ui/label";
 import { useI18n } from "vue-i18n";
 import { useToast } from "@/components/ui/toast/use-toast";
 import { useDownloadStore } from "@/store/download";
+import { useSettingsStore } from "@/store/settings";
 
 const { toast } = useToast();
 const i18n = useI18n();
 const route = useRoute();
 const router = useRouter();
+const settingsStore = useSettingsStore();
 const album = ref<any>({
     artists: [],
     tracks: { items: [] },
@@ -229,7 +231,14 @@ onMounted(async () => {
     dominantColors.value = await GetDominantColor(
         album.value.album.images[0].url,
     );
+    await settingsStore.fetchLastDownloadPath();
 });
+
+watch(() => settingsStore.lastDownloadPath, (newPath) => {
+    if (newPath) {
+        downloadOptions.value.path = newPath;
+    }
+}, { immediate: true });
 
 const formatDuration = (ms?: number) => {
     if (!ms) return "0:00";
@@ -254,9 +263,10 @@ const goToTrack = (trackId: string) => {
 
 const error = ref<string | null>(null);
 const selectDownloadPath = async () => {
-    const path = await ChooseDirectory();
-    if (path) {
-        downloadOptions.value.path = path;
+    const selectedPath = await ChooseDirectory();
+    if (selectedPath) {
+        downloadOptions.value.path = selectedPath;
+        await settingsStore.updateLastDownloadPath(selectedPath);
     }
 };
 

@@ -14,6 +14,8 @@ export function GetArtist(arg1:string):Promise<Record<string, any>>;
 
 export function GetArtistsFromDB():Promise<Array<database.Artist>>;
 
+export function GetLastDownloadPath():Promise<string>;
+
 export function GetSpotifyCredentials():Promise<Record<string, string>>;
 
 export function GetTrack(arg1:string):Promise<Record<string, any>>;
@@ -23,6 +25,8 @@ export function HasValidSpotifyCredentials():Promise<boolean>;
 export function IsANewRelease(arg1:string,arg2:Record<string, any>):Promise<boolean>;
 
 export function RemoveArtist(arg1:string):Promise<boolean>;
+
+export function SaveLastDownloadPath(arg1:string):Promise<void>;
 
 export function Search(arg1:string):Promise<Record<string, any>>;
 
