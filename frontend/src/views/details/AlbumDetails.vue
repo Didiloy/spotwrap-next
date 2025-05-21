@@ -236,7 +236,6 @@ onMounted(async () => {
     await settingsStore.fetchLastDownloadPath();
     artistName.value = album.value?.album?.artists?.[0]?.name;
     albumName.value = album.value?.album?.name;
-    console.log(`${artistName.value} - ${albumName.value}`);
 });
 
 const effectiveDownloadPath = computed(() => {
@@ -246,7 +245,6 @@ const effectiveDownloadPath = computed(() => {
     if (settingsStore.appendArtistAlbumToPath) {
             const saneArtistName = sanitizeFilename(artistName.value);
             const saneAlbumName = sanitizeFilename(albumName.value);
-            console.log(`${basePath}/${saneArtistName} - ${saneAlbumName}`);
             return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
         
     }

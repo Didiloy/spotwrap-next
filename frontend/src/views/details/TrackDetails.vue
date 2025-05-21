@@ -267,6 +267,9 @@ const downloadOptions = ref({
 const BITRATE_OPTIONS = ["320", "256", "192", "128", "96"];
 const FORMAT_OPTIONS = ["mp3", "flac", "m4a", "ogg", "opus"];
 
+const artistName = ref("");
+const albumName = ref("");
+
 onMounted(async () => {
     const trackId = route.params.id as string;
     trackDetails.value = await getTrackDetails(trackId);
@@ -276,7 +279,22 @@ onMounted(async () => {
         );
     }
     await settingsStore.fetchLastDownloadPath();
+    artistName.value = trackDetails.value?.track?.artists?.[0]?.name;
+    albumName.value = trackDetails.value?.track?.name;
 });
+
+const effectiveDownloadPath = computed(() => {
+    const basePath = downloadOptions.value.path;
+    if (!basePath) return "";
+
+    if (settingsStore.appendArtistAlbumToPath) {
+            const saneArtistName = sanitizeFilename(artistName.value);
+            const saneAlbumName = sanitizeFilename(albumName.value);
+            return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
+    }
+    return basePath;
+});
+
 
 watch(() => settingsStore.lastDownloadPath, (newPath) => {
     if (newPath) {
@@ -396,22 +414,6 @@ const sanitizeFilename = (name: string): string => {
     if (!name) return "";
     return name.replace(/[\\/:*?"<>|]/g, '-');
 };
-
-const effectiveDownloadPath = computed(() => {
-    const basePath = downloadOptions.value.path;
-    if (!basePath) return "";
-
-    if (settingsStore.appendArtistAlbumToPath) {
-        const artistName = trackDetails.value?.track?.artists?.[0]?.name;
-        const albumName = trackDetails.value?.track?.album?.name;
-        if (artistName && albumName) {
-            const saneArtistName = sanitizeFilename(artistName);
-            const saneAlbumName = sanitizeFilename(albumName);
-            return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
-        }
-    }
-    return basePath;
-});
 </script>
 
 <style scoped>
