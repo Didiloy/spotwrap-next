@@ -117,7 +117,7 @@ watch(downloadStore.downloadMessages, (messages) => {
             </div>
         </SidebarHeader>
 
-        <SidebarNavControls class="mb-2" />
+        <SidebarNavControls class="mb-2 mx-4" />
 
         <SidebarContent class="px-2">
             <SidebarGroup>

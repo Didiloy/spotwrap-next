@@ -11,7 +11,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between  px-2 py-2 mx-2 border border-zinc-300 rounded-md">
+  <div class="flex items-center justify-between px-2 py-2 bg-zinc-100 rounded-md">
     <Button variant="outline" size="sm" @click="goBack" class="text-sm">
       &leftarrow; Back
     </Button>
