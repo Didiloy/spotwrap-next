@@ -164,13 +164,15 @@ const resetSearchState = () => {
 };
 
 const handleSearch = async () => {
-    const term = search_query.value.trim();
-    if (term === "") return;
+    const termToSearch = search_query.value.trim();
+    if (termToSearch === "") return;
 
-    if (route.params.term !== term) {
-        router.push({ name: 'search', params: { term } });
+    const termInRoute = (typeof route.params.term === 'string') ? route.params.term : null;
+
+    if (termInRoute !== termToSearch) {
+        router.push({ name: 'search', params: { term: termToSearch } });
     } else {
-        await performSearch(term);
+        await performSearch(termToSearch);
     }
 };
 
@@ -181,13 +183,15 @@ onMounted(async () => {
     }
 });
 
-watch(() => route.params.term, (newTerm) => {
-    if (newTerm && typeof newTerm === 'string') {
-        if (search_query.value !== newTerm) {
-            search_query.value = newTerm;
-            performSearch(newTerm);
+watch(() => route.params.term, (newTermParam) => {
+    const termFromRoute = (typeof newTermParam === 'string') ? newTermParam : null;
+
+    if (termFromRoute) {
+        if (search_query.value !== termFromRoute) {
+            search_query.value = termFromRoute;
         }
-    } else if (!newTerm && search_query.value) {
+        performSearch(termFromRoute);
+    } else if (!termFromRoute && search_query.value !== "") {
         search_query.value = "";
         resetSearchState();
     }
