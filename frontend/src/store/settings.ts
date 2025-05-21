@@ -1,13 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { 
-    GetSpotifyCredentials, 
-    SetSpotifyCredentials, 
-    HasValidSpotifyCredentials,
-    SaveLastDownloadPath,
-    GetLastDownloadPath,
-    SaveAppendArtistAlbumToPath,
-    GetAppendArtistAlbumToPath
+    GetSetting,
+    SetSetting,
+    ValidateAndStoreSpotifyCredentials,
+    HasValidSpotifyCredentials
 } from "../../wailsjs/go/main/App";
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -19,19 +16,28 @@ export const useSettingsStore = defineStore('settings', () => {
   const appendArtistAlbumToPath = ref(false);
 
   async function loadSpotifyCredentials() {
-    const credentials = await GetSpotifyCredentials();
-    spotifyClientId.value = credentials.clientId || "";
-    spotifyClientSecret.value = credentials.clientSecret || "";
-    await checkCredentialsValidity();
+    try {
+      spotifyClientId.value = await GetSetting("spotify_client_id") || "";
+      spotifyClientSecret.value = await GetSetting("spotify_client_secret") || "";
+      await checkCredentialsValidity();
+    } catch (error) {
+      console.error("Error loading Spotify credentials:", error);
+      spotifyClientId.value = "";
+      spotifyClientSecret.value = "";
+      hasValidCredentials.value = false;
+    }
   }
 
+
   async function saveSpotifyCredentials() {
-    const success = await SetSpotifyCredentials(
+    const success = await ValidateAndStoreSpotifyCredentials(
       spotifyClientId.value,
       spotifyClientSecret.value
     );
-    
     hasValidCredentials.value = success;
+    if (success) {
+      await checkCredentialsValidity();
+    }
     return success;
   }
 
@@ -42,8 +48,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function fetchLastDownloadPath() {
     try {
-      const path = await GetLastDownloadPath();
-      lastDownloadPath.value = path || "";
+      lastDownloadPath.value = await GetSetting("lastDownloadPath") || "";
     } catch (error) {
       console.error("Error fetching last download path:", error);
       lastDownloadPath.value = "";
@@ -52,7 +57,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function updateLastDownloadPath(newPath: string) {
     try {
-      await SaveLastDownloadPath(newPath);
+      await SetSetting("lastDownloadPath", newPath);
       lastDownloadPath.value = newPath;
     } catch (error) {
       console.error("Error updating last download path:", error);
@@ -61,7 +66,8 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function loadAppendArtistAlbumToPathSetting() {
     try {
-      appendArtistAlbumToPath.value = await GetAppendArtistAlbumToPath();
+      const stringValue = await GetSetting("appendArtistAlbumToPath");
+      appendArtistAlbumToPath.value = stringValue === "true";
     } catch (error) {
       console.error("Error loading appendArtistAlbumToPath setting:", error);
       appendArtistAlbumToPath.value = false;
@@ -70,9 +76,10 @@ export const useSettingsStore = defineStore('settings', () => {
 
   async function toggleAppendArtistAlbumToPath() {
     const oldValue = appendArtistAlbumToPath.value;
-    appendArtistAlbumToPath.value = !oldValue;
+    const newValue = !oldValue;
+    appendArtistAlbumToPath.value = newValue;
     try {
-      await SaveAppendArtistAlbumToPath(appendArtistAlbumToPath.value);
+      await SetSetting("appendArtistAlbumToPath", newValue ? "true" : "false");
     } catch (error) {
       console.error("Error saving appendArtistAlbumToPath setting:", error);
       appendArtistAlbumToPath.value = oldValue;
@@ -85,7 +92,6 @@ export const useSettingsStore = defineStore('settings', () => {
     await loadAppendArtistAlbumToPathSetting();
   }
 
-
   return {
     initSettings,
     spotifyClientId,
@@ -94,7 +100,7 @@ export const useSettingsStore = defineStore('settings', () => {
     showCredentialsModal,
     lastDownloadPath,
     appendArtistAlbumToPath,
-    loadSpotifyCredentials, 
+    loadSpotifyCredentials,
     saveSpotifyCredentials,
     checkCredentialsValidity,
     fetchLastDownloadPath,

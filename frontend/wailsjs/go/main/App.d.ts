@@ -10,15 +10,11 @@ export function Close():Promise<void>;
 
 export function GetAlbum(arg1:string):Promise<Record<string, any>>;
 
-export function GetAppendArtistAlbumToPath():Promise<boolean>;
-
 export function GetArtist(arg1:string):Promise<Record<string, any>>;
 
 export function GetArtistsFromDB():Promise<Array<database.Artist>>;
 
-export function GetLastDownloadPath():Promise<string>;
-
-export function GetSpotifyCredentials():Promise<Record<string, string>>;
+export function GetSetting(arg1:string):Promise<string>;
 
 export function GetTrack(arg1:string):Promise<Record<string, any>>;
 
@@ -28,10 +24,8 @@ export function IsANewRelease(arg1:string,arg2:Record<string, any>):Promise<bool
 
 export function RemoveArtist(arg1:string):Promise<boolean>;
 
-export function SaveAppendArtistAlbumToPath(arg1:boolean):Promise<void>;
-
-export function SaveLastDownloadPath(arg1:string):Promise<void>;
-
 export function Search(arg1:string):Promise<Record<string, any>>;
 
-export function SetSpotifyCredentials(arg1:string,arg2:string):Promise<boolean>;
+export function SetSetting(arg1:string,arg2:string):Promise<void>;
+
+export function ValidateAndStoreSpotifyCredentials(arg1:string,arg2:string):Promise<boolean>;

@@ -18,10 +18,6 @@ export function GetAlbum(arg1) {
   return window['go']['main']['App']['GetAlbum'](arg1);
 }
 
-export function GetAppendArtistAlbumToPath() {
-  return window['go']['main']['App']['GetAppendArtistAlbumToPath']();
-}
-
 export function GetArtist(arg1) {
   return window['go']['main']['App']['GetArtist'](arg1);
 }
@@ -30,12 +26,8 @@ export function GetArtistsFromDB() {
   return window['go']['main']['App']['GetArtistsFromDB']();
 }
 
-export function GetLastDownloadPath() {
-  return window['go']['main']['App']['GetLastDownloadPath']();
-}
-
-export function GetSpotifyCredentials() {
-  return window['go']['main']['App']['GetSpotifyCredentials']();
+export function GetSetting(arg1) {
+  return window['go']['main']['App']['GetSetting'](arg1);
 }
 
 export function GetTrack(arg1) {
@@ -54,18 +46,14 @@ export function RemoveArtist(arg1) {
   return window['go']['main']['App']['RemoveArtist'](arg1);
 }
 
-export function SaveAppendArtistAlbumToPath(arg1) {
-  return window['go']['main']['App']['SaveAppendArtistAlbumToPath'](arg1);
-}
-
-export function SaveLastDownloadPath(arg1) {
-  return window['go']['main']['App']['SaveLastDownloadPath'](arg1);
-}
-
 export function Search(arg1) {
   return window['go']['main']['App']['Search'](arg1);
 }
 
-export function SetSpotifyCredentials(arg1, arg2) {
-  return window['go']['main']['App']['SetSpotifyCredentials'](arg1, arg2);
+export function SetSetting(arg1, arg2) {
+  return window['go']['main']['App']['SetSetting'](arg1, arg2);
+}
+
+export function ValidateAndStoreSpotifyCredentials(arg1, arg2) {
+  return window['go']['main']['App']['ValidateAndStoreSpotifyCredentials'](arg1, arg2);
 }

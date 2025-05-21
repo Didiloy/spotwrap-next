@@ -151,53 +151,66 @@ func (a *App) GetArtistsFromDB() []database.Artist {
 	return artists
 }
 
-// ================ Spotify Credentials =================
-// GetSpotifyCredentials retrieves Spotify credentials from the database
-func (a *App) GetSpotifyCredentials() map[string]string {
-	creds, err := a.db.GetSpotifyCredentials()
+// ================ Generic Settings =================
+// AppGetSetting retrieves a setting value by its key.
+func (a *App) GetSetting(key string) (string, error) {
+	value, err := a.db.GetSetting(key)
 	if err != nil {
-		log.Printf("Error getting Spotify credentials: %v", err)
-		return map[string]string{
-			"clientId":     "",
-			"clientSecret": "",
-		}
+		log.Printf("Error getting setting '%s': %v", key, err)
+		return value, err
 	}
-
-	return map[string]string{
-		"clientId":     creds.ClientID,
-		"clientSecret": creds.ClientSecret,
-	}
+	return value, nil
 }
 
-// SetSpotifyCredentials validates and stores Spotify credentials
-func (a *App) SetSpotifyCredentials(clientID, clientSecret string) bool {
+// AppSetSetting saves a key-value pair.
+func (a *App) SetSetting(key string, value string) error {
+	err := a.db.SetSetting(key, value)
+	if err != nil {
+		log.Printf("Error setting setting '%s': %v", key, err)
+	}
+	return err
+}
+
+// ================ Spotify Credentials Specific =================
+
+func (a *App) ValidateAndStoreSpotifyCredentials(clientID, clientSecret string) bool {
 	// First check if the credentials are valid by trying to get a token
 	token, _, err := api.GetToken(clientID, clientSecret)
 	if err != nil || token == "" {
+		log.Printf("Validation of Spotify credentials failed: %v", err)
 		return false
 	}
 
-	// Store credentials in database
-	if err := a.db.StoreSpotifyCredentials(clientID, clientSecret); err != nil {
-		log.Printf("Error storing Spotify credentials: %v", err)
+	// Store client ID
+	if err := a.db.SetSetting("spotify_client_id", clientID); err != nil {
+		log.Printf("Error storing spotify_client_id: %v", err)
+		return false
+	}
+	// Store client secret
+	if err := a.db.SetSetting("spotify_client_secret", clientSecret); err != nil {
+		log.Printf("Error storing spotify_client_secret: %v", err)
 		return false
 	}
 
-	// If credentials are valid, refresh the token immediately
+	log.Println("Spotify credentials validated and stored successfully.")
 	a.fetchSpotifyAccessToken()
 	return true
 }
 
 // HasValidSpotifyCredentials checks if the stored credentials are valid
 func (a *App) HasValidSpotifyCredentials() bool {
-	creds, err := a.db.GetSpotifyCredentials()
-	if err != nil {
-		log.Printf("Error getting Spotify credentials: %v", err)
+	clientID, err := a.db.GetSetting("spotify_client_id")
+	if err != nil || clientID == "" {
+		return false
+	}
+	clientSecret, err := a.db.GetSetting("spotify_client_secret")
+	if err != nil || clientSecret == "" {
 		return false
 	}
 
-	token, _, err := api.GetToken(creds.ClientID, creds.ClientSecret)
-	return err == nil && token != ""
+	token, _, errApi := api.GetToken(clientID, clientSecret)
+	isValid := errApi == nil && token != ""
+	return isValid
 }
 
 // ChooseDirectory opens a directory selection dialog
@@ -237,51 +250,6 @@ func (a *App) IsANewRelease(id string, release map[string]any) bool {
 	}
 
 	return releaseDate.After(artist.LastChecked)
-}
-
-// ================ Settings =================
-
-// SaveLastDownloadPath saves the most recently used download path.
-func (a *App) SaveLastDownloadPath(path string) error {
-	err := a.db.SetSetting("lastDownloadPath", path)
-	if err != nil {
-		log.Printf("Error saving last download path: %v", err)
-	}
-	return err
-}
-
-// GetLastDownloadPath retrieves the most recently used download path.
-func (a *App) GetLastDownloadPath() (string, error) {
-	path, err := a.db.GetSetting("lastDownloadPath")
-	if err != nil {
-		log.Printf("Error getting last download path: %v", err)
-		return "", err
-	}
-	return path, nil
-}
-
-// SaveAppendArtistAlbumToPath saves the user's preference for appending artist/album to the download path.
-func (a *App) SaveAppendArtistAlbumToPath(enabled bool) error {
-	stringValue := "false"
-	if enabled {
-		stringValue = "true"
-	}
-	err := a.db.SetSetting("appendArtistAlbumToPath", stringValue)
-	if err != nil {
-		log.Printf("Error saving appendArtistAlbumToPath setting: %v", err)
-	}
-	return err
-}
-
-// GetAppendArtistAlbumToPath retrieves the user's preference for appending artist/album to the download path.
-// Defaults to false if not set or on error.
-func (a *App) GetAppendArtistAlbumToPath() (bool, error) {
-	stringValue, err := a.db.GetSetting("appendArtistAlbumToPath")
-	if err != nil {
-		log.Printf("Error getting appendArtistAlbumToPath setting: %v. Defaulting to false.", err)
-		return false, err // Propagate error but still return a default
-	}
-	return stringValue == "true", nil
 }
 
 // Background
