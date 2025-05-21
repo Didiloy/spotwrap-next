@@ -4,7 +4,8 @@ import {
     GetSetting,
     SetSetting,
     ValidateAndStoreSpotifyCredentials,
-    HasValidSpotifyCredentials
+    HasValidSpotifyCredentials,
+    CheckForUpdates
 } from "../../wailsjs/go/main/App";
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -14,6 +15,13 @@ export const useSettingsStore = defineStore('settings', () => {
   const showCredentialsModal = ref(false);
   const lastDownloadPath = ref("");
   const appendArtistAlbumToPath = ref(false);
+
+  // New state for update checking
+  const updateAvailable = ref(false);
+  const latestVersionTag = ref("");
+  const updateReleaseURL = ref("");
+  const updateCheckError = ref("");
+  const showUpdateDialog = ref(false); // Controls visibility of the dialog
 
   async function loadSpotifyCredentials() {
     try {
@@ -28,8 +36,8 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-
   async function saveSpotifyCredentials() {
+    
     const success = await ValidateAndStoreSpotifyCredentials(
       spotifyClientId.value,
       spotifyClientSecret.value
@@ -86,10 +94,37 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  // Action for checking updates
+  async function performUpdateCheck() {
+    try {
+      const result = await CheckForUpdates();
+      if (result.error) {
+        updateCheckError.value = result.error;
+        updateAvailable.value = false;
+        showUpdateDialog.value = false;
+        console.error("Update check failed:", result.error);
+      } else {
+        updateAvailable.value = result.updateAvailable;
+        latestVersionTag.value = result.latestVersion;
+        updateReleaseURL.value = result.releaseURL;
+        updateCheckError.value = "";
+        if (result.updateAvailable) {
+          showUpdateDialog.value = true; // Automatically show dialog if update is available
+        }
+      }
+    } catch (e) {
+      console.error("Error calling CheckForUpdates:", e);
+      updateCheckError.value = "Failed to check for updates.";
+      updateAvailable.value = false;
+      showUpdateDialog.value = false;
+    }
+  }
+
   async function initSettings() {
     await loadSpotifyCredentials();
     await fetchLastDownloadPath();
     await loadAppendArtistAlbumToPathSetting();
+    await performUpdateCheck(); // Check for updates on init
   }
 
   return {
@@ -105,6 +140,13 @@ export const useSettingsStore = defineStore('settings', () => {
     checkCredentialsValidity,
     fetchLastDownloadPath,
     updateLastDownloadPath,
-    toggleAppendArtistAlbumToPath
+    toggleAppendArtistAlbumToPath,
+    // Update checker state and actions
+    updateAvailable,
+    latestVersionTag,
+    updateReleaseURL,
+    updateCheckError,
+    showUpdateDialog,
+    performUpdateCheck // Expose action if manual check is desired later
   };
 }); 

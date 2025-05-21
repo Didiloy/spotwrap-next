@@ -6,6 +6,10 @@ export function AddArtist(arg1) {
   return window['go']['main']['App']['AddArtist'](arg1);
 }
 
+export function CheckForUpdates() {
+  return window['go']['main']['App']['CheckForUpdates']();
+}
+
 export function ChooseDirectory() {
   return window['go']['main']['App']['ChooseDirectory']();
 }

@@ -169,7 +169,6 @@ onMounted(async () => {
         locale.value = currentLanguage.value;
     }
     logs.value = [...downloadStore.downloadMessages];
-    await settingsStore.initSettings();
 });
 
 // Logs dialog state

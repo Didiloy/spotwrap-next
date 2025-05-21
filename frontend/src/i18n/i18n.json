@@ -154,6 +154,12 @@
       "cancel": "Annuler",
       "save": "Enregistrer",
       "saving": "Enregistrement..."
+    },
+    "UpdateDialog": {
+      "title": "Mise à jour disponible",
+      "description": "Une nouvelle version ({version}) de SpotWrap est disponible.",
+      "laterButton": "Plus tard",
+      "viewButton": "Voir la version"
     }
   },
   "en": {
@@ -312,6 +318,12 @@
       "cancel": "Cancel",
       "save": "Save",
       "saving": "Saving..."
+    },
+    "UpdateDialog": {
+      "title": "Update Available",
+      "description": "A new version ({version}) of SpotWrap is available.",
+      "laterButton": "Later",
+      "viewButton": "View Release"
     }
   }
 }

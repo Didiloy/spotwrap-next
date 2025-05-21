@@ -5,6 +5,7 @@ import AppSidebar from "@/components/sidebar/AppSidebar.vue";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Toaster from "@/components/ui/toast/Toaster.vue";
 import SpotifyCredentialsModal from "@/components/settings/SpotifyCredentialsModal.vue";
+import UpdateNotificationDialog from "@/components/updater/UpdateNotificationDialog.vue";
 import { useSettingsStore } from "@/store/settings";
 import { useDownloadStore } from "@/store/download";
 
@@ -18,7 +19,7 @@ onMounted(async () => {
     downloadStore.setupEventListener();
 
     // Check if Spotify credentials are valid
-    await settingsStore.loadSpotifyCredentials();
+    await settingsStore.initSettings();
     const hasValidCredentials = await settingsStore.checkCredentialsValidity();
 
     if (!hasValidCredentials) {
@@ -45,6 +46,7 @@ onMounted(async () => {
     <SpotifyCredentialsModal
         v-model:open="settingsStore.showCredentialsModal"
     />
+    <UpdateNotificationDialog />
 </template>
 
 <style></style>

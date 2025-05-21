@@ -4,6 +4,8 @@ import {database} from '../models';
 
 export function AddArtist(arg1:string):Promise<boolean>;
 
+export function CheckForUpdates():Promise<Record<string, any>>;
+
 export function ChooseDirectory():Promise<string>;
 
 export function Close():Promise<void>;

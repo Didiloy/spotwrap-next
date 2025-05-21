@@ -7,6 +7,7 @@ import (
 	"spotwrap-next/api"
 	"spotwrap-next/database"
 	"spotwrap-next/notifications"
+	"spotwrap-next/updater"
 	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
@@ -340,6 +341,45 @@ func (a *App) checkForNewReleases() {
 	}
 
 	fmt.Println("Background check completed")
+}
+
+// ================ Update Checker =================
+
+// UpdateInfo holds information about a potential application update.
+type UpdateInfo struct {
+	UpdateAvailable bool   `json:"updateAvailable"`
+	LatestVersion   string `json:"latestVersion"`
+	ReleaseURL      string `json:"releaseURL"`
+	Error           string `json:"error,omitempty"` // Include error message if something went wrong
+}
+
+// CheckForUpdates checks if a new version of the application is available on GitHub.
+func (a *App) CheckForUpdates() map[string]any {
+	currentVersion, err := updater.GetCurrentAppVersion()
+	if err != nil {
+		log.Printf("Error getting current app version: %v", err)
+		return map[string]any{"error": "Could not determine current app version: " + err.Error()}
+	}
+
+	latestRelease, err := updater.FetchLatestReleaseInfo("Didiloy", "spotwrap-next")
+	if err != nil {
+		log.Printf("Error fetching latest release info: %v", err)
+		return map[string]any{"error": "Could not fetch latest release details: " + err.Error()}
+	}
+
+	isNewer, err := updater.IsNewerVersion(currentVersion, latestRelease.TagName)
+	if err != nil {
+		log.Printf("Error comparing versions: %v", err)
+		return map[string]any{"error": "Could not compare versions: " + err.Error()}
+	}
+
+	log.Printf("Update check: Current=%s, Latest=%s, Newer=%t, URL=%s", currentVersion, latestRelease.TagName, isNewer, latestRelease.HTMLURL)
+
+	return map[string]any{
+		"updateAvailable": isNewer,
+		"latestVersion":   latestRelease.TagName,
+		"releaseURL":      latestRelease.HTMLURL,
+	}
 }
 
 func (a *App) Close() {
