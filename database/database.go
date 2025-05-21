@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -211,7 +212,7 @@ func (d *Database) GetSetting(key string) (string, error) {
 	var val sql.NullString
 	err := d.db.QueryRow("SELECT value FROM settings WHERE key = ?", key).Scan(&val)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return "", nil // Key not found, return empty string and no error
 		}
 		return "", err // Other error
