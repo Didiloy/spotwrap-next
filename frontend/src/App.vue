@@ -12,7 +12,6 @@ const settingsStore = useSettingsStore();
 const downloadStore = useDownloadStore();
 const showMainTrigger = ref(false);
 
-const router = useRouter();
 
 onMounted(async () => {
     // Initialize download store event listener

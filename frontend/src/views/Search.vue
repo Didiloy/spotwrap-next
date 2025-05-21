@@ -95,7 +95,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowRef } from "vue";
+import { ref, shallowRef, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import AlbumsRow from "@/components/search/AlbumsRow.vue";
 import TracksRow from "@/components/search/TracksRow.vue";
 import ArtistsRow from "@/components/search/ArtistsRow.vue";
@@ -108,10 +109,15 @@ import {
 } from "lucide-vue-next";
 import { useI18n } from "vue-i18n";
 import { Search } from "../../wailsjs/go/main/App";
+import { SearchResults } from "@/interfaces/searchResult";
 
 const i18n = useI18n();
+const route = useRoute();
+const router = useRouter();
+
 const search_query = ref("");
-const search_results = shallowRef<any>(null);
+const search_results = shallowRef<SearchResults | null>(null);
+
 const is_loading = ref(false);
 const error_message = ref("");
 const search_attempted = ref(false);
@@ -125,15 +131,19 @@ const isEmptyResults = (results: any) => {
     );
 };
 
-const handleSearch = async () => {
-    if (search_query.value.trim() === "") return;
+const performSearch = async (term: string) => {
+    if (term.trim() === "") {
+        resetSearchState();
+        return;
+    }
 
     search_attempted.value = true;
     is_loading.value = true;
     error_message.value = "";
+    search_query.value = term;
 
     try {
-        search_results.value = await Search(search_query.value);
+        search_results.value = await Search(term);
         if (isEmptyResults(search_results.value)) {
             error_message.value = i18n.t("Search.noResultsDetailed");
         }
@@ -146,4 +156,40 @@ const handleSearch = async () => {
         is_loading.value = false;
     }
 };
+
+const resetSearchState = () => {
+    search_results.value = null;
+    error_message.value = "";
+    search_attempted.value = false;
+};
+
+const handleSearch = async () => {
+    const term = search_query.value.trim();
+    if (term === "") return;
+
+    if (route.params.term !== term) {
+        router.push({ name: 'search', params: { term } });
+    } else {
+        await performSearch(term);
+    }
+};
+
+onMounted(async () => {
+    if (route.params.term && typeof route.params.term === 'string') {
+        search_query.value = route.params.term;
+        await performSearch(route.params.term);
+    }
+});
+
+watch(() => route.params.term, (newTerm) => {
+    if (newTerm && typeof newTerm === 'string') {
+        if (search_query.value !== newTerm) {
+            search_query.value = newTerm;
+            performSearch(newTerm);
+        }
+    } else if (!newTerm && search_query.value) {
+        search_query.value = "";
+        resetSearchState();
+    }
+});
 </script>

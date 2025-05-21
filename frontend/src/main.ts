@@ -17,7 +17,7 @@ import { createPinia } from "pinia";
 const routes = [
   { path: "/", component: Home },
   { path: "/settings", component: Settings },
-  { path: "/search", component: Search },
+  { path: "/search/:term?", name: "search", component: Search },
   { path: "/subscriptions", component: Subscriptions },
   { path: "/artist/:id", component: ArtistDetails },
   { path: "/album/:id", component: AlbumDetails },
