@@ -15,16 +15,13 @@ import (
 )
 
 const (
-	// coverDirName = "album_cover" // Removed constant
 	timeout = 10 * time.Second
 )
 
-// Utils provides utility functions for the application
 type Utils struct {
 	counter int
 }
 
-// New creates a new Utils instance
 func New() *Utils {
 	return &Utils{}
 }
@@ -88,12 +85,11 @@ func (u *Utils) extractDominantColors(imageLink string) ([]string, error) {
 	}
 
 	// Create a temporary file for the image
-	filename := filepath.Join(albumCoverDir, fmt.Sprintf("cover%d.tmp", u.incrementCounter())) // Added .tmp extension for clarity
+	filename := filepath.Join(albumCoverDir, fmt.Sprintf("cover%d.tmp", u.incrementCounter()))
 	if err := os.WriteFile(filename, imgData, 0666); err != nil {
 		return nil, fmt.Errorf("failed to write image file '%s': %w", filename, err)
 	}
 
-	// Ensure the file is deleted when we're done
 	defer os.Remove(filename)
 
 	img, err := loadImage(filename)
