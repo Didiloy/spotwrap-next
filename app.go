@@ -355,30 +355,28 @@ type UpdateInfo struct {
 
 // CheckForUpdates checks if a new version of the application is available on GitHub.
 func (a *App) CheckForUpdates() map[string]any {
-	currentVersion, err := updater.GetCurrentAppVersion()
+	current_version, err := updater.GetCurrentAppVersion()
 	if err != nil {
 		log.Printf("Error getting current app version: %v", err)
 		return map[string]any{"error": "Could not determine current app version: " + err.Error()}
 	}
 
-	latestRelease, err := updater.FetchLatestReleaseInfo("Didiloy", "spotwrap-next")
+	latest_release, err := updater.FetchLatestReleaseInfo()
 	if err != nil {
 		log.Printf("Error fetching latest release info: %v", err)
 		return map[string]any{"error": "Could not fetch latest release details: " + err.Error()}
 	}
 
-	isNewer, err := updater.IsNewerVersion(currentVersion, latestRelease.TagName)
+	is_newer, err := updater.IsNewerVersion(current_version, latest_release.TagName)
 	if err != nil {
 		log.Printf("Error comparing versions: %v", err)
 		return map[string]any{"error": "Could not compare versions: " + err.Error()}
 	}
 
-	log.Printf("Update check: Current=%s, Latest=%s, Newer=%t, URL=%s", currentVersion, latestRelease.TagName, isNewer, latestRelease.HTMLURL)
-
 	return map[string]any{
-		"updateAvailable": isNewer,
-		"latestVersion":   latestRelease.TagName,
-		"releaseURL":      latestRelease.HTMLURL,
+		"updateAvailable": is_newer,
+		"latestVersion":   latest_release.TagName,
+		"releaseURL":      latest_release.HTMLURL,
 	}
 }
 

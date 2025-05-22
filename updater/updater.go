@@ -14,7 +14,7 @@ import (
 // GitHubRelease holds the information we need from the GitHub API
 type GitHubRelease struct {
 	TagName string `json:"tag_name"`
-	HTMLURL string `json:"html_url"` // This is the general releases page, latest is usually at /releases/latest
+	HTMLURL string `json:"html_url"`
 }
 
 // PackageJSON to parse version from package.json
@@ -22,12 +22,12 @@ type PackageJSON struct {
 	Version string `json:"version"`
 }
 
+const LATEST_RELEASE_LINK = "https://api.github.com/repos/Didiloy/spotwrap-next/releases/latest"
+
 // GetCurrentAppVersion reads the version from package.json
 func GetCurrentAppVersion() (string, error) {
-	// Wails dev usually runs with the project root as CWD.
 	data, err := os.ReadFile("./frontend/package.json")
 	if err != nil {
-		// Fallback if not in CWD, try one level up (less common for Go Wails project root)
 		data, err = os.ReadFile("package.json")
 		if err != nil {
 			return "", fmt.Errorf("failed to read package.json from ./frontend.package.json or package.json: %w", err)
@@ -38,15 +38,13 @@ func GetCurrentAppVersion() (string, error) {
 	if err := json.Unmarshal(data, &pkg); err != nil {
 		return "", fmt.Errorf("failed to parse package.json: %w", err)
 	}
-	// Return version without 'v' prefix for consistent comparison, e.g., "1.0.0"
-	return strings.TrimPrefix(pkg.Version, "v"), nil
+	return pkg.Version, nil
 }
 
 // FetchLatestReleaseInfo fetches the latest release tag_name and html_url from GitHub.
-func FetchLatestReleaseInfo(owner, repo string) (*GitHubRelease, error) {
-	url := fmt.Sprintf("https://api.github.com/repos/%s/%s/releases/latest", owner, repo)
+func FetchLatestReleaseInfo() (*GitHubRelease, error) {
 	client := &http.Client{Timeout: 15 * time.Second}
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", LATEST_RELEASE_LINK, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -56,7 +54,7 @@ func FetchLatestReleaseInfo(owner, repo string) (*GitHubRelease, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch latest release from %s: %w", url, err)
+		return nil, fmt.Errorf("failed to fetch latest release from %s: %w", LATEST_RELEASE_LINK, err)
 	}
 	defer resp.Body.Close()
 
@@ -74,11 +72,9 @@ func FetchLatestReleaseInfo(owner, repo string) (*GitHubRelease, error) {
 	if err := json.Unmarshal(body, &release); err != nil {
 		return nil, fmt.Errorf("failed to parse release JSON (body: %s): %w", string(body), err)
 	}
-	// Ensure tag_name is also cleaned up if it has 'v'
+	// Ensure tag_name is cleaned up if it has 'v'
 	release.TagName = strings.TrimPrefix(release.TagName, "v")
-	// The HTMLURL from the API is for the specific release, not the general /releases/latest page.
-	// We want the user to go to the main releases page to see the latest.
-	release.HTMLURL = fmt.Sprintf("https://github.com/%s/%s/releases/latest", owner, repo)
+	release.HTMLURL = LATEST_RELEASE_LINK
 	return &release, nil
 }
 
