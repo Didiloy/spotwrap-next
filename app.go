@@ -334,10 +334,10 @@ func (a *App) checkForNewReleases() {
 			}
 		}
 
-		// Update last checked time
-		if _, err := a.db.AddArtist(artist.SpotifyID); err != nil {
-			fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
-		}
+		// Do not update last checked time because in we dont want to update it in the background check
+		// if _, err := a.db.AddArtist(artist.SpotifyID); err != nil {
+		// 	fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
+		// }
 	}
 
 	fmt.Println("Background check completed")
