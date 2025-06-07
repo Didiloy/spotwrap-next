@@ -86,16 +86,18 @@
       "loading": "Chargement...",
       "loading_rate_limit": "Le chargement peut prendre un moment en raison des limites de l'API Spotify...",
       "emptyTitle": "Aucun artiste suivi",
-      "emptySubtitle": "Commencez à suivre des artistes pour voir leurs dernières sorties ici",
+      "emptySubtitle": "Ajoutez des artistes à votre bibliothèque pour voir leurs dernières sorties ici.",
       "discoverArtists": "Découvrir des artistes",
-      "tracks": "Titres",
+      "tracks": "titres",
       "viewAlbum": "Voir l'album",
-      "newRelease": "Nouvelle sortie",
+      "newRelease": "Nouveau",
       "newReleases": "Nouvelles sorties",
       "markAsSeen": "Marquer comme vu",
-      "processing": "En cours...",
+      "processing": "Traitement...",
       "checking_artist": "Vérification de {name}...",
-      "checking_artist_progress": "Vérification de {name} - {index}/{total}..."
+      "checking_artist_progress": "Vérification de {name} - {index}/{total}...",
+      "reload": "Rafraîchir",
+      "reloadComplete": "Rechargement terminé"
     },
     "Subscriptions": {
       "loading": "Chargement...",
@@ -114,7 +116,12 @@
         "name_desc": "Nom (Z-A)",
         "date_asc": "Date d'ajout (ancien)",
         "date_desc": "Date d'ajout (récent)"
-      }
+      },
+      "processing": "Processing...",
+      "checking_artist": "Checking {name}...",
+      "checking_artist_progress": "Checking {name} - {index}/{total}...",
+      "reload": "Reload",
+      "reloadComplete": "Reload complete"
     },
     "Settings": {
       "title": "Paramètres",
@@ -250,16 +257,18 @@
       "loading": "Loading...",
       "loading_rate_limit": "Loading may take a moment due to Spotify API rate limits...",
       "emptyTitle": "No followed artists",
-      "emptySubtitle": "Start following artists to see their latest releases here",
-      "discoverArtists": "Discover Artists",
-      "tracks": "Tracks",
+      "emptySubtitle": "Add artists to your library to see their latest releases here.",
+      "discoverArtists": "Discover artists",
+      "tracks": "tracks",
       "viewAlbum": "View Album",
-      "newRelease": "New Release",
+      "newRelease": "New",
       "newReleases": "New Releases",
-      "markAsSeen": "Mark as Seen",
+      "markAsSeen": "Mark as seen",
       "processing": "Processing...",
       "checking_artist": "Checking {name}...",
-      "checking_artist_progress": "Checking {name} - {index}/{total}..."
+      "checking_artist_progress": "Checking {name} - {index}/{total}...",
+      "reload": "Reload",
+      "reloadComplete": "Reload complete"
     },
     "Subscriptions": {
       "loading": "Loading...",
@@ -278,7 +287,12 @@
         "name_desc": "Name (Z-A)",
         "date_asc": "Date added (oldest)",
         "date_desc": "Date added (newest)"
-      }
+      },
+      "processing": "Processing...",
+      "checking_artist": "Checking {name}...",
+      "checking_artist_progress": "Checking {name} - {index}/{total}...",
+      "reload": "Reload",
+      "reloadComplete": "Reload complete"
     },
     "Settings": {
       "title": "Settings",

@@ -1,18 +1,30 @@
 <template>
     <div class="artist-updates h-full overflow-y-auto p-6">
         <!-- Header -->
-        <div class="mb-8">
-            <h1 class="text-3xl font-bold text-zinc-900">
-                {{ $t("Home.title") }}
-            </h1>
-            <p class="text-gray-400 mt-2">
-                {{ $t("Home.subtitle") }}
-            </p>
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-zinc-900">
+                    {{ $t("Home.title") }}
+                </h1>
+                <p class="text-gray-400 mt-2">
+                    {{ $t("Home.subtitle") }}
+                </p>
+            </div>
+            <Button
+                v-if="initialLoaded"
+                @click="reloadTimeline"
+                variant="outline"
+                size="sm"
+                class="rounded-md"
+            >
+                <RefreshCw class="w-5 h-5" :class="{ 'animate-spin': loading }" />
+                {{ $t("Home.reload") }}
+            </Button>
         </div>
 
         <!-- Loading state -->
         <div
-            v-if="loading"
+            v-if="loading && !initialLoaded"
             class="flex flex-col items-center justify-center py-12"
         >
             <div
@@ -202,44 +214,31 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import { Button } from "@/components/ui/button";
-import {
-    GetArtist,
-    GetArtistsFromDB,
-    IsANewRelease,
-    AddArtist,
-} from "../../wailsjs/go/main/App";
-import { GetDominantColor } from "../../wailsjs/go/utils/Utils";
+import { useTimelineStore } from "@/store/timeline";
 import { useRouter } from "vue-router";
+import { RefreshCw } from "lucide-vue-next";
+import { useToast } from "@/components/ui/toast/use-toast";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
+const { toast } = useToast();
 const router = useRouter();
+const timelineStore = useTimelineStore();
 
-interface TimelineItem {
-    artist: {
-        id: string;
-        name: string;
-        images?: Array<{ url: string }>;
-    };
-    album: {
-        id: string;
-        name: string;
-        album_type: string;
-        release_date: string;
-        total_tracks: number;
-        images: Array<{ url: string }>;
-    };
-    type: "album" | "single";
-    date: Date;
-    dominantColors?: string[];
-    isNewRelease?: boolean;
-}
+const {
+    timelineItems,
+    loading,
+    initialLoaded,
+    currentCheckingArtist,
+    totalArtistsToCheck,
+    currentArtistProgressIndex,
+    markingAsSeenIndex,
+} = storeToRefs(timelineStore);
 
-const loading = ref(true);
-const currentCheckingArtist = ref<string>("");
-const totalArtistsToCheck = ref(0);
-const currentArtistProgressIndex = ref(0);
-const timelineItems = ref<(TimelineItem & { dominantColors?: string[] })[]>([]);
+const { fetchTimelineItems, markAsSeen } = timelineStore;
 
 const formatReleaseDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = {
@@ -251,10 +250,10 @@ const formatReleaseDate = (dateString: string) => {
 };
 
 const getCardStyle = ( index: number) => {
-    const colors = timelineItems.value[index]?.dominantColors;
-    if (colors && colors.length >= 2) {
+    const item = timelineItems.value[index];
+    if (item && item.dominantColors && item.dominantColors.length >= 2) {
         return {
-            background: `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`,
+            background: `linear-gradient(135deg, ${item.dominantColors[0]} 0%, ${item.dominantColors[1]} 100%)`,
             backdropFilter: 'blur(8px)',
         };
     }
@@ -265,96 +264,18 @@ const getCardStyle = ( index: number) => {
     };
 };
 
-async function loadDominantColorsForItem(item: TimelineItem, index: number) {
-    try {
-        if (item.album.images?.[0]?.url) {
-            const colors = await GetDominantColor(item.album.images[0].url);
-            timelineItems.value = timelineItems.value.map((el, i) =>
-                i === index ? { ...el, dominantColors: colors } : el,
-            );
-        }
-    } catch (error) {
-        console.error("Error loading dominant colors:", error);
-    }
-}
-
 onMounted(async () => {
-    try {
-        const artists = await GetArtistsFromDB();
-
-        if (artists.length === 0) {
-            loading.value = false;
-            return;
-        }
-
-        totalArtistsToCheck.value = artists.length;
-        const allAlbums: TimelineItem[] = [];
-
-        for (let i = 0; i < artists.length; i++) {
-            const artist = artists[i];
-            currentArtistProgressIndex.value = i + 1;
-
-            // Set the current checking artist name
-            const artistData = await GetArtist(artist.SpotifyID);
-            currentCheckingArtist.value = artistData.artist.name;
-
-            if (artistData.albums) {
-                for (const album of artistData.albums) {
-                    // Check if this is a new release
-                    const isNewRelease = await IsANewRelease(
-                        artist.SpotifyID,
-                        album,
-                    );
-
-                    allAlbums.push({
-                        artist: {
-                            id: artistData.artist.id,
-                            name: artistData.artist.name,
-                            images: artistData.artist.images,
-                        },
-                        album: {
-                            id: album.id,
-                            name: album.name,
-                            album_type: album.album_type,
-                            release_date: album.release_date,
-                            total_tracks: album.total_tracks,
-                            images: album.images,
-                        },
-                        type: album.album_type === "album" ? "album" : "single",
-                        date: new Date(album.release_date),
-                        isNewRelease: isNewRelease,
-                    });
-                }
-            }
-        }
-
-        // Sort with new releases first
-        timelineItems.value = allAlbums
-            .sort((a, b) => {
-                // New releases come first
-                if (a.isNewRelease && !b.isNewRelease) return -1;
-                if (!a.isNewRelease && b.isNewRelease) return 1;
-                // Then sort by date
-                return b.date.getTime() - a.date.getTime();
-            })
-            .slice(0, 20);
-
-        // Clear current checking artist and set loading to false
-        currentCheckingArtist.value = "";
-        loading.value = false;
-
-        // Load dominant colors asynchronously
-        timelineItems.value.forEach((item, index) => {
-            loadDominantColorsForItem(item, index);
-        });
-    } catch (error) {
-        console.error("Error fetching artist data:", error);
-        currentCheckingArtist.value = "";
-        totalArtistsToCheck.value = 0;
-        currentArtistProgressIndex.value = 0;
-        loading.value = false;
+    if (!initialLoaded.value) {
+        await fetchTimelineItems();
     }
 });
+
+async function reloadTimeline() {
+    await fetchTimelineItems(true);
+    toast({
+        description: t("Home.reloadComplete"),
+    });
+}
 
 function goToSearch() {
     router.push("/search");
@@ -362,19 +283,6 @@ function goToSearch() {
 
 function goToAlbum(id: string) {
     router.push(`/album/${id}`);
-}
-
-const markingAsSeenIndex = ref<number | null>(null);
-
-async function markAsSeen(artistId: string, index: number) {
-    try {
-        await AddArtist(artistId);
-        timelineItems.value = timelineItems.value.map((item, i) =>
-            i === index ? { ...item, isNewRelease: false } : item,
-        );
-    } catch (error) {
-        console.error("Error marking release as seen:", error);
-    }
 }
 </script>
 
