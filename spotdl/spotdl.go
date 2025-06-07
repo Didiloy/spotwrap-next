@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"sync"
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
@@ -157,11 +158,23 @@ func (d *Downloader) extractBinary(embeddedFS embed.FS, embeddedPath, targetPath
 func (d *Downloader) pipeReader(wg *sync.WaitGroup, pipe io.ReadCloser) {
 	defer wg.Done()
 
+	// List of strings to remove from the output
+	spotdl_strings := []string{
+		"WARNING:root:",
+		"INFO:spotdl.download.downloader:",
+		"INFO:spotdl.utils.search:",
+		"ERROR:spotipy.client:",
+		"ERROR:spotdl.download.progress_handler:",
+	}
+
 	buf := make([]byte, 1024)
 	for {
 		n, err := pipe.Read(buf)
 		if n > 0 {
 			output := string(buf[:n])
+			for _, spotdl_string := range spotdl_strings {
+				output = strings.ReplaceAll(output, spotdl_string, "")
+			}
 			log.Print(output)
 			wailsruntime.EventsEmit(d.ctx, "update_in_download", output)
 		}
