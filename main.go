@@ -16,10 +16,14 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
+
+//go:embed build/appicon.png
+var icon []byte
 
 func main() {
 	noGUI := flag.Bool("no-gui", false, "Run in background mode")
@@ -68,6 +72,9 @@ func startGUI() error {
 		CSSDragProperty:          "windows",
 		CSSDragValue:             "1",
 		EnableDefaultContextMenu: false,
+		Linux: &linux.Options{
+			Icon: icon,
+		},
 		OnShutdown: func(ctx context.Context) {
 			app.Close()
 			utils.CleanUp() // clean the cover directory
