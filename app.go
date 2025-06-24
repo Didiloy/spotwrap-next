@@ -4,13 +4,18 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"spotwrap-next/api"
 	"spotwrap-next/database"
 	"spotwrap-next/notifications"
+	"spotwrap-next/spotdl"
 	"spotwrap-next/updater"
+	"strings"
+	"sync"
 	"time"
 
-	"github.com/wailsapp/wails/v2/pkg/runtime"
+	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // App represents the main application structure
@@ -216,7 +221,7 @@ func (a *App) HasValidSpotifyCredentials() bool {
 
 // ChooseDirectory opens a directory selection dialog
 func (a *App) ChooseDirectory() string {
-	dir, err := runtime.OpenDirectoryDialog(a.ctx, runtime.OpenDialogOptions{
+	dir, err := wailsruntime.OpenDirectoryDialog(a.ctx, wailsruntime.OpenDialogOptions{
 		Title: "Select Directory",
 	})
 	if err != nil {
@@ -251,6 +256,18 @@ func (a *App) IsANewRelease(id string, release map[string]any) bool {
 	}
 
 	return releaseDate.After(artist.LastChecked)
+}
+
+// sanitizeFilename removes characters that are not allowed in file paths across major OSes.
+func sanitizeFilename(name string) string {
+	if name == "" {
+		return ""
+	}
+	invalid := []string{`/`, `\\`, `:`, `*`, `?`, `"`, `<`, `>`, `|`}
+	for _, char := range invalid {
+		name = strings.ReplaceAll(name, char, "-")
+	}
+	return name
 }
 
 // Background
@@ -327,9 +344,68 @@ func (a *App) checkForNewReleases() {
 				message := fmt.Sprintf("%s has released %s", artistName, albumName)
 
 				// Send desktop notification
-				err := notifications.Notify("New Release!", message)
-				if err != nil {
+				if err := notifications.Notify("New Release!", message); err != nil {
 					fmt.Printf("Failed to send notification: %v\n", err)
+				}
+
+				// Auto-download if enabled
+				autoDownload, _ := a.db.GetSetting("autoDownloadNewReleases")
+				if autoDownload == "true" {
+					// Determine base path
+					basePath, _ := a.db.GetSetting("newReleasesDownloadPath")
+					if basePath == "" {
+						// Fallback to default directory
+						homeDir, err := os.UserHomeDir()
+						if err != nil {
+							fmt.Printf("Error getting user home directory: %v\n", err)
+							continue
+						}
+						basePath = filepath.Join(homeDir, "spotwrap")
+					}
+
+					// Append "Artist - Album" folder if setting enabled
+					appendPath, _ := a.db.GetSetting("appendArtistAlbumToPath")
+					if appendPath == "true" {
+						safeArtist := sanitizeFilename(artistName)
+						safeAlbum := sanitizeFilename(albumName)
+						basePath = filepath.Join(basePath, fmt.Sprintf("%s - %s", safeArtist, safeAlbum))
+					}
+
+					if basePath == "" {
+						fmt.Println("No valid download path found; skipping auto download")
+						continue
+					}
+
+					if err := os.MkdirAll(basePath, 0755); err != nil {
+						fmt.Printf("Could not create download directory %s: %v\n", basePath, err)
+						continue
+					}
+
+					// Prepare download
+					externalUrls, ok := albumMap["external_urls"].(map[string]any)
+					if !ok {
+						fmt.Printf("Unexpected external_urls format for artist %s\n", artist.SpotifyID)
+						continue
+					}
+
+					spotifyURL, _ := externalUrls["spotify"].(string)
+					if spotifyURL != "" {
+						downloader := spotdl.NewDownloader()
+						downloader.Startup(a.ctx, false)
+						var wg sync.WaitGroup
+						wg.Add(1)
+						go func() {
+							defer wg.Done()
+							downloader.Download(spotifyURL, basePath, "mp3", "320k", []string{})
+							// Send desktop notification
+							if err := notifications.Notify("New Release!", "Downloaded "+fmt.Sprintf("%s - %s", artistName, albumName)); err != nil {
+								fmt.Printf("Failed to send notification: %v\n", err)
+							}
+							fmt.Println("Downloaded " + fmt.Sprintf("%s - %s", artistName, albumName))
+						}()
+						wg.Wait()
+					}
+
 				}
 			}
 		}

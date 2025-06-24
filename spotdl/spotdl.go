@@ -24,7 +24,8 @@ const (
 
 // Downloader handles downloading of tracks from Spotify
 type Downloader struct {
-	ctx context.Context
+	ctx        context.Context
+	emitEvents bool
 }
 
 // NewDownloader creates a new Downloader instance
@@ -33,8 +34,9 @@ func NewDownloader() *Downloader {
 }
 
 // Startup is called when the application starts
-func (d *Downloader) Startup(ctx context.Context) {
+func (d *Downloader) Startup(ctx context.Context, emitEvents bool) {
 	d.ctx = ctx
+	d.emitEvents = emitEvents
 }
 
 // Download downloads a track from the provided Spotify link
@@ -108,7 +110,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	}
 
 	// Start the command
-	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Downloading")
+	d.emitUpdateEvent("Downloading")
 	if err := cmd.Start(); err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to start command: %v", err))
 		return false
@@ -133,7 +135,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 		return false
 	}
 
-	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Done")
+	d.emitUpdateEvent("Done")
 	return true
 }
 
@@ -176,7 +178,7 @@ func (d *Downloader) pipeReader(wg *sync.WaitGroup, pipe io.ReadCloser) {
 				output = strings.ReplaceAll(output, spotdl_string, "")
 			}
 			log.Print(output)
-			wailsruntime.EventsEmit(d.ctx, "update_in_download", output)
+			d.emitUpdateEvent(output)
 		}
 		if err != nil {
 			break
@@ -186,6 +188,14 @@ func (d *Downloader) pipeReader(wg *sync.WaitGroup, pipe io.ReadCloser) {
 
 // emitErrorEvent emits a fatal error event and a done event
 func (d *Downloader) emitErrorEvent(errMsg string) {
-	wailsruntime.EventsEmit(d.ctx, "update_in_download", fmt.Sprintf("fatal_error: %s", errMsg))
-	wailsruntime.EventsEmit(d.ctx, "update_in_download", "Done")
+	d.emitUpdateEvent(fmt.Sprintf("fatal_error: %s", errMsg))
+	d.emitUpdateEvent("Done")
+}
+
+// emitUpdateEvent emits an update event
+func (d *Downloader) emitUpdateEvent(errMsg string) {
+	if !d.emitEvents {
+		return
+	}
+	wailsruntime.EventsEmit(d.ctx, "update_in_download", errMsg)
 }

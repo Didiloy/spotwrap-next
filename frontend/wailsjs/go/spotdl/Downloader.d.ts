@@ -4,4 +4,4 @@ import {context} from '../models';
 
 export function Download(arg1:string,arg2:string,arg3:string,arg4:string,arg5:Array<string>):Promise<boolean>;
 
-export function Startup(arg1:context.Context):Promise<void>;
+export function Startup(arg1:context.Context,arg2:boolean):Promise<void>;

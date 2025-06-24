@@ -61,7 +61,7 @@ func startGUI() error {
 		BackgroundColour: &options.RGBA{R: 255, G: 255, B: 255, A: 255},
 		OnStartup: func(ctx context.Context) {
 			app.startup(ctx)
-			downloader.Startup(ctx)
+			downloader.Startup(ctx, true)
 		},
 		Bind: []any{
 			app,

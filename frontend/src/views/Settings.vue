@@ -1,5 +1,5 @@
 <template>
-    <div class="settings-page p-6 max-w-3xl mx-auto space-y-8">
+    <div class="settings-page p-6 max-w-3xl mx-auto space-y-8 overflow-y-auto h-full">
         <h1 class="text-2xl font-bold">{{ $t("Settings.title") }}</h1>
 
         <!-- Language Selector -->
@@ -23,13 +23,32 @@
             </Select>
         </div>
 
-        <!-- Autostart -->
-        <AutoStartToggle />
+        <!-- Background Mode Section -->
+        <div class="space-y-2">
+            <Label class="text-md text-purple-800">{{ $t("Settings.background_mode") }}</Label>
+            <div class="space-y-4 ml-2">
+                <AutoStartToggle />
+                <AutoDownloadToggle />
+
+                <!-- Preferred Download Path Selector -->
+                <div class="flex flex-wrap items-center gap-4">
+                    <Button @click="selectPreferredPath" variant="outline">
+                        {{ t("AlbumDetails.select_path") }}
+                    </Button>
+                    <span v-if="settingsStore.newReleasesDownloadPath" class="text-sm text-green-600">
+                        {{ settingsStore.newReleasesDownloadPath }}
+                    </span>
+                    <span v-else class="text-sm text-muted-foreground">
+                        {{ t("AlbumDetails.no_path_selected") }}
+                    </span>
+                </div>
+            </div>
+        </div>
 
         <!-- Append Artist/Album Path Toggle -->
         <div class="space-y-2">
-            <Label class="text-base">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
-            <div class="flex items-center justify-between">
+            <Label class="text-md text-purple-800">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
+            <div class="flex items-center justify-between  ml-2">
                 <div>
                     <p class="text-sm font-medium">{{ $t("Settings.appendPathTitle") }}</p>
                     <p class="text-xs text-muted-foreground">
@@ -45,8 +64,8 @@
 
         <!-- Spotify API Credentials -->
         <div class="space-y-2">
-            <Label>{{ $t("Settings.spotify_api") }}</Label>
-            <div class="flex flex-col gap-2">
+            <Label class="text-md text-purple-800">{{ $t("Settings.spotify_api") }}</Label>
+            <div class="flex flex-col gap-2  ml-2">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium">{{ $t("Settings.spotify_credentials") }}</p>
@@ -135,9 +154,11 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import AutoStartToggle from "@/components/settings/AutoStartToggle.vue";
+import AutoDownloadToggle from "@/components/settings/AutoDownloadToggle.vue";
 import SpotifyCredentialsModal from "@/components/settings/SpotifyCredentialsModal.vue";
 import { useDownloadStore } from "@/store/download";
 import { useSettingsStore } from "@/store/settings";
+import { ChooseDirectory, SetSetting } from "../../wailsjs/go/main/App";
 
 const { locale, t } = useI18n();
 const downloadStore = useDownloadStore();
@@ -187,6 +208,15 @@ function clearLogs() {
     downloadStore.clearMessages();
     logs.value = [];
 }
+
+// Preferred path selector
+const selectPreferredPath = async () => {
+    const selectedPath = await ChooseDirectory();
+    if (selectedPath) {
+        await SetSetting("newReleasesDownloadPath",selectedPath);
+        await settingsStore.fetchNewReleasesDownloadPath();
+    }
+};
 </script>
 
 <style scoped>

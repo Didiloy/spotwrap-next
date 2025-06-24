@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
 import AppSidebar from "@/components/sidebar/AppSidebar.vue";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Toaster from "@/components/ui/toast/Toaster.vue";

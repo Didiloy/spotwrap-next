@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, Ref } from 'vue';
 import { 
     GetSetting,
     SetSetting,
@@ -14,7 +14,9 @@ export const useSettingsStore = defineStore('settings', () => {
   const hasValidCredentials = ref(false);
   const showCredentialsModal = ref(false);
   const lastDownloadPath = ref("");
+  const newReleasesDownloadPath = ref("");
   const appendArtistAlbumToPath = ref(false);
+  const autoDownloadNewReleases = ref(false);
 
   // New state for update checking
   const updateAvailable = ref(false);
@@ -63,6 +65,15 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  async function fetchNewReleasesDownloadPath() {
+    try {
+      newReleasesDownloadPath.value = await GetSetting("newReleasesDownloadPath") || "";
+    } catch (error) {
+      console.error("Error fetching new releases download path:", error);
+      newReleasesDownloadPath.value = "";
+    }
+  }
+
   async function updateLastDownloadPath(newPath: string) {
     try {
       await SetSetting("lastDownloadPath", newPath);
@@ -72,14 +83,19 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
-  async function loadAppendArtistAlbumToPathSetting() {
+  // Generic loader for boolean settings stored as "true"/"false" strings
+  async function loadBooleanSetting(key: string, targetRef: Ref<boolean>) {
     try {
-      const stringValue = await GetSetting("appendArtistAlbumToPath");
-      appendArtistAlbumToPath.value = stringValue === "true";
+      const stringValue = await GetSetting(key);
+      targetRef.value = stringValue === "true";
     } catch (error) {
-      console.error("Error loading appendArtistAlbumToPath setting:", error);
-      appendArtistAlbumToPath.value = false;
+      console.error(`Error loading ${key} setting:`, error);
+      targetRef.value = false;
     }
+  }
+
+  async function loadAppendArtistAlbumToPathSetting() {
+    await loadBooleanSetting("appendArtistAlbumToPath", appendArtistAlbumToPath);
   }
 
   async function toggleAppendArtistAlbumToPath() {
@@ -91,6 +107,24 @@ export const useSettingsStore = defineStore('settings', () => {
     } catch (error) {
       console.error("Error saving appendArtistAlbumToPath setting:", error);
       appendArtistAlbumToPath.value = oldValue;
+    }
+  }
+
+  // Load auto download setting
+  async function loadAutoDownloadNewReleasesSetting() {
+    await loadBooleanSetting("autoDownloadNewReleases", autoDownloadNewReleases);
+  }
+
+  // Toggle auto download setting
+  async function toggleAutoDownloadNewReleases() {
+    const oldValue = autoDownloadNewReleases.value;
+    const newValue = !oldValue;
+    autoDownloadNewReleases.value = newValue;
+    try {
+      await SetSetting("autoDownloadNewReleases", newValue ? "true" : "false");
+    } catch (error) {
+      console.error("Error saving autoDownloadNewReleases setting:", error);
+      autoDownloadNewReleases.value = oldValue;
     }
   }
 
@@ -123,8 +157,10 @@ export const useSettingsStore = defineStore('settings', () => {
   async function initSettings() {
     await loadSpotifyCredentials();
     await fetchLastDownloadPath();
+    await fetchNewReleasesDownloadPath();
     await loadAppendArtistAlbumToPathSetting();
-    await performUpdateCheck(); // Check for updates on init
+    await loadAutoDownloadNewReleasesSetting();
+    await performUpdateCheck();
   }
 
   return {
@@ -134,19 +170,24 @@ export const useSettingsStore = defineStore('settings', () => {
     hasValidCredentials,
     showCredentialsModal,
     lastDownloadPath,
+    newReleasesDownloadPath,
+    fetchNewReleasesDownloadPath,
     appendArtistAlbumToPath,
+    autoDownloadNewReleases,
     loadSpotifyCredentials,
     saveSpotifyCredentials,
     checkCredentialsValidity,
     fetchLastDownloadPath,
     updateLastDownloadPath,
     toggleAppendArtistAlbumToPath,
+    loadAutoDownloadNewReleasesSetting,
+    toggleAutoDownloadNewReleases,
     // Update checker state and actions
     updateAvailable,
     latestVersionTag,
     updateReleaseURL,
     updateCheckError,
     showUpdateDialog,
-    performUpdateCheck // Expose action if manual check is desired later
+    performUpdateCheck
   };
 }); 

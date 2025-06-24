@@ -6,6 +6,6 @@ export function Download(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['spotdl']['Downloader']['Download'](arg1, arg2, arg3, arg4, arg5);
 }
 
-export function Startup(arg1) {
-  return window['go']['spotdl']['Downloader']['Startup'](arg1);
+export function Startup(arg1, arg2) {
+  return window['go']['spotdl']['Downloader']['Startup'](arg1, arg2);
 }
