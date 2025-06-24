@@ -10,7 +10,7 @@ const settingsStore = useSettingsStore();
 <template>
   <div class="flex items-center justify-between p-0 w-full">
     <div>
-      <h3 class="">{{ t("Settings.auto_download") }}</h3>
+      <h3 class="font-medium">{{ t("Settings.auto_download") }}</h3>
       <p class="text-sm text-muted-foreground">
         {{ t("Settings.auto_download_description") }}
       </p>

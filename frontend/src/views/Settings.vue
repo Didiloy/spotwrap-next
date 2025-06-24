@@ -50,7 +50,7 @@
             <Label class="text-purple-800">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
             <div class="flex items-center justify-between  ml-2">
                 <div>
-                    <h3 class="">{{ $t("Settings.appendPathTitle") }}</h3>
+                    <h3 class="font-medium">{{ $t("Settings.appendPathTitle") }}</h3>
                     <p class="text-sm text-muted-foreground">
                         {{ $t("Settings.appendPathDescription") }}
                     </p>
@@ -68,7 +68,7 @@
             <div class="flex flex-col gap-2  ml-2">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="">{{ $t("Settings.spotify_credentials") }}</h3>
+                        <h3 class="font-medium">{{ $t("Settings.spotify_credentials") }}</h3>
                         <p class="text-sm text-muted-foreground">
                             {{ settingsStore.hasValidCredentials ? $t("Settings.spotify_credentials_set") : $t("Settings.spotify_credentials_not_set") }}
                         </p>
