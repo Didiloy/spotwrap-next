@@ -25,7 +25,7 @@
 
         <!-- Background Mode Section -->
         <div class="space-y-2">
-            <Label class="text-md text-purple-800">{{ $t("Settings.background_mode") }}</Label>
+            <Label class="text-purple-800">{{ $t("Settings.background_mode") }}</Label>
             <div class="space-y-4 ml-2">
                 <AutoStartToggle />
                 <AutoDownloadToggle />
@@ -47,11 +47,11 @@
 
         <!-- Append Artist/Album Path Toggle -->
         <div class="space-y-2">
-            <Label class="text-md text-purple-800">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
+            <Label class="text-purple-800">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
             <div class="flex items-center justify-between  ml-2">
                 <div>
-                    <p class="text-sm font-medium">{{ $t("Settings.appendPathTitle") }}</p>
-                    <p class="text-xs text-muted-foreground">
+                    <h3 class="">{{ $t("Settings.appendPathTitle") }}</h3>
+                    <p class="text-sm text-muted-foreground">
                         {{ $t("Settings.appendPathDescription") }}
                     </p>
                 </div>
@@ -64,12 +64,12 @@
 
         <!-- Spotify API Credentials -->
         <div class="space-y-2">
-            <Label class="text-md text-purple-800">{{ $t("Settings.spotify_api") }}</Label>
+            <Label class="text-purple-800">{{ $t("Settings.spotify_api") }}</Label>
             <div class="flex flex-col gap-2  ml-2">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-medium">{{ $t("Settings.spotify_credentials") }}</p>
-                        <p class="text-xs text-muted-foreground">
+                        <h3 class="">{{ $t("Settings.spotify_credentials") }}</h3>
+                        <p class="text-sm text-muted-foreground">
                             {{ settingsStore.hasValidCredentials ? $t("Settings.spotify_credentials_set") : $t("Settings.spotify_credentials_not_set") }}
                         </p>
                     </div>
@@ -143,7 +143,7 @@ import {
 } from "@/components/ui/select";
 import {
     Dialog,
-    DialogContent,
+DialogContent,
     DialogDescription,
     DialogFooter,
     DialogHeader,
