@@ -38,6 +38,10 @@ export const useTimelineStore = defineStore("timeline", () => {
     const markingAsSeenIndex = ref<number | null>(null);
 
     async function fetchTimelineItems(force = false) {
+        if (loading.value) {
+            return;
+        }
+
         if (timelineItems.value.length > 0 && !force) {
             return;
         }
