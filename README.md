@@ -8,6 +8,22 @@
 
 Spotwrap Next is a modern desktop application that helps you track and download your favorite music from Spotify. Built with Wails (Go + Vue-TS), it provides a seamless experience for managing your music collection and staying up-to-date with new releases.
 
+<p align="center">
+  <img src="images/home.png" alt="Home Screen" width="45%">
+  <img src="images/search.png" alt="Search Screen" width="45%">
+</p>
+
+<p align="center">
+  <img src="images/artist.png" alt="Artist Screen" width="45%">
+  <img src="images/album.png" alt="Album Screen" width="45%">
+</p>
+
+<p align="center">
+  <img src="images/settings.png" alt="Settings Screen" width="45%">
+</p>
+
+
+
 ## Features
 
 - 🎵 **Artist Tracking**: Subscribe to your favorite artists and get notified when they release new music
