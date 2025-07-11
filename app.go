@@ -78,16 +78,16 @@ func (a *App) fetchSpotifyAccessToken() {
 
 	a.spotifyAccessToken = token
 	a.tokenExpirationTime = time.Now().Add(time.Duration(expiresIn) * time.Second)
+	log.Println("Token refreshed")
 }
 
 // refreshTokenPeriodically refreshes the Spotify token every 55 minutes
 func (a *App) refreshTokenPeriodically() {
-	ticker := time.NewTicker(55 * time.Minute) // Refresh 5 min before expiry
+	ticker := time.NewTicker(30 * time.Second) // We can do that because in the function to refresh the token we verify if it is still valid and if yes we do not make any request
 	defer ticker.Stop()
 
 	for range ticker.C {
 		a.fetchSpotifyAccessToken()
-		log.Println("Token refreshed")
 	}
 }
 
