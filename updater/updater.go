@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -25,17 +24,9 @@ type PackageJSON struct {
 const LATEST_RELEASE_LINK = "https://api.github.com/repos/Didiloy/spotwrap-next/releases/latest"
 
 // GetCurrentAppVersion reads the version from package.json
-func GetCurrentAppVersion() (string, error) {
-	data, err := os.ReadFile("./frontend/package.json")
-	if err != nil {
-		data, err = os.ReadFile("package.json")
-		if err != nil {
-			return "", fmt.Errorf("failed to read package.json from ./frontend.package.json or package.json: %w", err)
-		}
-	}
-
+func GetCurrentAppVersion(file []byte) (string, error) {
 	var pkg PackageJSON
-	if err := json.Unmarshal(data, &pkg); err != nil {
+	if err := json.Unmarshal(file, &pkg); err != nil {
 		return "", fmt.Errorf("failed to parse package.json: %w", err)
 	}
 	return pkg.Version, nil

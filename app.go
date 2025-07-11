@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +18,9 @@ import (
 
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
+
+//go:embed frontend/package.json
+var packagejson []byte
 
 // App represents the main application structure
 type App struct {
@@ -431,7 +435,7 @@ type UpdateInfo struct {
 
 // CheckForUpdates checks if a new version of the application is available on GitHub.
 func (a *App) CheckForUpdates() map[string]any {
-	current_version, err := updater.GetCurrentAppVersion()
+	current_version, err := updater.GetCurrentAppVersion(packagejson)
 	if err != nil {
 		log.Printf("Error getting current app version: %v", err)
 		return map[string]any{"error": "Could not determine current app version: " + err.Error()}
