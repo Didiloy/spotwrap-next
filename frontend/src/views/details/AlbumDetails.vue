@@ -287,6 +287,19 @@ const selectDownloadPath = async () => {
     }
 };
 
+const buildExpectedFilenames = (): string[] => {
+    const tracks: any[] = album.value?.tracks || [];
+    const ext = downloadOptions.value.format || "mp3";
+    const unique = new Set<string>();
+    for (const t of tracks) {
+        const artist = sanitizeFilename(t?.artists?.[0]?.name || "");
+        const title = sanitizeFilename(t?.name || "");
+        if (!artist || !title) continue;
+        unique.add(`${artist} - ${title}.${ext}`);
+    }
+    return Array.from(unique);
+};
+
 const downloadAlbum = async () => {
     if (!downloadOptions.value.path) {
         toast({
@@ -303,16 +316,25 @@ const downloadAlbum = async () => {
         downloadStore.clearMessages();
         downloadStore.setupEventListener();
 
+        // Prepare expected filenames for backend verification
+        const expectedFiles = buildExpectedFilenames();
+
         // Download album - now returns a boolean
         const success = await Download(
             album.value.album.external_urls.spotify,
             pathToUse,
             downloadOptions.value.format,
             downloadOptions.value.bitrate + "k",
-            [],
+            expectedFiles,
         );
 
-        // Show success toast immediately if Download function returned true
+        // Check if backend reported missing tracks during verification
+        const missingAll = downloadStore.downloadMessages
+            .filter((m) => m.startsWith("missing_track:"))
+            .map((m) => m.replace("missing_track:", "").trim())
+            .filter((m) => m.length > 0);
+        const missing = Array.from(new Set(missingAll));
+
         if (success) {
             toast({
                 title: i18n.t("AlbumDetails.download_complete"),
@@ -322,13 +344,24 @@ const downloadAlbum = async () => {
                 variant: "default",
             });
         } else {
-            // Show error toast immediately if Download function returned false
             toast({
                 title: i18n.t("AlbumDetails.download_error"),
                 description: i18n.t("AlbumDetails.download_error_message"),
                 variant: "destructive",
             });
         }
+
+        if (missing.length > 0) {
+            // Send one toast per missing track
+            console.log("missing", missing);
+            for (const trackName of missing) {
+                toast({
+                    title: i18n.t("AlbumDetails.download_error"),
+                    description: `This song was not downloaded: ${trackName}`,
+                    variant: "destructive",
+                });
+            }
+        } 
 
         console.log("Download result:", success);
     } catch (error) {

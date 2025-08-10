@@ -45,9 +45,9 @@ func (d *Downloader) Startup(ctx context.Context, emitEvents bool) {
 // - outputPath: directory where to save the downloaded files
 // - format: output format (mp3, wav, etc.)
 // - bitrate: quality of the output (128k, 320k, etc.)
-// - songsToDelete: optional list of songs to delete after download
+// - songsToCheck: optional list of songs to check after download
 // Returns: boolean indicating whether the download was successful
-func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToDelete []string) bool {
+func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToCheck []string) bool {
 	// Extract the spotdl binary to a temporary location
 	tmpDir, err := os.MkdirTemp("", "spotdl")
 	if err != nil {
@@ -133,6 +133,29 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToD
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("command execution failed: %v", err))
 		return false
+	}
+
+	// Optional post-download verification: if a list of expected files was provided
+	// via songsToDelete, verify that each exists on disk. For any missing file,
+	// emit an update event that the frontend can react to.
+	if len(songsToCheck) > 0 {
+		// Indicate verification start
+		d.emitUpdateEvent("VerifyingDownload")
+
+		for _, expectedFileName := range songsToCheck {
+			var candidatePath string
+			if outputPath != "" {
+				candidatePath = filepath.Join(outputPath, expectedFileName)
+			} else {
+				candidatePath = expectedFileName
+			}
+
+			if _, statErr := os.Stat(candidatePath); os.IsNotExist(statErr) {
+				// Prefix with a recognizable tag for the frontend to parse
+				d.emitUpdateEvent(fmt.Sprintf("missing_track:%s", expectedFileName))
+			}
+		}
+		d.emitUpdateEvent("VerificationComplete")
 	}
 
 	d.emitUpdateEvent("Done")
