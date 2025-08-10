@@ -205,6 +205,26 @@ func GetTrackDetails(id string, token string) (map[string]any, error) {
 	return trackData, nil
 }
 
+// GetNewReleases fetches the featured new album releases from Spotify Browse API
+func GetNewReleases(token string, limit int, offset int) (map[string]any, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	if limit > 50 {
+		limit = 50
+	}
+	if offset < 0 {
+		offset = 0
+	}
+
+	url := fmt.Sprintf("%s/browse/new-releases?limit=%d&offset=%d", BaseURL, limit, offset)
+	result, err := makeRequest(url, token)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 // makeRequest makes an API request with rate limiting and retries
 func makeRequest(url string, token string) (map[string]any, error) {
 	req, err := http.NewRequest("GET", url, nil)

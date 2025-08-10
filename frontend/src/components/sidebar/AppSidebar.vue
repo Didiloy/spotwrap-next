@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Home, Settings, Search, Bell } from "lucide-vue-next";
+import { Home, Settings, Search, Bell, Sparkles } from "lucide-vue-next";
 import ProgressCard from "@/components/sidebar/ProgressCard.vue";
 import {
     Sidebar,
@@ -46,6 +46,11 @@ const items = ref([
         icon: Home,
     },
     {
+        title: i18n.t("AppSidebar.new_releases"),
+        url: "/new-releases",
+        icon: Sparkles,
+    },
+    {
         title: i18n.t("AppSidebar.search"),
         url: "/search",
         icon: Search,
@@ -71,6 +76,11 @@ watch(
                 title: i18n.t("AppSidebar.home"),
                 url: "/",
                 icon: Home,
+            },
+            {
+                title: i18n.t("AppSidebar.new_releases"),
+                url: "/new-releases",
+                icon: Sparkles,
             },
             {
                 title: i18n.t("AppSidebar.search"),

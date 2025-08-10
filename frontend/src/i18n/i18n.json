@@ -2,12 +2,24 @@
   "fr": {
     "AppSidebar": {
       "home": "Accueil",
+      "new_releases": "Nouvelles sorties",
       "settings": "Paramètres",
       "search": "Rechercher",
       "subscriptions": "Abonnements",
       "version": "Version",
       "download_error": "Erreur lors du téléchargement, consultez les journaux dans les paramètres pour plus d'informations.",
       "downloading": "Téléchargement en cours..."
+    },
+    "NewReleases": {
+      "title": "Nouvelles sorties",
+      "subtitle": "Découvrez les dernières sorties en vedette sur Spotify",
+      "loading": "Chargement des nouvelles sorties...",
+      "emptyTitle": "Aucune sortie trouvée",
+      "emptySubtitle": "Revenez plus tard pour découvrir les dernières nouveautés.",
+      "reload": "Rafraîchir",
+      "view": "Voir",
+      "prev": "Précédent",
+      "next": "Suivant"
     },
     "Search": {
       "placeholder": "Rechercher...",
@@ -175,12 +187,24 @@
   "en": {
     "AppSidebar": {
       "home": "Home",
+      "new_releases": "New Releases",
       "settings": "Settings",
       "search": "Search",
       "subscriptions": "Subscriptions",
       "version": "Version",
       "download_error": "Error downloading, check logs in settings for more information.",
       "downloading": "Downloading..."
+    },
+    "NewReleases": {
+      "title": "New Releases",
+      "subtitle": "Discover Spotify's featured latest album drops",
+      "loading": "Loading new releases...",
+      "emptyTitle": "No releases found",
+      "emptySubtitle": "Check back later to see the latest drops.",
+      "reload": "Reload",
+      "view": "View",
+      "prev": "Previous",
+      "next": "Next"
     },
     "Search": {
       "placeholder": "Search...",

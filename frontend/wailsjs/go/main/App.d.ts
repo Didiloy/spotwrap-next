@@ -16,6 +16,8 @@ export function GetArtist(arg1:string):Promise<Record<string, any>>;
 
 export function GetArtistsFromDB():Promise<Array<database.Artist>>;
 
+export function GetNewReleases(arg1:number,arg2:number):Promise<Record<string, any>>;
+
 export function GetSetting(arg1:string):Promise<string>;
 
 export function GetTrack(arg1:string):Promise<Record<string, any>>;

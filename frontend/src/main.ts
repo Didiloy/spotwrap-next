@@ -3,6 +3,7 @@ import App from "./App.vue";
 import Home from "./views/Home.vue";
 import Settings from "./views/Settings.vue";
 import Search from "./views/Search.vue";
+import NewReleases from "./views/NewReleases.vue";
 import Subscriptions from "./views/Subscriptions.vue";
 import ArtistDetails from "./views/details/ArtistDetails.vue";
 import AlbumDetails from "./views/details/AlbumDetails.vue";
@@ -18,6 +19,7 @@ const routes = [
   { path: "/", component: Home },
   { path: "/settings", component: Settings },
   { path: "/search/:term?", name: "search", component: Search },
+  { path: "/new-releases", component: NewReleases },
   { path: "/subscriptions", component: Subscriptions },
   { path: "/artist/:id", component: ArtistDetails },
   { path: "/album/:id", component: AlbumDetails },

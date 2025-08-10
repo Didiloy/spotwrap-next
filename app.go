@@ -131,6 +131,16 @@ func (a *App) GetTrack(id string) map[string]any {
 	return result
 }
 
+// GetNewReleases retrieves featured new releases from Spotify
+func (a *App) GetNewReleases(limit int, offset int) map[string]any {
+	result, err := api.GetNewReleases(a.spotifyAccessToken, limit, offset)
+	if err != nil {
+		log.Printf("Error getting new releases: %v", err)
+		return map[string]any{}
+	}
+	return result
+}
+
 // AddArtist adds an artist to the database by Spotify ID
 func (a *App) AddArtist(spotifyID string) bool {
 	success, err := a.db.AddArtist(spotifyID)

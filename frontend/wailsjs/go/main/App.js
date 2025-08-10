@@ -30,6 +30,10 @@ export function GetArtistsFromDB() {
   return window['go']['main']['App']['GetArtistsFromDB']();
 }
 
+export function GetNewReleases(arg1, arg2) {
+  return window['go']['main']['App']['GetNewReleases'](arg1, arg2);
+}
+
 export function GetSetting(arg1) {
   return window['go']['main']['App']['GetSetting'](arg1);
 }
