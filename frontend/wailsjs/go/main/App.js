@@ -26,8 +26,16 @@ export function GetArtist(arg1) {
   return window['go']['main']['App']['GetArtist'](arg1);
 }
 
+export function GetArtistAlbums(arg1) {
+  return window['go']['main']['App']['GetArtistAlbums'](arg1);
+}
+
 export function GetArtistsFromDB() {
   return window['go']['main']['App']['GetArtistsFromDB']();
+}
+
+export function GetArtistsLatestAlbumsBatch(arg1, arg2) {
+  return window['go']['main']['App']['GetArtistsLatestAlbumsBatch'](arg1, arg2);
 }
 
 export function GetNewReleases(arg1, arg2) {
@@ -36,6 +44,10 @@ export function GetNewReleases(arg1, arg2) {
 
 export function GetSetting(arg1) {
   return window['go']['main']['App']['GetSetting'](arg1);
+}
+
+export function GetSeveralArtists(arg1) {
+  return window['go']['main']['App']['GetSeveralArtists'](arg1);
 }
 
 export function GetTrack(arg1) {

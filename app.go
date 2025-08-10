@@ -141,6 +141,62 @@ func (a *App) GetNewReleases(limit int, offset int) map[string]any {
 	return result
 }
 
+// GetSeveralArtists fetches up to 50 artists in a single request
+func (a *App) GetSeveralArtists(ids []string) map[string]any {
+	result, err := api.GetSeveralArtists(ids, a.spotifyAccessToken)
+	if err != nil {
+		log.Printf("Error getting several artists: %v", err)
+		return map[string]any{}
+	}
+	return result
+}
+
+// GetArtistAlbums retrieves albums for a single artist (albums + singles)
+func (a *App) GetArtistAlbums(id string) map[string]any {
+	result, err := api.GetArtistAlbums(id, a.spotifyAccessToken)
+	if err != nil {
+		log.Printf("Error getting artist albums: %v", err)
+		return map[string]any{}
+	}
+	return result
+}
+
+// GetArtistsLatestAlbumsBatch returns basic artist info and recent albums for up to 50 artist IDs
+func (a *App) GetArtistsLatestAlbumsBatch(ids []string, perArtistLimit int) []map[string]any {
+	a.fetchSpotifyAccessToken()
+	payload := []map[string]any{}
+	// Fetch basic info in one call
+	artistsResp, err := api.GetSeveralArtists(ids, a.spotifyAccessToken)
+	if err != nil {
+		log.Printf("Error in GetSeveralArtists: %v", err)
+		return payload
+	}
+	artistsArr, ok := artistsResp["artists"].([]any)
+	if !ok {
+		return payload
+	}
+	for _, aobj := range artistsArr {
+		artistMap, ok := aobj.(map[string]any)
+		if !ok {
+			continue
+		}
+		id, _ := artistMap["id"].(string)
+		if id == "" {
+			continue
+		}
+		albumsResp, err := api.GetArtistAlbums(id, a.spotifyAccessToken)
+		if err != nil {
+			log.Printf("Error getting albums for %s: %v", id, err)
+			albumsResp = map[string]any{"items": []any{}}
+		}
+		payload = append(payload, map[string]any{
+			"artist": artistMap,
+			"albums": albumsResp["items"],
+		})
+	}
+	return payload
+}
+
 // AddArtist adds an artist to the database by Spotify ID
 func (a *App) AddArtist(spotifyID string) bool {
 	success, err := a.db.AddArtist(spotifyID)
@@ -327,112 +383,92 @@ func (a *App) checkForNewReleases() {
 
 	a.fetchSpotifyAccessToken()
 
-	for _, artist := range artists {
-		fmt.Printf("Checking for new releases from artist %s...\n", artist.SpotifyID)
-
-		// Get artist's latest albums
-		artistData, err := api.GetArtistDetails(artist.SpotifyID, a.spotifyAccessToken, true)
-		if err != nil {
-			fmt.Printf("Error getting artist details for %s: %v\n", artist.SpotifyID, err)
-			continue
+	// Process in chunks of 50
+	chunkSize := 50
+	for i := 0; i < len(artists); i += chunkSize {
+		end := i + chunkSize
+		if end > len(artists) {
+			end = len(artists)
 		}
-
-		// Check albums for new releases
-		albums, ok := artistData["albums"].([]any)
-		if !ok {
-			fmt.Printf("Unexpected albums format for artist %s\n", artist.SpotifyID)
-			continue
+		batch := artists[i:end]
+		// Collect IDs
+		ids := make([]string, 0, len(batch))
+		for _, ar := range batch {
+			ids = append(ids, ar.SpotifyID)
 		}
-
-		for _, album := range albums {
-			albumMap, ok := album.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			if a.IsANewRelease(artist.SpotifyID, albumMap) {
-				fmt.Printf("New release found for artist %s: %v\n", artist.SpotifyID, albumMap["name"])
-
-				albumName := albumMap["name"].(string)
-				artistName := artistData["artist"].(map[string]any)["name"].(string)
-				message := fmt.Sprintf("%s has released %s", artistName, albumName)
-
-				// Send desktop notification
-				if err := notifications.Notify("New Release!", message); err != nil {
-					fmt.Printf("Failed to send notification: %v\n", err)
+		// Fetch basic info + albums
+		grouped := a.GetArtistsLatestAlbumsBatch(ids, 10)
+		for _, entry := range grouped {
+			artistObj, _ := entry["artist"].(map[string]any)
+			albums, _ := entry["albums"].([]any)
+			artistID, _ := artistObj["id"].(string)
+			artistName, _ := artistObj["name"].(string)
+			for _, album := range albums {
+				albumMap, ok := album.(map[string]any)
+				if !ok {
+					continue
 				}
+				if a.IsANewRelease(artistID, albumMap) {
+					fmt.Printf("New release found for artist %s: %v\n", artistID, albumMap["name"])
+					albumName, _ := albumMap["name"].(string)
+					message := fmt.Sprintf("%s has released %s", artistName, albumName)
+					if err := notifications.Notify("New Release!", message); err != nil {
+						fmt.Printf("Failed to send notification: %v\n", err)
+					}
 
-				// Auto-download if enabled
-				autoDownload, _ := a.db.GetSetting("autoDownloadNewReleases")
-				if autoDownload == "true" {
-					// Determine base path
-					basePath, _ := a.db.GetSetting("newReleasesDownloadPath")
-					if basePath == "" {
-						// Fallback to default directory
-						homeDir, err := os.UserHomeDir()
-						if err != nil {
-							fmt.Printf("Error getting user home directory: %v\n", err)
+					autoDownload, _ := a.db.GetSetting("autoDownloadNewReleases")
+					if autoDownload == "true" {
+						basePath, _ := a.db.GetSetting("newReleasesDownloadPath")
+						if basePath == "" {
+							homeDir, err := os.UserHomeDir()
+							if err != nil {
+								fmt.Printf("Error getting user home directory: %v\n", err)
+								continue
+							}
+							basePath = filepath.Join(homeDir, "spotwrap")
+						}
+						appendPath, _ := a.db.GetSetting("appendArtistAlbumToPath")
+						if appendPath == "true" {
+							safeArtist := sanitizeFilename(artistName)
+							safeAlbum := sanitizeFilename(albumName)
+							basePath = filepath.Join(basePath, fmt.Sprintf("%s - %s", safeArtist, safeAlbum))
+						}
+						if basePath == "" {
+							fmt.Println("No valid download path found; skipping auto download")
 							continue
 						}
-						basePath = filepath.Join(homeDir, "spotwrap")
-					}
-
-					// Append "Artist - Album" folder if setting enabled
-					appendPath, _ := a.db.GetSetting("appendArtistAlbumToPath")
-					if appendPath == "true" {
-						safeArtist := sanitizeFilename(artistName)
-						safeAlbum := sanitizeFilename(albumName)
-						basePath = filepath.Join(basePath, fmt.Sprintf("%s - %s", safeArtist, safeAlbum))
-					}
-
-					if basePath == "" {
-						fmt.Println("No valid download path found; skipping auto download")
-						continue
-					}
-
-					if err := os.MkdirAll(basePath, 0755); err != nil {
-						fmt.Printf("Could not create download directory %s: %v\n", basePath, err)
-						continue
-					}
-
-					// Prepare download
-					externalUrls, ok := albumMap["external_urls"].(map[string]any)
-					if !ok {
-						fmt.Printf("Unexpected external_urls format for artist %s\n", artist.SpotifyID)
-						continue
-					}
-
-					spotifyURL, _ := externalUrls["spotify"].(string)
-					if spotifyURL != "" {
-						downloader := spotdl.NewDownloader()
-						downloader.Startup(a.ctx, false)
-						var wg sync.WaitGroup
-						wg.Add(1)
-						go func() {
-							defer wg.Done()
-							downloader.Download(spotifyURL, basePath, "mp3", "320k", []string{})
-							// Send desktop notification
-							if err := notifications.Notify("New Release!", "Downloaded "+fmt.Sprintf("%s - %s", artistName, albumName)); err != nil {
-								fmt.Printf("Failed to send notification: %v\n", err)
+						if err := os.MkdirAll(basePath, 0755); err != nil {
+							fmt.Printf("Could not create download directory %s: %v\n", basePath, err)
+							continue
+						}
+						externalUrls, ok := albumMap["external_urls"].(map[string]any)
+						if !ok {
+							fmt.Printf("Unexpected external_urls format for artist %s\n", artistID)
+							continue
+						}
+						spotifyURL, _ := externalUrls["spotify"].(string)
+						if spotifyURL != "" {
+							downloader := spotdl.NewDownloader()
+							downloader.Startup(a.ctx, false)
+							var wg sync.WaitGroup
+							wg.Add(1)
+							go func() {
+								defer wg.Done()
+								downloader.Download(spotifyURL, basePath, "mp3", "320k", []string{})
+								if err := notifications.Notify("New Release!", "Downloaded "+fmt.Sprintf("%s - %s", artistName, albumName)); err != nil {
+									fmt.Printf("Failed to send notification: %v\n", err)
+								}
+								fmt.Println("Downloaded " + fmt.Sprintf("%s - %s", artistName, albumName))
+							}()
+							wg.Wait()
+							if _, err := a.db.AddArtist(artistID); err != nil {
+								fmt.Printf("Error updating last_checked for artist %s: %v\n", artistID, err)
 							}
-							fmt.Println("Downloaded " + fmt.Sprintf("%s - %s", artistName, albumName))
-						}()
-						wg.Wait()
-
-						// Update last_checked for artist if we downloaded something
-						if _, err := a.db.AddArtist(artist.SpotifyID); err != nil {
-							fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
 						}
 					}
-
 				}
 			}
 		}
-
-		// Do not update last checked time because in we dont want to update it in the background check
-		// if _, err := a.db.AddArtist(artist.SpotifyID); err != nil {
-		// 	fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
-		// }
 	}
 
 	fmt.Println("Background check completed")

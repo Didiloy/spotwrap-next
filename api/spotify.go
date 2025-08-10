@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -203,6 +204,27 @@ func GetTrackDetails(id string, token string) (map[string]any, error) {
 	trackData["track"] = trackInfo
 
 	return trackData, nil
+}
+
+// GetSeveralArtists fetches up to 50 artists at once by IDs
+func GetSeveralArtists(ids []string, token string) (map[string]any, error) {
+	if len(ids) == 0 {
+		return map[string]any{"artists": []any{}}, nil
+	}
+	if len(ids) > 50 {
+		ids = ids[:50]
+	}
+
+	q := url.Values{}
+	q.Add("ids", strings.Join(ids, ","))
+	urlStr := fmt.Sprintf("%s/artists?%s", BaseURL, q.Encode())
+	return makeRequest(urlStr, token)
+}
+
+// GetArtistAlbums fetches albums (and singles) for an artist, without extra info
+func GetArtistAlbums(id string, token string) (map[string]any, error) {
+	albumsURL := fmt.Sprintf("%s/%s/albums?include_groups=single,album", ArtistURL, id)
+	return makeRequest(albumsURL, token)
 }
 
 // GetNewReleases fetches the featured new album releases from Spotify Browse API

@@ -1,10 +1,11 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import {
-    GetArtist,
     GetArtistsFromDB,
     IsANewRelease,
     AddArtist,
+    GetSeveralArtists,
+    GetArtistAlbums,
 } from "../../wailsjs/go/main/App";
 import { GetDominantColor } from "../../wailsjs/go/utils/Utils";
 
@@ -64,25 +65,40 @@ export const useTimelineStore = defineStore("timeline", () => {
             totalArtistsToCheck.value = artists.length;
             const allAlbums: TimelineItem[] = [];
 
-            for (let i = 0; i < artists.length; i++) {
-                const artist = artists[i];
-                currentArtistProgressIndex.value = i + 1;
+            // Process in chunks of 50 artists
+            const chunkSize = 50;
+            for (let start = 0; start < artists.length; start += chunkSize) {
+                const end = Math.min(start + chunkSize, artists.length);
+                const batch = artists.slice(start, end);
 
-                const artistData = await GetArtist(artist.SpotifyID);
-                currentCheckingArtist.value = artistData.artist.name;
+                const ids = batch.map((a) => a.SpotifyID);
+                // Fetch basic artist info for names/images (batched up to 50)
+                const artistsResp: any = await GetSeveralArtists(ids);
+                const artistObjs: any[] = (artistsResp?.artists as any[]) || [];
 
-                if (artistData.albums) {
-                    for (const album of artistData.albums) {
+                for (let bi = 0; bi < artistObjs.length; bi++) {
+                    const artistObj = artistObjs[bi];
+                    if (!artistObj || !artistObj.id) continue;
+
+                    // Update progress immediately per artist
+                    currentArtistProgressIndex.value = start + bi + 1;
+                    currentCheckingArtist.value = artistObj.name || "";
+
+                    // Fetch recent albums/singles for this artist
+                    const albumsResp: any = await GetArtistAlbums(artistObj.id);
+                    const albums: any[] = (albumsResp?.items as any[]) || [];
+
+                    for (const album of albums) {
                         const isNewRelease = await IsANewRelease(
-                            artist.SpotifyID,
-                            album,
+                            artistObj.id,
+                            album as any,
                         );
 
                         allAlbums.push({
                             artist: {
-                                id: artistData.artist.id,
-                                name: artistData.artist.name,
-                                images: artistData.artist.images,
+                                id: artistObj.id,
+                                name: artistObj.name,
+                                images: artistObj.images,
                             },
                             album: {
                                 id: album.id,
