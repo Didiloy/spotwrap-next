@@ -320,7 +320,7 @@ func (a *App) checkForNewReleases() {
 	for _, artist := range artists {
 		fmt.Printf("Checking for new releases from artist %s...\n", artist.SpotifyID)
 
-		// Get artist's latest albums with retry mechanism
+		// Get artist's latest albums
 		artistData, err := api.GetArtistDetails(artist.SpotifyID, a.spotifyAccessToken, true)
 		if err != nil {
 			fmt.Printf("Error getting artist details for %s: %v\n", artist.SpotifyID, err)
@@ -408,6 +408,11 @@ func (a *App) checkForNewReleases() {
 							fmt.Println("Downloaded " + fmt.Sprintf("%s - %s", artistName, albumName))
 						}()
 						wg.Wait()
+
+						// Update last_checked for artist if we downloaded something
+						if _, err := a.db.AddArtist(artist.SpotifyID); err != nil {
+							fmt.Printf("Error updating last_checked for artist %s: %v\n", artist.SpotifyID, err)
+						}
 					}
 
 				}
