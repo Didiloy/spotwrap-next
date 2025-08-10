@@ -163,7 +163,6 @@ watch(downloadStore.downloadMessages, (messages) => {
                 :progress="50"
                 :showProgress="isDownloading"
                 :message="lastMessage"
-                :maxLength="30"
                 class="w-full mb-2"
             />
             <span class="text-xs text-sidebar-foreground/70"
