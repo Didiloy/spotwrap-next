@@ -14,7 +14,7 @@ import {
     SidebarFooter,
     useSidebar,
 } from "@/components/ui/sidebar";
-import SidebarNavControls from "@/components/SidebarNavControls.vue";
+import SidebarNavControls from "@/components/sidebar/SidebarNavControls.vue";
 import logo from "../../assets/images/appicon.png";
 import { useDownloadStore } from "@/store/download";
 import { storeToRefs } from "pinia";

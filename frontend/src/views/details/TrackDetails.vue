@@ -74,8 +74,10 @@
                                     •
                                     {{
                                         trackDetails?.track?.album?.total_tracks
+                                        + " " +
+                                        i18n.t("AlbumDetails.tracks")
                                     }}
-                                    tracks
+                                   
                                 </p>
                             </div>
                         </div>
