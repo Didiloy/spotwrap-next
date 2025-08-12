@@ -254,7 +254,6 @@ const downloadStore = useDownloadStore();
 const settingsStore = useSettingsStore();
 const i18n = useI18n();
 const route = useRoute();
-const router = useRouter();
 const { toast } = useToast();
 const trackDetails = ref<any>(null);
 
@@ -288,19 +287,22 @@ const effectiveDownloadPath = computed(() => {
     if (!basePath) return "";
 
     if (settingsStore.appendArtistAlbumToPath) {
-            const saneArtistName = sanitizeFilename(artistName.value);
-            const saneAlbumName = sanitizeFilename(albumName.value);
-            return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
+        const saneArtistName = sanitizeFilename(artistName.value);
+        const saneAlbumName = sanitizeFilename(albumName.value);
+        return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
     }
     return basePath;
 });
 
-
-watch(() => settingsStore.lastDownloadPath, (newPath) => {
-    if (newPath) {
-        downloadOptions.value.path = newPath;
-    }
-}, { immediate: true });
+watch(
+    () => settingsStore.lastDownloadPath,
+    (newPath) => {
+        if (newPath) {
+            downloadOptions.value.path = newPath;
+        }
+    },
+    { immediate: true },
+);
 
 const formatDuration = (ms?: number) => {
     if (!ms) return "0:00";
@@ -319,7 +321,6 @@ const formatDate = (dateString?: string) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const error = ref<string | null>(null);
 const selectDownloadPath = async () => {
     const selectedPath = await ChooseDirectory();
     if (selectedPath) {
@@ -337,14 +338,14 @@ const downloadTrack = async () => {
         });
         return;
     }
-    
+
     const pathToUse = effectiveDownloadPath.value;
 
     try {
         // Setup event listener for download updates
         downloadStore.clearMessages();
         downloadStore.setupEventListener();
-        
+
         // Download track - now returns a boolean
         const success = await Download(
             trackDetails.value.track.external_urls.spotify,
@@ -353,13 +354,13 @@ const downloadTrack = async () => {
             downloadOptions.value.bitrate + "k",
             [],
         );
-        
+
         // Show success toast immediately if Download function returned true
         if (success) {
             toast({
                 title: i18n.t("TrackDetails.download_complete"),
                 description: i18n.t("TrackDetails.download_complete_message", {
-                    name: trackDetails.value.track.name
+                    name: trackDetails.value.track.name,
                 }),
                 variant: "default",
             });
@@ -371,7 +372,7 @@ const downloadTrack = async () => {
                 variant: "destructive",
             });
         }
-        
+
         console.log("Download result:", success);
     } catch (error) {
         console.error("Download error:", error);
@@ -412,7 +413,7 @@ const getTrackDetails = async (id: string) => {
 
 const sanitizeFilename = (name: string): string => {
     if (!name) return "";
-    return name.replace(/[\\/:*?"<>|]/g, '-');
+    return name.replace(/[\\/:*?"<>|]/g, "-");
 };
 </script>
 
