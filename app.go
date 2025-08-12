@@ -386,10 +386,7 @@ func (a *App) checkForNewReleases() {
 	// Process in chunks of 50
 	chunkSize := 50
 	for i := 0; i < len(artists); i += chunkSize {
-		end := i + chunkSize
-		if end > len(artists) {
-			end = len(artists)
-		}
+		end := min(i+chunkSize, len(artists))
 		batch := artists[i:end]
 		// Collect IDs
 		ids := make([]string, 0, len(batch))
