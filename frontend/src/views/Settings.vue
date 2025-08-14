@@ -94,35 +94,7 @@
         </div>
 
         <!-- Logs Dialog -->
-        <Dialog v-model:open="showLogsDialog">
-            <DialogContent class="max-h-[80vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle>{{ $t("Settings.logs_title") }}</DialogTitle>
-                    <DialogDescription>
-                        {{ $t("Settings.logs_description") }}
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div class="font-mono text-sm space-y-1">
-                    <div
-                        v-for="(log, index) in logs"
-                        :key="index"
-                        class="py-1 border-b"
-                    >
-                        {{ log }}
-                    </div>
-                    <div v-if="logs.length === 0" class="text-muted-foreground">
-                        {{ $t("Settings.no_logs") }}
-                    </div>
-                </div>
-
-                <DialogFooter>
-                    <Button @click="showLogsDialog = false">
-                        {{ $t("Settings.close") }}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <LogsDialog v-model:open="showLogsDialog" />
 
         <!-- Spotify Credentials Modal -->
         <SpotifyCredentialsModal v-model:open="settingsStore.showCredentialsModal" @saved="checkCredentials" />
@@ -137,19 +109,10 @@ import {
     SelectContent,
     SelectGroup,
     SelectItem,
-    SelectLabel,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Dialog,
-DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
+import LogsDialog from "@/components/settings/LogsDialog.vue";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -163,7 +126,6 @@ import { ChooseDirectory, SetSetting } from "../../wailsjs/go/main/App";
 const { locale, t } = useI18n();
 const downloadStore = useDownloadStore();
 const settingsStore = useSettingsStore();
-// Available languages
 const availableLanguages = [
     { code: "en", name: "English" },
     { code: "fr", name: "Français" },
@@ -179,37 +141,22 @@ watch(currentLanguage, (newLang) => {
     localStorage.setItem("lang", newLang);
 });
 
-// Spotify credentials state
 function checkCredentials() {
     settingsStore.checkCredentialsValidity();
 }
 
-// Set initial language
 onMounted(async () => {
     if (currentLanguage.value) {
         locale.value = currentLanguage.value;
     }
-    logs.value = [...downloadStore.downloadMessages];
 });
 
-// Logs dialog state
 const showLogsDialog = ref(false);
-const logs = ref<string[]>([]);
-
-watch(
-    () => downloadStore.downloadMessages,
-    (newLogs) => {
-        logs.value = [...newLogs];
-    },
-    { deep: true },
-);
 
 function clearLogs() {
     downloadStore.clearMessages();
-    logs.value = [];
 }
 
-// Preferred path selector
 const selectPreferredPath = async () => {
     const selectedPath = await ChooseDirectory();
     if (selectedPath) {

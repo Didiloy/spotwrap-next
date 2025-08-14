@@ -151,7 +151,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 	// emit an update event that the frontend can react to.
 	if len(songsToCheck) > 0 {
 		// Indicate verification start
-		d.emitUpdateEvent("VerifyingDownload")
+		d.emitUpdateEvent("Verifying download")
 
 		for _, expectedFileName := range songsToCheck {
 			var candidatePath string
@@ -166,7 +166,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 				d.emitUpdateEvent(fmt.Sprintf("missing_track:%s", expectedFileName))
 			}
 		}
-		d.emitUpdateEvent("VerificationComplete")
+		d.emitUpdateEvent("Verification complete")
 	}
 
 	d.emitUpdateEvent("Done")

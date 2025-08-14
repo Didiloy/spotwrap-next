@@ -13,17 +13,15 @@ export const useDownloadStore = defineStore("download", () => {
 
   function setupEventListener() {
     EventsOn("update_in_download", (message: string) => {
-      // Create a new array reference to ensure reactivity
-      downloadMessages.value = [...downloadMessages.value, message];
+      if (!downloadMessages.value.includes(message)) {
+        downloadMessages.value = [...downloadMessages.value, message];
+      }
 
-      // Update downloading status
       if (message === "Done") {
         isDownloading.value = false;
       } else if (!isDownloading.value && message.includes("Downloading")) {
         isDownloading.value = true;
       }
-
-      console.log("Download update:", message);
     });
   }
 
