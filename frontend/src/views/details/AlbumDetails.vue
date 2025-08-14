@@ -243,26 +243,22 @@ const effectiveDownloadPath = computed(() => {
     if (!basePath) return "";
 
     if (settingsStore.appendArtistAlbumToPath) {
-            const saneArtistName = sanitizeFilename(artistName.value);
-            const saneAlbumName = sanitizeFilename(albumName.value);
-            return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
-        
+        const saneArtistName = sanitizeFilename(artistName.value);
+        const saneAlbumName = sanitizeFilename(albumName.value);
+        return `${basePath}/${saneArtistName} - ${saneAlbumName}`;
     }
     return basePath;
 });
 
-watch(() => settingsStore.lastDownloadPath, (newPath) => {
-    if (newPath) {
-        downloadOptions.value.path = newPath;
-    }
-}, { immediate: true });
-
-const formatDuration = (ms?: number) => {
-    if (!ms) return "0:00";
-    const minutes = Math.floor(ms / 60000);
-    const seconds = ((ms % 60000) / 1000).toFixed(0);
-    return `${minutes}:${seconds.padStart(2, "0")}`;
-};
+watch(
+    () => settingsStore.lastDownloadPath,
+    (newPath) => {
+        if (newPath) {
+            downloadOptions.value.path = newPath;
+        }
+    },
+    { immediate: true },
+);
 
 const formatDate = (dateString?: string) => {
     if (!dateString) return "";
@@ -274,11 +270,6 @@ const formatDate = (dateString?: string) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const goToTrack = (trackId: string) => {
-    router.push(`/track/${trackId}`);
-};
-
-const error = ref<string | null>(null);
 const selectDownloadPath = async () => {
     const selectedPath = await ChooseDirectory();
     if (selectedPath) {
@@ -319,7 +310,6 @@ const downloadAlbum = async () => {
         // Prepare expected filenames for backend verification
         const expectedFiles = buildExpectedFilenames();
 
-        // Download album - now returns a boolean
         const success = await Download(
             album.value.album.external_urls.spotify,
             pathToUse,
@@ -353,7 +343,6 @@ const downloadAlbum = async () => {
 
         if (missing.length > 0) {
             // Send one toast per missing track
-            console.log("missing", missing);
             for (const trackName of missing) {
                 toast({
                     title: i18n.t("AlbumDetails.download_error"),
@@ -361,7 +350,7 @@ const downloadAlbum = async () => {
                     variant: "destructive",
                 });
             }
-        } 
+        }
 
         console.log("Download result:", success);
     } catch (error) {
@@ -388,9 +377,8 @@ const heroSectionStyle = computed(() => {
 
 const sanitizeFilename = (name: string): string => {
     if (!name) return "";
-    return name.replace(/[\\/:*?"<>|]/g, '-');
+    return name.replace(/[\\/:*?"<>|]/g, "-");
 };
-
 </script>
 
 <style scoped>

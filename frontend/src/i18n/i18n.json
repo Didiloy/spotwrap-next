@@ -1,5 +1,8 @@
 {
   "fr": {
+    "SidebarNavControls": {
+      "back": "Retour"
+    },
     "AppSidebar": {
       "home": "Accueil",
       "new_releases": "Nouvelles sorties",
@@ -185,6 +188,9 @@
     }
   },
   "en": {
+    "SidebarNavControls": {
+      "back": "Back"
+    },
     "AppSidebar": {
       "home": "Home",
       "new_releases": "New Releases",
