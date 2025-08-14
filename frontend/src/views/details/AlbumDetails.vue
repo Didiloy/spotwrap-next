@@ -1,7 +1,7 @@
 <template>
     <div class="album-detail h-full overflow-y-auto">
         <!-- Hero Section -->
-        <div class="relative w-full" :style="heroSectionStyle">
+        <div class="relative w-full rounded-lg" :style="heroSectionStyle">
             <div
                 class="container mx-auto px-6 py-12 flex flex-col md:flex-row items-start gap-8"
             >
