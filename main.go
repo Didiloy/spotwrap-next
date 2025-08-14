@@ -47,7 +47,7 @@ func startGUI() error {
 	}
 
 	utils := utils.New()
-	downloader := spotdl.NewDownloader()
+	downloader := spotdl.NewDownloader(app.db)
 	autostartSvc := autostart.New("spotwrap-next", "Spotwrap Next")
 
 	// Create application with options

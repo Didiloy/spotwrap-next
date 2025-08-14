@@ -448,7 +448,7 @@ func (a *App) checkForNewReleases() {
 						}
 						spotifyURL, _ := externalUrls["spotify"].(string)
 						if spotifyURL != "" {
-							downloader := spotdl.NewDownloader()
+							downloader := spotdl.NewDownloader(a.db)
 							downloader.Startup(a.ctx, false)
 							var wg sync.WaitGroup
 							wg.Add(1)

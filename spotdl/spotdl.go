@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 
+	"spotwrap-next/database"
+
 	wailsruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -26,11 +28,12 @@ const (
 type Downloader struct {
 	ctx        context.Context
 	emitEvents bool
+	db         *database.Database
 }
 
 // NewDownloader creates a new Downloader instance
-func NewDownloader() *Downloader {
-	return &Downloader{}
+func NewDownloader(db *database.Database) *Downloader {
+	return &Downloader{db: db}
 }
 
 // Startup is called when the application starts
@@ -74,11 +77,19 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 		spotdlPath = filepath.Join(tmpDir, "spotdl")
 	}
 
+	creds, err := d.db.GetSpotifyCredentials()
+	if err != nil {
+		log.Printf("Error fetching credentials: %v", err)
+		return false
+	}
+
 	// Prepare arguments
 	args := []string{
 		link,
 		"--bitrate", bitrate,
 		"--format", format,
+		"--client-id", creds.ClientID,
+		"--client-secret", creds.ClientSecret,
 		"--output",
 	}
 
