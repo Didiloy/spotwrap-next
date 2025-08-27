@@ -42,7 +42,7 @@ Spotwrap Next is a modern desktop application that helps you track and download 
    - Click "Create App"
    - Fill in the application details:
      - App name: Choose a name (e.g., "Spotwrap Next")
-     - Redirect URI: `http://localhost:8080/callback`
+     - Redirect URI: `https://127.0.0.1`
      - Description: Optional
    - Once created, you'll see your `Client ID`
    - Click "Show Client Secret" to reveal your `Client Secret`
@@ -82,4 +82,4 @@ wails build
 ## Acknowledgments
 
 - Built with [Wails](https://wails.io/)
-- Powered by [Spotify Web API](https://developer.spotify.com/documentation/web-api/)
+- Powered by [Spotify Web API](https://developer.spotify.com/documentation/web-api/) and [SpotDL](https://github.com/spotDL/spotify-downloader/tree/master/)
