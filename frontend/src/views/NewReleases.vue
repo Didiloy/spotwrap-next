@@ -27,9 +27,7 @@
         </div>
 
         <div v-if="loading" class="grid place-items-center py-16">
-            <div
-                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"
-            ></div>
+            <Loader />
             <p class="text-zinc-500 dark:text-zinc-400">
                 {{ $t("NewReleases.loading") }}
             </p>
@@ -98,6 +96,7 @@ import { Button } from "@/components/ui/button";
 import Card from "@/components/new_releases/Card.vue";
 import { RefreshCw, Sparkles } from "lucide-vue-next";
 import { GetNewReleases } from "../../wailsjs/go/main/App";
+import Loader from "@/components/common/Loader.vue";
 
 const router = useRouter();
 const loading = ref(false);

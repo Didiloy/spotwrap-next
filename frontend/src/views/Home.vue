@@ -30,9 +30,7 @@
             v-if="loading && !initialLoaded"
             class="flex flex-col items-center justify-center py-12"
         >
-            <div
-                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"
-            ></div>
+            <Loader />
             <p class="text-gray-400">{{ $t("Home.loading") }}</p>
             <p class="text-gray-400 text-sm mt-2 max-w-md text-center">
                 {{ $t("Home.loading_rate_limit") }}
@@ -234,6 +232,7 @@ import { useRouter } from "vue-router";
 import { RefreshCw } from "lucide-vue-next";
 import { useToast } from "@/components/ui/toast/use-toast";
 import { useI18n } from "vue-i18n";
+import Loader from "@/components/common/Loader.vue";
 
 const { t } = useI18n();
 const { toast } = useToast();

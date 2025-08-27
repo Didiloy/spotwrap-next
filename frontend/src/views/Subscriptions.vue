@@ -4,11 +4,11 @@
             v-if="loading"
             class="flex flex-col items-center justify-center py-12"
         >
-            <div
-                class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"
-            ></div>
+            <Loader />
             <p class="text-gray-400">{{ $t("Subscriptions.loading") }}</p>
-            <p class="text-gray-400 text-sm mt-2 max-w-md text-center">{{ $t("Subscriptions.loading_rate_limit") }}</p>
+            <p class="text-gray-400 text-sm mt-2 max-w-md text-center">
+                {{ $t("Subscriptions.loading_rate_limit") }}
+            </p>
         </div>
 
         <div
@@ -95,6 +95,7 @@ import { GetArtistsFromDB, RemoveArtist } from "../../wailsjs/go/main/App";
 import { useI18n } from "vue-i18n";
 import { useToast } from "@/components/ui/toast/use-toast";
 import Sort from "../components/subscriptions/Sort.vue";
+import Loader from "@/components/common/Loader.vue";
 
 const { toast } = useToast();
 const i18n = useI18n();
