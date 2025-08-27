@@ -1,5 +1,7 @@
 <template>
-    <div class="settings-page p-6 max-w-3xl mx-auto space-y-8 overflow-y-auto h-full">
+    <div
+        class="settings-page p-6 max-w-3xl mx-auto space-y-8 overflow-y-auto h-full"
+    >
         <h1 class="text-2xl font-bold">{{ $t("Settings.title") }}</h1>
 
         <!-- Language Selector -->
@@ -25,7 +27,9 @@
 
         <!-- Background Mode Section -->
         <div class="space-y-2">
-            <Label class="text-purple-800">{{ $t("Settings.background_mode") }}</Label>
+            <Label class="text-purple-800">{{
+                $t("Settings.background_mode")
+            }}</Label>
             <div class="space-y-4 ml-2">
                 <AutoStartToggle />
                 <AutoDownloadToggle />
@@ -35,7 +39,10 @@
                     <Button @click="selectPreferredPath" variant="outline">
                         {{ t("AlbumDetails.select_path") }}
                     </Button>
-                    <span v-if="settingsStore.newReleasesDownloadPath" class="text-sm text-green-600">
+                    <span
+                        v-if="settingsStore.newReleasesDownloadPath"
+                        class="text-sm text-green-600"
+                    >
                         {{ settingsStore.newReleasesDownloadPath }}
                     </span>
                     <span v-else class="text-sm text-muted-foreground">
@@ -47,34 +54,52 @@
 
         <!-- Append Artist/Album Path Toggle -->
         <div class="space-y-2">
-            <Label class="text-purple-800">{{ $t("Settings.downloadPathOptionsTitle") }}</Label>
-            <div class="flex items-center justify-between  ml-2">
+            <Label class="text-purple-800">{{
+                $t("Settings.downloadPathOptionsTitle")
+            }}</Label>
+            <div class="flex items-center justify-between ml-2">
                 <div>
-                    <h3 class="font-medium">{{ $t("Settings.appendPathTitle") }}</h3>
+                    <h3 class="font-medium">
+                        {{ $t("Settings.appendPathTitle") }}
+                    </h3>
                     <p class="text-sm text-muted-foreground">
                         {{ $t("Settings.appendPathDescription") }}
                     </p>
                 </div>
-                <Switch 
+                <Switch
                     :model-value="settingsStore.appendArtistAlbumToPath"
-                    @update:model-value="settingsStore.toggleAppendArtistAlbumToPath"
+                    @update:model-value="
+                        settingsStore.toggleAppendArtistAlbumToPath
+                    "
                 />
             </div>
         </div>
 
         <!-- Spotify API Credentials -->
         <div class="space-y-2">
-            <Label class="text-purple-800">{{ $t("Settings.spotify_api") }}</Label>
-            <div class="flex flex-col gap-2  ml-2">
+            <Label class="text-purple-800">{{
+                $t("Settings.spotify_api")
+            }}</Label>
+            <div class="flex flex-col gap-2 ml-2">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="font-medium">{{ $t("Settings.spotify_credentials") }}</h3>
+                        <h3 class="font-medium">
+                            {{ $t("Settings.spotify_credentials") }}
+                        </h3>
                         <p class="text-sm text-muted-foreground">
-                            {{ settingsStore.hasValidCredentials ? $t("Settings.spotify_credentials_set") : $t("Settings.spotify_credentials_not_set") }}
+                            {{
+                                settingsStore.hasValidCredentials
+                                    ? $t("Settings.spotify_credentials_set")
+                                    : $t("Settings.spotify_credentials_not_set")
+                            }}
                         </p>
                     </div>
                     <Button @click="settingsStore.showCredentialsModal = true">
-                        {{ settingsStore.hasValidCredentials ? $t("Settings.update_credentials") : $t("Settings.set_credentials") }}
+                        {{
+                            settingsStore.hasValidCredentials
+                                ? $t("Settings.update_credentials")
+                                : $t("Settings.set_credentials")
+                        }}
                     </Button>
                 </div>
             </div>
@@ -97,7 +122,10 @@
         <LogsDialog v-model:open="showLogsDialog" />
 
         <!-- Spotify Credentials Modal -->
-        <SpotifyCredentialsModal v-model:open="settingsStore.showCredentialsModal" @saved="checkCredentials" />
+        <SpotifyCredentialsModal
+            v-model:open="settingsStore.showCredentialsModal"
+            @saved="checkCredentials"
+        />
     </div>
 </template>
 
@@ -160,7 +188,7 @@ function clearLogs() {
 const selectPreferredPath = async () => {
     const selectedPath = await ChooseDirectory();
     if (selectedPath) {
-        await SetSetting("newReleasesDownloadPath",selectedPath);
+        await SetSetting("newReleasesDownloadPath", selectedPath);
         await settingsStore.fetchNewReleasesDownloadPath();
     }
 };

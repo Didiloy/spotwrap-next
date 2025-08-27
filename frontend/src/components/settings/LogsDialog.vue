@@ -1,6 +1,6 @@
 <template>
     <Dialog :open="open" @update:open="onUpdateOpen">
-        <DialogContent class="max-h-[80vh] overflow-y-auto">
+        <DialogContent class="max-h-[80vh] max-w-4xl w-fit overflow-y-auto">
             <DialogHeader>
                 <DialogTitle>{{ t("Settings.logs_title") }}</DialogTitle>
                 <DialogDescription>
@@ -16,7 +16,10 @@
                 >
                     {{ log }}
                 </div>
-                <div v-if="downloadStore.downloadMessages.length === 0" class="text-muted-foreground">
+                <div
+                    v-if="downloadStore.downloadMessages.length === 0"
+                    class="text-muted-foreground"
+                >
                     {{ t("Settings.no_logs") }}
                 </div>
             </div>
@@ -53,5 +56,3 @@ function onUpdateOpen(value: boolean) {
     emit("update:open", value);
 }
 </script>
-
-
