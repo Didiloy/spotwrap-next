@@ -17,7 +17,10 @@
                 size="sm"
                 class="rounded-md"
             >
-                <RefreshCw class="w-5 h-5" :class="{ 'animate-spin': loading }" />
+                <RefreshCw
+                    class="w-5 h-5"
+                    :class="{ 'animate-spin': loading }"
+                />
                 {{ $t("Home.reload") }}
             </Button>
         </div>
@@ -31,9 +34,20 @@
                 class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500 mb-4"
             ></div>
             <p class="text-gray-400">{{ $t("Home.loading") }}</p>
-            <p class="text-gray-400 text-sm mt-2 max-w-md text-center">{{ $t("Home.loading_rate_limit") }}</p>
-            <p v-if="currentCheckingArtist && totalArtistsToCheck > 0" class="text-purple-400 text-sm mt-3 font-medium">
-                {{ $t("Home.checking_artist_progress", { name: currentCheckingArtist, index: currentArtistProgressIndex, total: totalArtistsToCheck }) }}
+            <p class="text-gray-400 text-sm mt-2 max-w-md text-center">
+                {{ $t("Home.loading_rate_limit") }}
+            </p>
+            <p
+                v-if="currentCheckingArtist && totalArtistsToCheck > 0"
+                class="text-purple-400 text-sm mt-3 font-medium"
+            >
+                {{
+                    $t("Home.checking_artist_progress", {
+                        name: currentCheckingArtist,
+                        index: currentArtistProgressIndex,
+                        total: totalArtistsToCheck,
+                    })
+                }}
             </p>
         </div>
 
@@ -64,7 +78,7 @@
             </p>
             <Button
                 class="mt-4 rounded-full bg-purple-600 hover:bg-purple-700 transition-colors"
-                @click="goToSearch"
+                @click="goToNewReleases"
             >
                 {{ $t("Home.discoverArtists") }}
             </Button>
@@ -108,9 +122,7 @@
                     <!-- Content card -->
                     <div
                         class="backdrop-blur-sm rounded-xl p-5 border border-gray-700/50 transition-all duration-300 group-hover:border-purple-500/50"
-                        :style="
-                            getCardStyle(index)
-                        "
+                        :style="getCardStyle(index)"
                     >
                         <div
                             v-if="artist.isNewRelease"
@@ -249,18 +261,19 @@ const formatReleaseDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-const getCardStyle = ( index: number) => {
+const getCardStyle = (index: number) => {
     const item = timelineItems.value[index];
     if (item && item.dominantColors && item.dominantColors.length >= 2) {
         return {
             background: `linear-gradient(135deg, ${item.dominantColors[0]} 0%, ${item.dominantColors[1]} 100%)`,
-            backdropFilter: 'blur(8px)',
+            backdropFilter: "blur(8px)",
         };
     }
     // Fallback to default gradient if colors not loaded yet
     return {
-        background: 'linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(30, 64, 175, 0.2) 100%)',
-        backdropFilter: 'blur(8px)',
+        background:
+            "linear-gradient(135deg, rgba(79, 70, 229, 0.2) 0%, rgba(30, 64, 175, 0.2) 100%)",
+        backdropFilter: "blur(8px)",
     };
 };
 
@@ -277,8 +290,8 @@ async function reloadTimeline() {
     });
 }
 
-function goToSearch() {
-    router.push("/search");
+function goToNewReleases() {
+    router.push("/new-releases");
 }
 
 function goToAlbum(id: string) {
