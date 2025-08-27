@@ -165,7 +165,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 
 			if _, statErr := os.Stat(candidatePath); os.IsNotExist(statErr) {
 				// Prefix with a recognizable tag for the frontend to parse
-				d.emitUpdateEvent(fmt.Sprintf("missing track: %s", expectedFileName))
+				d.emitUpdateEvent(fmt.Sprintf("missing_track: %s", expectedFileName))
 			}
 		}
 		d.emitUpdateEvent("Verification complete")

@@ -214,7 +214,7 @@ const album = ref<any>({
 });
 
 const downloadOptions = ref({
-    bitrate: "320",
+    bitrate: "128",
     format: "mp3",
     path: "",
 });

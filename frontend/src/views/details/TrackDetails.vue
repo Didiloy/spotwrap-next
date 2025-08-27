@@ -73,11 +73,11 @@
                                     }}
                                     •
                                     {{
-                                        trackDetails?.track?.album?.total_tracks
-                                        + " " +
+                                        trackDetails?.track?.album
+                                            ?.total_tracks +
+                                        " " +
                                         i18n.t("AlbumDetails.tracks")
                                     }}
-                                   
                                 </p>
                             </div>
                         </div>
@@ -260,7 +260,7 @@ const { toast } = useToast();
 const trackDetails = ref<any>(null);
 
 const downloadOptions = ref({
-    bitrate: "320",
+    bitrate: "128",
     format: "mp3",
     path: "",
 });
