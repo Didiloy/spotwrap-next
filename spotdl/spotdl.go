@@ -52,7 +52,7 @@ func (d *Downloader) Startup(ctx context.Context, emitEvents bool) {
 // Returns: boolean indicating whether the download was successful
 func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToCheck []string) bool {
 	// Extract the spotdl binary to a temporary location
-	tmpDir, err := os.MkdirTemp("", "spotdl")
+	tmpDir, err := os.MkdirTemp("", "spotdl_tmp")
 	if err != nil {
 		d.emitErrorEvent(fmt.Sprintf("failed to create temp directory: %v", err))
 		return false
@@ -75,6 +75,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 			return false
 		}
 		spotdlPath = filepath.Join(tmpDir, "spotdl")
+		ffmpegPath = filepath.Join(tmpDir, "ffmpeg")
 	}
 
 	creds, err := d.db.GetSpotifyCredentials()
@@ -90,6 +91,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 		"--format", format,
 		"--client-id", creds.ClientID,
 		"--client-secret", creds.ClientSecret,
+		"--lyrics", "genius", // fix bug introduced in spotdl v4.4.1
 		"--output",
 	}
 
@@ -99,8 +101,8 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 	}
 	args = append(args, outputFilePath)
 
-	// Add ffmpeg path argument for Windows
-	if isWindows && ffmpegPath != "" {
+	// Add ffmpeg path argument
+	if ffmpegPath != "" {
 		args = append(args, "--ffmpeg", ffmpegPath)
 	}
 
@@ -163,7 +165,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 
 			if _, statErr := os.Stat(candidatePath); os.IsNotExist(statErr) {
 				// Prefix with a recognizable tag for the frontend to parse
-				d.emitUpdateEvent(fmt.Sprintf("missing_track:%s", expectedFileName))
+				d.emitUpdateEvent(fmt.Sprintf("missing track: %s", expectedFileName))
 			}
 		}
 		d.emitUpdateEvent("Verification complete")
@@ -203,7 +205,7 @@ func (d *Downloader) pipeReader(wg *sync.WaitGroup, pipe io.ReadCloser) {
 		"ERROR:spotdl.download.progress_handler:",
 	}
 
-	buf := make([]byte, 1024)
+	buf := make([]byte, 100000)
 	for {
 		n, err := pipe.Read(buf)
 		if n > 0 {
