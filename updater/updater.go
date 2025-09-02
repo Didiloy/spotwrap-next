@@ -21,7 +21,8 @@ type PackageJSON struct {
 	Version string `json:"version"`
 }
 
-const LATEST_RELEASE_LINK = "https://api.github.com/repos/Didiloy/spotwrap-next/releases/latest"
+const LATEST_RELEASE_LINK_API = "https://api.github.com/repos/Didiloy/spotwrap-next/releases/latest"
+const LATEST_RELEASE_LINK = "https://github.com/Didiloy/spotwrap-next/releases/latest"
 
 // GetCurrentAppVersion reads the version from package.json
 func GetCurrentAppVersion(file []byte) (string, error) {
@@ -35,7 +36,7 @@ func GetCurrentAppVersion(file []byte) (string, error) {
 // FetchLatestReleaseInfo fetches the latest release tag_name and html_url from GitHub.
 func FetchLatestReleaseInfo() (*GitHubRelease, error) {
 	client := &http.Client{Timeout: 15 * time.Second}
-	req, err := http.NewRequest("GET", LATEST_RELEASE_LINK, nil)
+	req, err := http.NewRequest("GET", LATEST_RELEASE_LINK_API, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}
@@ -45,7 +46,7 @@ func FetchLatestReleaseInfo() (*GitHubRelease, error) {
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("failed to fetch latest release from %s: %w", LATEST_RELEASE_LINK, err)
+		return nil, fmt.Errorf("failed to fetch latest release from %s: %w", LATEST_RELEASE_LINK_API, err)
 	}
 	defer resp.Body.Close()
 
