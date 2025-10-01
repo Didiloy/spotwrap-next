@@ -91,7 +91,7 @@ func (d *Downloader) Download(link, outputPath, format, bitrate string, songsToC
 		"--format", format,
 		"--client-id", creds.ClientID,
 		"--client-secret", creds.ClientSecret,
-		"--lyrics", "genius", // fix bug introduced in spotdl v4.4.1
+		// "--lyrics", "genius", // fix bug introduced in spotdl v4.4.1
 		"--output",
 	}
 
